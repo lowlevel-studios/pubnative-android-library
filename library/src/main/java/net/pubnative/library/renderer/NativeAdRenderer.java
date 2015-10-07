@@ -68,7 +68,7 @@ public class NativeAdRenderer extends AdRenderer<NativeAdModel> implements
     /**
      * Renders the loaded native ad using the views set by caller
      * @param ad       valid native ad object
-     * @param listener listener to track ad rendering callbacks
+     * @param listener listener to track the behaviour of this method
      */
     @Override
     public void render(NativeAdModel ad, AdRendererListener listener)
