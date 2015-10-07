@@ -124,6 +124,10 @@ public class NativeAdModel extends Model implements NativeAd, TaskItemListener
         return result;
     }
 
+    /**
+     * Open the click url in Browser or Play Store app based on it's type
+     * @param context Context object
+     */
     public void open(Context context)
     {
         this.context = context;
@@ -212,11 +216,22 @@ public class NativeAdModel extends Model implements NativeAd, TaskItemListener
         }
     }
 
+    /**
+     * Start impression tracking in background on given view.
+     * @param context Context object.
+     * @param view    View object, whose impression should be tracked.
+     */
     public void confirmImpressionAutomatically(Context context, View view)
     {
         this.confirmImpressionAutomatically(context, view, null);
     }
 
+    /**
+     * Start impression tracking in background with a listener to track impression confirmation callbacks.
+     * @param context  Context object.
+     * @param view     View object, whose impression should be tracked.
+     * @param listener listener object to track the impression callbacks
+     */
     public void confirmImpressionAutomatically(Context context, View view, Listener listener)
     {
         this.listener = listener;
