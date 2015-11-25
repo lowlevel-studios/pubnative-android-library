@@ -34,7 +34,7 @@ public class VideoAdModel extends NativeAdModel implements VideoNativeAd {
         return null;
     }
 
-    private VastAdModel getVastAdModel(int index) {
+    public VastAdModel getVastAdModel(int index) {
         VastAdModel result = null;
         if (this.vast.length > index) {
             result = this.vast[index];

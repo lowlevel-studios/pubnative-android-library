@@ -43,13 +43,26 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Interstitial"
-        android:id="@+id/btn_interstitial"
+        android:text="Video"
+        android:id="@+id/btn_video"
         android:layout_below="@+id/separator_view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:onClick="onVideoClick"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Interstitial"
+        android:id="@+id/btn_interstitial"
+        android:layout_below="@+id/btn_video"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onInterstitialClick"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -60,7 +73,8 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:onClick="onGameListClick"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -71,7 +85,8 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:onClick="onNativeClick"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

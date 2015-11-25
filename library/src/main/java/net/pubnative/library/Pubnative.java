@@ -8,19 +8,24 @@ import net.pubnative.library.managers.TaskManager;
 import net.pubnative.library.predefined.PubnativeActivityListener;
 import net.pubnative.library.predefined.game_list.PubnativeGameListDelegate;
 import net.pubnative.library.predefined.interstitial.PubnativeInterstitialDelegate;
+import net.pubnative.library.predefined.video.PubnativeVideoDelegate;
 
 import java.lang.ref.WeakReference;
 
 public class Pubnative {
+
     public interface FullScreen {
+
         String INTERSTITIAL = "interstitial";
-        String GAME_LIST = "game_list";
+        String GAME_LIST    = "game_list";
+        String VIDEO        = "video";
     }
 
     /**
      * Pauses the execution of Pubnative tasks
      */
     public static void onPause() {
+
         TaskManager.onPause();
     }
 
@@ -28,6 +33,7 @@ public class Pubnative {
      * Resumes the execution of Pubnative tasks
      */
     public static void onResume() {
+
         TaskManager.onResume();
     }
 
@@ -35,6 +41,7 @@ public class Pubnative {
      * Stops the execution of Pubnative tasks
      */
     public static void onDestroy() {
+
         TaskManager.onDestroy();
     }
 
@@ -47,21 +54,30 @@ public class Pubnative {
      * @param listener  Listener to keep track of behaviour of this method
      */
     public static void show(Context context, String type, String app_token, PubnativeActivityListener listener) {
+
         if (!Pubnative.isMainThread()) {
+
             // If were not in the main thread, call this from the main thread
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new MainThreadRunnable(context, app_token, type, listener));
-        } else {
-            if (FullScreen.INTERSTITIAL.equals(type)) {
-                PubnativeInterstitialDelegate.Create(context, app_token, listener);
-            } else if (FullScreen.GAME_LIST.equals(type)) {
-                PubnativeGameListDelegate.Create(context, app_token, listener);
-            }
+
+        } else if (FullScreen.INTERSTITIAL.equals(type)) {
+
+            PubnativeInterstitialDelegate.Create(context, app_token, listener);
+
+        } else if (FullScreen.GAME_LIST.equals(type)) {
+
+            PubnativeGameListDelegate.Create(context, app_token, listener);
+
+        } else if (FullScreen.VIDEO.equals(type)) {
+
+            PubnativeVideoDelegate.Create(context, app_token, listener);
         }
     }
 
     // HELPERS
     private static boolean isMainThread() {
+
         return Looper.getMainLooper().getThread() == Thread.currentThread();
     }
 
@@ -70,12 +86,14 @@ public class Pubnative {
      * while waiting for the main thread execution
      */
     private static class MainThreadRunnable implements Runnable {
-        Context context;
-        String app_token;
-        String type;
+
+        Context                                  context;
+        String                                   app_token;
+        String                                   type;
         WeakReference<PubnativeActivityListener> listener;
 
         public MainThreadRunnable(final Context context, final String type, final String app_token, final PubnativeActivityListener listener) {
+
             this.context = context;
             this.app_token = app_token;
             this.type = type;
@@ -84,6 +102,7 @@ public class Pubnative {
 
         @Override
         public void run() {
+
             Pubnative.show(this.context, this.type, this.app_token, this.listener.get());
         }
     }

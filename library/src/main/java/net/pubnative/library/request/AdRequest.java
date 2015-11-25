@@ -1,16 +1,16 @@
 /**
  * Copyright 2014 PubNative GmbH
- * <p/>
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p/>
+ * <p>
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * <p/>
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,19 +45,21 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListener, IdUtil.AndroidAdvertisingIDTask.AndroidAdvertisingIDTaskListener {
-    String BASE_URL = "http://api.pubnative.net/api/partner/v2/promotions";
+
+    String BASE_URL            = "http://api.pubnative.net/api/partner/v2/promotions";
     String NATIVE_ENDPOINT_URL = "native";
-    String VIDEO_ENDPOINT_URL = "video";
+    String VIDEO_ENDPOINT_URL  = "video";
 
     public enum Endpoint {
-        NATIVE, VIDEO
+        NATIVE,
+        VIDEO
     }
 
-    private static final long serialVersionUID = 1L;
-    private final HashMap<String, String> requestParameters = new HashMap<String, String>();
-    private AdRequestListener listener = null;
-    private Endpoint endpoint = null;
-    private Context context = null;
+    private static final long                    serialVersionUID  = 1L;
+    private final        HashMap<String, String> requestParameters = new HashMap<String, String>();
+    private              AdRequestListener       listener          = null;
+    private              Endpoint                endpoint          = null;
+    private              Context                 context           = null;
 
     /**
      * Creates a new ad request object
@@ -65,6 +67,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
      * @param context valid Context object
      */
     public AdRequest(Context context) {
+
         this.context = context;
     }
 
@@ -75,6 +78,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
      * @param val actual value of parameter
      */
     public void setParameter(String key, String val) {
+
         if (val == null) {
             requestParameters.remove(key);
         } else {
@@ -83,6 +87,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
     }
 
     public Endpoint getEndpoint() {
+
         return this.endpoint;
     }
 
@@ -93,6 +98,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
      * @param listener valid listener to track ad request callbacks.
      */
     public void start(final Endpoint endpoint, AdRequestListener listener) {
+
         this.listener = listener;
         this.endpoint = endpoint;
         if (this.listener == null) {
@@ -112,6 +118,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
 
     @Override
     public void onAndroidAdvertisingIDTaskFinished(String result) {
+
         if (!TextUtils.isEmpty(result)) {
             this.requestParameters.put(PubnativeContract.Request.ANDROID_ADVERTISER_ID, result);
             this.requestParameters.put(PubnativeContract.Request.ANDROID_ADVERTISER_ID_SHA1, Crypto.sha1(result));
@@ -127,6 +134,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
 
     @Override
     public void onAsyncHttpTaskFinished(AsyncHttpTask task, String result) {
+
         if (!TextUtils.isEmpty(result)) {
             try {
                 JSONObject jsonObject = new JSONObject(result);
@@ -149,10 +157,12 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
 
     @Override
     public void onAsyncHttpTaskFailed(AsyncHttpTask task, Exception e) {
+
         this.invokeOnAdRequestFailed(e);
     }
 
     private void fillInDefaults() {
+
         if (!this.requestParameters.containsKey(PubnativeContract.Request.BUNDLE_ID)) {
             this.requestParameters.put(PubnativeContract.Request.BUNDLE_ID, IdUtil.getPackageName(this.context));
         }
@@ -188,6 +198,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
 
     @Override
     public String toString() {
+
         Uri.Builder uriBuilder = Uri.parse(this.BASE_URL).buildUpon();
         switch (endpoint) {
             case NATIVE:
@@ -210,18 +221,21 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
     }
 
     private void invokeOnAdRequestStarted() {
+
         if (this.listener != null) {
             this.listener.onAdRequestStarted(this);
         }
     }
 
     private void invokeOnAdRequestFinished(ArrayList<? extends NativeAdModel> ads) {
+
         if (this.listener != null) {
             this.listener.onAdRequestFinished(this, ads);
         }
     }
 
     private void invokeOnAdRequestFailed(Exception e) {
+
         if (this.listener != null) {
             this.listener.onAdRequestFailed(this, e);
         }

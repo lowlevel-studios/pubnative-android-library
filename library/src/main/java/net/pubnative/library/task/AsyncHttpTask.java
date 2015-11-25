@@ -13,12 +13,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class AsyncHttpTask extends AsyncTask<String, Void, String> {
+
     private Context context;
-    private String httpUrl;
-    private String result;
+    private String  httpUrl;
+    private String  result;
     private boolean isErrror;
 
     public interface AsyncHttpTaskListener {
+
         /**
          * Invoked when http task is finished
          *
@@ -44,24 +46,29 @@ public class AsyncHttpTask extends AsyncTask<String, Void, String> {
      * @param listener Listener object to be attached
      */
     public void setListener(AsyncHttpTaskListener listener) {
+
         this.listener = listener;
     }
 
     public Context getContext() {
+
         return this.context;
     }
 
     public String getHttpUrl() {
+
         return this.httpUrl;
     }
 
     public AsyncHttpTask(Context context) {
+
         this.context = context;
         this.isErrror = false;
     }
 
     @Override
     protected String doInBackground(String... params) {
+
         String result = null;
         if (params.length > 0) {
             this.httpUrl = params[0];
@@ -105,6 +112,7 @@ public class AsyncHttpTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
+
         if (this.listener != null) {
             if (isErrror) {
                 this.listener.onAsyncHttpTaskFailed(this, new Exception(result));
@@ -115,9 +123,10 @@ public class AsyncHttpTask extends AsyncTask<String, Void, String> {
     }
 
     private String getStringFromInputStream(InputStream is) {
+
         BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-        String line;
+        StringBuilder  sb = new StringBuilder();
+        String         line;
         try {
             br = new BufferedReader(new InputStreamReader(is));
             while ((line = br.readLine()) != null) {
