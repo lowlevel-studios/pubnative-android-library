@@ -1,10 +1,13 @@
 package net.pubnative.library.demo;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.view.View;
 
-@SuppressWarnings("deprecation")
-public class MainActivity extends ActionBarActivity {
+import net.pubnative.library.SimpleClass;
+
+public class MainActivity extends Activity {
 
     private final String APP_TOKEN = "6651a94cad554c30c47427cbaf0b613a967abcca317df325f363ef154a027092";
 
@@ -13,5 +16,15 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+    }
+
+    public void onNativeClicked(View v){
+
+        Log.d("PubnativeLibrary", "onNativeClicked");
+
+        SimpleClass simpleClass = new SimpleClass();
+        if(simpleClass.isTest()){
+            Log.d("PubnativeLibrary", "test");
+        }
     }
 }

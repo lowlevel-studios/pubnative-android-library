@@ -49,6 +49,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="10dp"
+        android:onClick="onNativeClicked"
         android:layout_below="@+id/separator_view"/>
 
     <RelativeLayout
