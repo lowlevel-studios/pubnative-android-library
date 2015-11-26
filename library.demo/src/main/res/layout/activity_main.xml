@@ -43,35 +43,13 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Interstitial"
-        android:id="@+id/btn_interstitial"
-        android:layout_below="@+id/separator_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Game List"
-        android:id="@+id/btn_game_list"
-        android:layout_below="@+id/btn_interstitial"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="10dp"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Native"
         android:id="@+id/btn_native"
-        android:layout_below="@+id/btn_game_list"
         android:layout_centerHorizontal="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/separator_view"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
