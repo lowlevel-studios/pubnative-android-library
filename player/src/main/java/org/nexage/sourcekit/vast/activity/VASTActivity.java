@@ -23,7 +23,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -605,12 +604,17 @@ public class VASTActivity extends Activity implements OnCompletionListener, OnEr
                         @Override
                         public void run() {
 
-                            mPlayerCountDown.setProgress(currentPosition, mMediaPlayer.getDuration());
-                            if (mSkipTime >= 0 &&
-                                mSkipTime * 1000 < currentPosition &&
-                                mIsSkipHidden) {
-                                mIsSkipHidden = false;
-                                mPlayerSkip.setVisibility(View.VISIBLE);
+                            if(mMediaPlayer != null) {
+
+                                mPlayerCountDown.setProgress(currentPosition, mMediaPlayer.getDuration());
+
+                                if (mSkipTime >= 0 &&
+                                    mSkipTime * 1000 < currentPosition &&
+                                    mIsSkipHidden) {
+
+                                    mIsSkipHidden = false;
+                                    mPlayerSkip.setVisibility(View.VISIBLE);
+                                }
                             }
                         }
                     });
