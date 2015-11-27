@@ -1,0 +1,82 @@
+package net.pubnative.library.demo.model;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+
+/**
+ * Created by daffodiliphone on 27/11/15.
+ */
+public class PubNativeAdModel implements Parcelable{
+    @SerializedName("title")
+    public String mTitle;
+
+    @SerializedName("description")
+    public String mDescription;
+
+    @SerializedName("cta_text")
+    public String mCtaText;
+
+    @SerializedName("icon_url")
+    public String mIconUrl;
+
+    @SerializedName("banner_url")
+    public String mBannerUrl;
+
+    @SerializedName("click_url")
+    public String mClickUrl;
+
+    @SerializedName("revenue_model")
+    public String mRevenueModel;
+
+    @SerializedName("points")
+    public int mPoints;
+
+    @SerializedName("beacons")
+    public ArrayList<Beacons> mBeacons;
+
+    protected PubNativeAdModel(Parcel in) {
+        mTitle = in.readString();
+        mDescription = in.readString();
+        mCtaText = in.readString();
+        mIconUrl = in.readString();
+        mBannerUrl = in.readString();
+        mClickUrl = in.readString();
+        mRevenueModel = in.readString();
+        mPoints = in.readInt();
+        mBeacons = in.createTypedArrayList(Beacons.CREATOR);
+    }
+
+    public static final Creator<PubNativeAdModel> CREATOR = new Creator<PubNativeAdModel>() {
+        @Override
+        public PubNativeAdModel createFromParcel(Parcel in) {
+            return new PubNativeAdModel(in);
+        }
+
+        @Override
+        public PubNativeAdModel[] newArray(int size) {
+            return new PubNativeAdModel[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(mTitle);
+        parcel.writeString(mDescription);
+        parcel.writeString(mCtaText);
+        parcel.writeString(mIconUrl);
+        parcel.writeString(mBannerUrl);
+        parcel.writeString(mClickUrl);
+        parcel.writeString(mRevenueModel);
+        parcel.writeInt(mPoints);
+        parcel.writeTypedList(mBeacons);
+    }
+}
