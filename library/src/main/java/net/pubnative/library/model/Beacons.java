@@ -1,4 +1,4 @@
-package net.pubnative.library.demo.model;
+package net.pubnative.library.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

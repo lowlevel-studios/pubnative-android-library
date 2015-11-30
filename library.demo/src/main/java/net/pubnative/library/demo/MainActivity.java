@@ -5,10 +5,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import net.pubnative.library.SimpleClass;
-import net.pubnative.library.demo.model.PubNativeAdModel;
-import net.pubnative.library.demo.request.PubNativeRequest;
+import net.pubnative.library.model.PubNativeAdModel;
+import net.pubnative.library.request.PubNativeRequest;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements View.OnClickListener, PubNativeRequest.PubNativeRequestListener {
     private Button mbtnNative;
@@ -39,23 +42,25 @@ public class MainActivity extends Activity implements View.OnClickListener, PubN
         switch (view.getId()){
             case R.id.btn_native:
                 PubNativeRequest request = new PubNativeRequest(getApplicationContext());
+                request.setIsLogging(true);
                 request.setParameter(PubNativeRequest.Parameters.APP_TOKEN, APP_TOKEN);
                 request.setParameter(PubNativeRequest.Parameters.AD_COUNT, "2");
                 request.setParameter(PubNativeRequest.Parameters.ICON_SIZE, "200x200");
                 request.setParameter(PubNativeRequest.Parameters.BANNER_SIZE,"1200x627");
-                request.start(PubNativeRequest.Type.NATIVE, this);
+                request.start(PubNativeRequest.AdType.VIDEO, this);
                 break;
         }
     }
 
-    @Override
-    public void onRequestSuccess(PubNativeRequest request, PubNativeAdModel ads) {
 
+    @Override
+    public void onRequestSuccess(PubNativeRequest request, ArrayList<PubNativeAdModel> ads) {
+        Toast.makeText(getApplication().getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onRequestFailed(PubNativeRequest request, PubNativeRequest.PubNativeException ex) {
-
+        Toast.makeText(getApplication().getApplicationContext(), ex.getErrMsg(), Toast.LENGTH_SHORT).show();
     }
 
 }

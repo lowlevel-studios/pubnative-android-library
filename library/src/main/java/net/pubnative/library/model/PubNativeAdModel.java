@@ -1,4 +1,4 @@
-package net.pubnative.library.demo.model;
+package net.pubnative.library.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,6 +38,16 @@ public class PubNativeAdModel implements Parcelable{
     @SerializedName("beacons")
     public ArrayList<Beacons> mBeacons;
 
+    @SerializedName("type")
+    public String mType;
+
+    @SerializedName("portrait_banner_url")
+    public String mPortraitBannerUrl;
+
+    @SerializedName("vast")
+    public ArrayList<Vast> mVast;
+
+
     protected PubNativeAdModel(Parcel in) {
         mTitle = in.readString();
         mDescription = in.readString();
@@ -48,6 +58,9 @@ public class PubNativeAdModel implements Parcelable{
         mRevenueModel = in.readString();
         mPoints = in.readInt();
         mBeacons = in.createTypedArrayList(Beacons.CREATOR);
+        mType = in.readString();
+        mPortraitBannerUrl = in.readString();
+       // mVast = in.createTypedArrayList(Vast.CREATOR);
     }
 
     public static final Creator<PubNativeAdModel> CREATOR = new Creator<PubNativeAdModel>() {
@@ -78,5 +91,8 @@ public class PubNativeAdModel implements Parcelable{
         parcel.writeString(mRevenueModel);
         parcel.writeInt(mPoints);
         parcel.writeTypedList(mBeacons);
+        parcel.writeString(mType);
+        parcel.writeString(mPortraitBannerUrl);
+        //parcel.writeTypedList(mVast);
     }
 }
