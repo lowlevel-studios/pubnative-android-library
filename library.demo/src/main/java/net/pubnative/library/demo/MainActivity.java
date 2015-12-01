@@ -22,7 +22,7 @@ public class MainActivity extends Activity implements PubnativeRequest.Listener 
 
     public void onNativeClicked(View v){
         PubnativeRequest request = new PubnativeRequest();
-      //  request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, APP_TOKEN);
+        request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, APP_TOKEN);
         request.setParameter(PubnativeRequest.Parameters.AD_COUNT, "2");
         request.setParameter(PubnativeRequest.Parameters.ICON_SIZE, "200x200");
         request.setParameter(PubnativeRequest.Parameters.BANNER_SIZE,"1200x627");
