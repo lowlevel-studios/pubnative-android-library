@@ -12,14 +12,10 @@ import android.util.Log;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
-
 /**
  * Created by daffodiliphone on 27/11/15.
  */
-public class UtilityFunction {
+public class SystemUtils {
 
     public static String getPackageName(Context context) {
         PackageInfo pInfo = getPackageInfo(context);
@@ -39,7 +35,7 @@ public class UtilityFunction {
      * @param context Context object
      * @return true if location permission granted else false
      */
-    public static boolean checkLocationPermissionGranted(Context context){
+    public static boolean isLocationPermissionGranted(Context context){
         if(context.checkCallingOrSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_GRANTED)
             return true;
         else
@@ -82,18 +78,18 @@ public class UtilityFunction {
      * @param context  Context object
      * @param listener Listener to get callback when android ad id is fetched.
      */
-    public static void getAndroidAdvertisingID(Context context, AndroidAdvertisingIDTask.AndroidAdvertisingIDTaskListener listener) {
-        new AndroidAdvertisingIDTask().setListener(listener).execute(context);
+    public static void getAndroidAdID(Context context, AndroidAdIDTask.AndroidAdIDTaskListener listener) {
+        new AndroidAdIDTask().setListener(listener).execute(context);
     }
 
-    public static class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
-        private AndroidAdvertisingIDTaskListener listener;
+    public static class AndroidAdIDTask extends AsyncTask<Context, Void, String> {
+        private AndroidAdIDTaskListener listener;
 
-        public interface AndroidAdvertisingIDTaskListener {
+        public interface AndroidAdIDTaskListener {
             void onAndroidAdvertisingIDTaskFinished(String result);
         }
 
-        public AndroidAdvertisingIDTask setListener(AndroidAdvertisingIDTaskListener listener) {
+        public AndroidAdIDTask setListener(AndroidAdIDTaskListener listener) {
             this.listener = listener;
             return this;
         }
@@ -122,60 +118,6 @@ public class UtilityFunction {
                 this.listener.onAndroidAdvertisingIDTaskFinished(result);
             }
         }
-    }
-
-
-    /**
-     * Encrypts the given input string using SHA-1 algorithm
-     *
-     * @param input String to be encrypted
-     * @return Encrypted string
-     */
-    public static String sha1(String input) {
-        String result = "";
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            byte[] bytes = input.getBytes("UTF-8");
-            digest.update(bytes, 0, bytes.length);
-            bytes = digest.digest();
-            for (final byte b : bytes) {
-                stringBuilder.append(String.format("%02X", b));
-            }
-            result = stringBuilder.toString().toLowerCase(Locale.US);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * Encrypts the given input string using md5 algorithm
-     *
-     * @param input String to be encrypted
-     * @return Encrypted string
-     */
-    public static String md5(String input) {
-        String result = "";
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-            digest.update(input.getBytes());
-            byte messageDigest[] = digest.digest();
-            // Create Hex String
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++) {
-                String h = Integer.toHexString(0xFF & messageDigest[i]);
-                while (h.length() < 2) {
-                    h = "0" + h;
-                }
-                hexString.append(h);
-            }
-            result = hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return result;
     }
 
 }

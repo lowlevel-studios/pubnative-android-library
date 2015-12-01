@@ -8,53 +8,14 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by daffodiliphone on 30/11/15.
  */
-public class Vast implements Parcelable {
-    @SerializedName("ad")
-    public String mAd;
+public class Vast {
+    public String ad;
 
-    @SerializedName("video_skip_time")
-    public int mVideoSkipTime;
+    public int video_skip_time;
 
-    @SerializedName("skip_video_button")
-    public String mShipVideoButton;
+    public String skip_video_button;
 
-    @SerializedName("mute")
-    public String mMute;
+    public String mute;
 
-    @SerializedName("learn_more_button")
-    public String mLearnMoreButton;
-
-    protected Vast(Parcel in) {
-        mAd = in.readString();
-        mVideoSkipTime = in.readInt();
-        mShipVideoButton = in.readString();
-        mMute = in.readString();
-        mLearnMoreButton = in.readString();
-    }
-
-    public static final Creator<Vast> CREATOR = new Creator<Vast>() {
-        @Override
-        public Vast createFromParcel(Parcel in) {
-            return new Vast(in);
-        }
-
-        @Override
-        public Vast[] newArray(int size) {
-            return new Vast[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(mAd);
-        parcel.writeInt(mVideoSkipTime);
-        parcel.writeString(mShipVideoButton);
-        parcel.writeString(mMute);
-        parcel.writeString(mLearnMoreButton);
-    }
+    public String learn_more_button;
 }
