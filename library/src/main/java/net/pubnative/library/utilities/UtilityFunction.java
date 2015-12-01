@@ -7,11 +7,11 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+
 import android.util.Log;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -33,6 +33,18 @@ public class UtilityFunction {
             Log.v("E:","Error in getting package info");
             return null;
         }
+    }
+
+    /**
+     * @param context Context object
+     * @return true if location permission granted else false
+     */
+    public static boolean checkLocationPermissionGranted(Context context){
+        if(context.checkCallingOrSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_GRANTED)
+            return true;
+        else
+            return false;
+
     }
 
 
@@ -63,6 +75,7 @@ public class UtilityFunction {
         }
         return loc;
     }
+
 
     /**
      * Gives you the android advertising id.

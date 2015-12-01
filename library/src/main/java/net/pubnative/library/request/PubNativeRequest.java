@@ -2,8 +2,10 @@ package net.pubnative.library.request;
 
 
 import android.content.Context;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,7 +40,7 @@ public class PubNativeRequest {
     private String NATIVE_TYPE_URL = "native";
     private String VIDEO_TYPE_URL = "video";
 
-    private Context context ;
+    private Context context;
     private AdType type;
     private HashMap<String, String> requestParameters;
     private PubNativeRequestListener listener;
@@ -156,7 +158,6 @@ public class PubNativeRequest {
             return mStatusCode;
         }
 
-
     }
 
     /**
@@ -183,25 +184,19 @@ public class PubNativeRequest {
      * @param type type of ad (ex: NATIVE)
      * @param listener valid listener to track ad request callbacks.
      */
-    public void start(AdType type, PubNativeRequestListener listener){
+    public void start(AdType type, @NonNull PubNativeRequestListener listener){
         this.listener = listener;
         this.type = type;
         if(this.listener != null){
             setOptionalParameters();
-            if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
+            if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID))
                 setAdvertisingId();
-            }
-
-        }
-        else {
-            PubNativeException exception = new PubNativeException();
-            exception.setErrMsg("Error while parsing Json");
-            exception.setStatus("error");
-            exception.setStatusCode(101);
-            requestFailed(exception);
+            else
+                createNetworkRequest();
         }
 
     }
+
 
     /**
      *  setting optional parameters to request parameters
@@ -234,23 +229,30 @@ public class PubNativeRequest {
             requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
 
+        if(!requestParameters.containsKey(Parameters.LAT) || !requestParameters.containsKey(Parameters.LONG)){
+            if(UtilityFunction.checkLocationPermissionGranted(this.context)){
+                Location location = UtilityFunction.getLastLocation(this.context);
+                if (location != null) {
+                        requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
+                        requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
+                }
+            }
 
-//        Location location = UtilityFunction.getLastLocation(this.context);
-//        if (location != null) {
-//            if (!requestParameters.containsKey(PubNativeRequest.Parameters.LAT)) {
-//                requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
-//            }
-//            if (!requestParameters.containsKey(PubNativeRequest.Parameters.LONG)) {
-//                requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
-//            }
-//        }
+        }
+
     }
 
 
+    /**
+     * This function sets the android advertising id if the user has not given.
+     */
     private void setAdvertisingId() {
         UtilityFunction.getAndroidAdvertisingID(this.context, advertisingListener);
     }
 
+    /**
+     *  Android Advertising Id Task Listener is finished when android ad id is fetched.
+     */
     private UtilityFunction.AndroidAdvertisingIDTask.AndroidAdvertisingIDTaskListener advertisingListener = new UtilityFunction.AndroidAdvertisingIDTask.AndroidAdvertisingIDTaskListener() {
         @Override
         public void onAndroidAdvertisingIDTaskFinished(String result) {
@@ -267,6 +269,9 @@ public class PubNativeRequest {
     };
 
 
+    /**
+     * This function is used to create network request.
+     */
     private void createNetworkRequest() {
         String url = null;
         if(type != null){
@@ -280,9 +285,9 @@ public class PubNativeRequest {
                 default:
                     throw new IllegalArgumentException(type.toString());
             }
-            if(isLogging()){
-                Log.v("path", url);
-            }
+//            if(isLogging()){
+//                Log.v("path", url);
+//            }
 
             sendNetworkRequest(url);
         }
@@ -328,31 +333,40 @@ public class PubNativeRequest {
      */
     private void sendNetworkRequest(String url) {
         RequestQueue queue = Volley.newRequestQueue(this.context);
-        StringRequest strRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                ArrayList<PubNativeAdModel> dataModel = parseJsonToAdModel(response);
-                requestSuccess(dataModel);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                String data = new String(error.networkResponse.data);
-                int statusCode = error.networkResponse.statusCode;
-                PubNativeException exception = new PubNativeException();
-                exception.setStatusCode(statusCode);
-                PubNativeException responseException = prepareExceptionFromErrorJson(data, exception);
-                requestFailed(responseException);
-            }
-        });
+        StringRequest strRequest = new StringRequest(Request.Method.GET, url, responseListener, errorListener);
         queue.add(strRequest);
     }
 
+    /**
+     * responseListener callback calls when network request gets response.
+     */
+    private Response.Listener<String> responseListener = new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            ArrayList<PubNativeAdModel> dataModel = parseJsonToAdModel(response);
+            sendSuccessEvent(dataModel);
+        }
+    };
+
+    /**
+     * errorListener callback calls when network request fails.
+     */
+    private Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            String data = new String(error.networkResponse.data);
+            int statusCode = error.networkResponse.statusCode;
+            PubNativeException exception = new PubNativeException();
+            exception.setStatusCode(statusCode);
+            exception = prepareExceptionFromErrorJson(data, exception);
+            sendFailEvent(exception);
+        }
+    };
 
     /**
      * @param data is network response data
      * @param exception is pub native exception
-     * @return exception
+     * @return exception if status is not ok and if there is error while parsing json
      */
     private PubNativeException prepareExceptionFromErrorJson(String data, PubNativeException exception) {
         if(data != null){
@@ -373,8 +387,8 @@ public class PubNativeRequest {
     }
 
     /**
-     * @param response after success
-     * @return pubNativeModel
+     * @param response parse json response to PubNativeAdModel
+     * @return pubNativeModel PubNativeAdModel is returned after parsing json response
      */
     private ArrayList<PubNativeAdModel> parseJsonToAdModel(String response) {
         ArrayList<PubNativeAdModel> ads = null;
@@ -394,20 +408,21 @@ public class PubNativeRequest {
             exception.setErrMsg("Error while parsing Json");
             exception.setStatus("error");
             exception.setStatusCode(101);
-            requestFailed(exception);
+            sendFailEvent(exception);
         }
 
         return ads;
     }
 
-    private void requestSuccess(ArrayList<PubNativeAdModel> ads) {
+
+    private void sendSuccessEvent(ArrayList<PubNativeAdModel> ads) {
         if(this.listener != null){
             this.listener.onRequestSuccess(this, ads);
         }
     }
 
 
-    private void requestFailed(PubNativeException exception) {
+    private void sendFailEvent(PubNativeException exception) {
         if(this.listener != null){
             this.listener.onRequestFailed(this, exception);
         }

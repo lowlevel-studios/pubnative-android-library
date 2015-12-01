@@ -2,19 +2,17 @@ package net.pubnative.library.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import net.pubnative.library.SimpleClass;
 import net.pubnative.library.model.PubNativeAdModel;
 import net.pubnative.library.request.PubNativeRequest;
 
 import java.util.ArrayList;
 
 public class MainActivity extends Activity implements View.OnClickListener, PubNativeRequest.PubNativeRequestListener {
-    private Button mbtnNative;
+    private Button mBtnNative;
 
     private final String APP_TOKEN = "6651a94cad554c30c47427cbaf0b613a967abcca317df325f363ef154a027092";
 
@@ -23,19 +21,19 @@ public class MainActivity extends Activity implements View.OnClickListener, PubN
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        mbtnNative = (Button) findViewById(R.id.btn_native);
-        mbtnNative.setOnClickListener(this);
+        mBtnNative = (Button) findViewById(R.id.btn_native);
+        mBtnNative.setOnClickListener(this);
     }
 
-    public void onNativeClicked(View v){
-
-        Log.d("PubnativeLibrary", "onNativeClicked");
-
-        SimpleClass simpleClass = new SimpleClass();
-        if(simpleClass.isTest()){
-            Log.d("PubnativeLibrary", "test");
-        }
-    }
+//    public void onNativeClicked(View v){
+//
+//        Log.d("PubnativeLibrary", "onNativeClicked");
+//
+//        SimpleClass simpleClass = new SimpleClass();
+//        if(simpleClass.isTest()){
+//            Log.d("PubnativeLibrary", "test");
+//        }
+//    }
 
     @Override
     public void onClick(View view) {
