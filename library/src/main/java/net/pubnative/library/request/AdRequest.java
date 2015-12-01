@@ -46,20 +46,19 @@ import java.util.Locale;
 
 public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListener, IdUtil.AndroidAdvertisingIDTask.AndroidAdvertisingIDTaskListener {
 
-    String BASE_URL            = "http://api.pubnative.net/api/partner/v2/promotions";
-    String NATIVE_ENDPOINT_URL = "native";
-    String VIDEO_ENDPOINT_URL  = "video";
+    protected String NATIVE_ENDPOINT_URL = "native";
+    protected String VIDEO_ENDPOINT_URL  = "video";
 
     public enum Endpoint {
         NATIVE,
         VIDEO
     }
 
-    private static final long                    serialVersionUID  = 1L;
-    private final        HashMap<String, String> requestParameters = new HashMap<String, String>();
-    private              AdRequestListener       listener          = null;
-    private              Endpoint                endpoint          = null;
-    private              Context                 context           = null;
+    protected static final long                    serialVersionUID  = 1L;
+    protected final        HashMap<String, String> requestParameters = new HashMap<String, String>();
+    protected              AdRequestListener       listener          = null;
+    protected              Endpoint                endpoint          = null;
+    protected              Context                 context           = null;
 
     /**
      * Creates a new ad request object
@@ -161,7 +160,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
         this.invokeOnAdRequestFailed(e);
     }
 
-    private void fillInDefaults() {
+    protected void fillInDefaults() {
 
         if (!this.requestParameters.containsKey(PubnativeContract.Request.BUNDLE_ID)) {
             this.requestParameters.put(PubnativeContract.Request.BUNDLE_ID, IdUtil.getPackageName(this.context));
@@ -199,7 +198,7 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
     @Override
     public String toString() {
 
-        Uri.Builder uriBuilder = Uri.parse(this.BASE_URL).buildUpon();
+        Uri.Builder uriBuilder = Uri.parse(this.getBaseURL()).buildUpon();
         switch (endpoint) {
             case NATIVE:
                 uriBuilder.appendPath(this.NATIVE_ENDPOINT_URL);
@@ -220,24 +219,28 @@ public class AdRequest implements Serializable, AsyncHttpTask.AsyncHttpTaskListe
         return uriBuilder.build().toString();
     }
 
-    private void invokeOnAdRequestStarted() {
+    protected void invokeOnAdRequestStarted() {
 
         if (this.listener != null) {
             this.listener.onAdRequestStarted(this);
         }
     }
 
-    private void invokeOnAdRequestFinished(ArrayList<? extends NativeAdModel> ads) {
+    protected void invokeOnAdRequestFinished(ArrayList<? extends NativeAdModel> ads) {
 
         if (this.listener != null) {
             this.listener.onAdRequestFinished(this, ads);
         }
     }
 
-    private void invokeOnAdRequestFailed(Exception e) {
+    protected void invokeOnAdRequestFailed(Exception e) {
 
         if (this.listener != null) {
             this.listener.onAdRequestFailed(this, e);
         }
+    }
+
+    protected String getBaseURL(){
+        return "http://api.pubnative.net/api/partner/v2/promotions";
     }
 }
