@@ -5,6 +5,5 @@ package net.pubnative.library.model;
  */
 public class PubnativeBeacon {
     public String type;
-
     public String url;
 }

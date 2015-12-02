@@ -36,15 +36,13 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdIDTaskListener, Response.Listener<String>, Response.ErrorListener{
-    protected static final String BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
-    protected static final String NATIVE_TYPE_URL =  "native";
-    protected static final String VIDEO_TYPE_URL  =  "video";
-
-    protected Context context;
-    protected EndPoint endpoint;
+public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdIDTaskListener, Response.Listener<String>, Response.ErrorListener {
+    private static final String BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final String NATIVE_TYPE_URL =  "native";
+    protected Context             context;
+    protected EndPoint            endpoint;
     protected Map<String, String> requestParameters;
-    protected Listener listener;
+    protected Listener            listener;
 
     /**
      * These are the various types of adds pubnative support
@@ -53,13 +51,10 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         NATIVE
     }
 
-    public PubnativeRequest(){
-    }
-
     /**
      * These are the various types of parameters
      */
-    public interface Parameters{
+    public interface Parameters {
         String APP_TOKEN                  =      "app_token";
         String BUNDLE_ID                  =      "bundle_id";
         String APPLE_IDFA                 =      "apple_idfa";
@@ -88,7 +83,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         String KEYWORDS                   =      "keywords";
     }
 
-    public interface Listener{
+    public interface Listener {
         /**
          * Invoked when PubnativeRequest request is success
          *
@@ -112,89 +107,86 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
      * @param key key name of parameter
      * @param value actual value of parameter
      */
-    public void setParameter(String key, String value){
+    public void setParameter(String key, String value) {
         if (requestParameters == null) {
             requestParameters = new HashMap<String, String>();
         }
-        if (value == null && !value.isEmpty()) {
+        if (value == null || TextUtils.isEmpty(value)) {
             requestParameters.remove(key);
-        }else {
-            requestParameters.put(key, value);
+        } else {
+            if (requestParameters.containsKey(key)){
+                requestParameters.remove(key);
+                requestParameters.put(key, value);
+            } else {
+                requestParameters.put(key, value);
+            }
         }
     }
-
 
     /**
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
-     * @param context
+     * @param context is application context
      * @param endpoint type of ad (ex: NATIVE)
      * @param listener valid listener to track ad request callbacks.
      */
-    public void start(Context context, EndPoint endpoint, @NonNull Listener listener){
+    public void start(Context context, EndPoint endpoint, @NonNull Listener listener) {
         this.context = context;
         this.listener = listener;
         this.endpoint = endpoint;
         if (this.listener != null) {
+            if (requestParameters == null) {
+                requestParameters = new HashMap<String, String>();
+            }
             setOptionalParameters();
             if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
-                setAdvertisingId();
-            }
-            else {
+                SystemUtils.getAndroidAdID(this.context, this);
+            } else {
                 createNetworkRequest();
             }
         }
     }
 
-
     /**
      *  setting optional parameters to request parameters
      */
-    private void setOptionalParameters() {
-        if (!requestParameters.containsKey(Parameters.BUNDLE_ID)) {
+    protected void setOptionalParameters() {
+        if (!this.requestParameters.containsKey(Parameters.BUNDLE_ID)) {
             this.requestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(this.context));
         }
 
-        if (!requestParameters.containsKey(Parameters.OS)) {
-            requestParameters.put(Parameters.OS, "android");
+        if (!this.requestParameters.containsKey(Parameters.OS)) {
+            this.requestParameters.put(Parameters.OS, "android");
         }
 
-        if (!requestParameters.containsKey(Parameters.DEVICE_MODEL)) {
-            requestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
+        if (!this.requestParameters.containsKey(Parameters.DEVICE_MODEL)) {
+            this.requestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
         }
 
-        if (!requestParameters.containsKey(Parameters.OS_VERSION)) {
-            requestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
+        if (!this.requestParameters.containsKey(Parameters.OS_VERSION)) {
+            this.requestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
         }
 
-        if (!requestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
+        if (!this.requestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
             DisplayMetrics dm = this.context.getResources().getDisplayMetrics();
-            requestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
+            this.requestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
         }
-        if (!requestParameters.containsKey(Parameters.DEVICE_TYPE)) {
-            requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(this.context) ? "tablet" : "phone");
+        if (!this.requestParameters.containsKey(Parameters.DEVICE_TYPE)) {
+            this.requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(this.context) ? "tablet" : "phone");
         }
-        if (!requestParameters.containsKey(Parameters.LOCALE)) {
-            requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
+        if (!this.requestParameters.containsKey(Parameters.LOCALE)) {
+            this.requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
 
-        if (!requestParameters.containsKey(Parameters.LAT) || !requestParameters.containsKey(Parameters.LONG)) {
+        if (!this.requestParameters.containsKey(Parameters.LAT) || !this.requestParameters.containsKey(Parameters.LONG)) {
             if (SystemUtils.isLocationPermissionGranted(this.context)) {
                 Location location = SystemUtils.getLastLocation(this.context);
                 if (location != null) {
-                        requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
-                        requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
+                    this.requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
+                    this.requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
                 }
             }
         }
-    }
-
-
-    /**
-     * This function sets the android advertising id if the user has not given.
-     */
-    private void setAdvertisingId() {
-        SystemUtils.getAndroidAdID(this.context, this);
     }
 
     /**
@@ -215,7 +207,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
     /**
      * This function is used to create network request.
      */
-    private void createNetworkRequest() {
+    protected void createNetworkRequest() {
         String url = null;
         if (endpoint != null) {
             switch (endpoint) {
@@ -229,13 +221,12 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         }
     }
 
-
     /**
      * @return url of native request
      */
-    private String createNativeRequest() {
-        Uri.Builder uriBuilder = Uri.parse(this.BASE_URL).buildUpon();
-        uriBuilder.appendPath(this.NATIVE_TYPE_URL);
+    protected String createNativeRequest() {
+        Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
+        uriBuilder.appendPath(NATIVE_TYPE_URL);
 
         for (String key : requestParameters.keySet()) {
             String value = requestParameters.get(key);
@@ -246,11 +237,10 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         return uriBuilder.build().toString();
     }
 
-
     /**
      * @param url used to send network request
      */
-    private void sendNetworkRequest(String url) {
+    protected void sendNetworkRequest(String url) {
         RequestQueue queue = Volley.newRequestQueue(this.context);
         StringRequest strRequest = new StringRequest(Request.Method.GET, url, this, this);
         queue.add(strRequest);
@@ -261,8 +251,10 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
      */
     @Override
     public void onResponse(String response) {
-        List<PubnativeAdModel> dataModel = parseJsonToAdModel(response);
-        sendSuccessEvent(dataModel);
+        List<PubnativeAdModel> dataModel = parseResponse(response);
+        if (dataModel != null) {
+            invokeOnPubnativeRequestSuccess(dataModel);
+        }
     }
 
     /**
@@ -273,7 +265,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         String data = new String(error.networkResponse.data);
         int statusCode = error.networkResponse.statusCode;
         Exception exception = prepareExceptionFromErrorJson(data, statusCode);
-        sendFailEvent(exception);
+        invokeOnPubnativeRequestFailure(exception);
     }
 
     /**
@@ -281,18 +273,19 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
      * @param statusCode is statusCode from volley response
      * @return exception if status is not ok and if there is error while parsing json
      */
-    private Exception prepareExceptionFromErrorJson(String data, int statusCode) {
+    protected Exception prepareExceptionFromErrorJson(String data, int statusCode) {
         Exception exception = null;
-        if (data != null) {
+        if (data != null && !TextUtils.isEmpty(data)) {
             try {
                 JSONObject jsonObject = new JSONObject(data);
                 String status = jsonObject.getString("status");
                 String errMsg = jsonObject.getString("error_message");
-                exception = new Exception(new StringBuilder().append(status).append(" ").append(errMsg).append(String.valueOf(statusCode)).toString(), new Throwable());
+                exception = new Exception(new StringBuilder().append(status).append(" ").append(errMsg).append(String.valueOf(statusCode)).toString());
             } catch (JSONException e) {
-                e.printStackTrace();
                 exception = e;
             }
+        } else {
+            exception = new Exception("Data is null");
         }
         return exception;
     }
@@ -301,7 +294,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
      * @param response parse json response to PubnativeAdModel
      * @return pubNativeModel PubnativeAdModel is returned after parsing json response
      */
-    private List<PubnativeAdModel> parseJsonToAdModel(String response) {
+    protected List<PubnativeAdModel> parseResponse(String response) {
         List<PubnativeAdModel> ads = null;
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -314,20 +307,18 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
             ads = gson.fromJson(resultsArray.toString(), listType);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            sendFailEvent(e);
+            this.invokeOnPubnativeRequestFailure(e);
         }
         return ads;
     }
 
-
-    private void sendSuccessEvent(List<PubnativeAdModel> ads) {
+    protected void invokeOnPubnativeRequestSuccess(List<PubnativeAdModel> ads) {
         if (this.listener != null) {
             this.listener.onPubnativeRequestSuccess(this, ads);
         }
     }
 
-    private void sendFailEvent(Exception exception) {
+    protected void invokeOnPubnativeRequestFailure(Exception exception) {
         if (this.listener != null) {
             this.listener.onPubnativeRequestFail(this, exception);
         }
