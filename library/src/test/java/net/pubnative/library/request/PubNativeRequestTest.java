@@ -1,13 +1,14 @@
 package net.pubnative.library.request;
 
 import android.content.Context;
+
 import junit.framework.Assert;
 import net.pubnative.library.BuildConfig;
+import net.pubnative.library.MyRobolectricTestRunner;
 import net.pubnative.library.models.PubnativeAdModel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(MyRobolectricTestRunner.class)
 @Config(constants = BuildConfig.class,sdk = 19)
 public class PubnativeRequestTest {
 
@@ -61,17 +62,17 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter("ad_count","1");
         pubnativeRequest.setParameter("icon_size", "10x10");
-        assertThat(pubnativeRequest.requestParameters.size() == 2);
+        assertThat(pubnativeRequest.requestParameters.size() == 2).isTrue();
 
         pubnativeRequest.setParameter("ad_count", "1");
-        assertThat(pubnativeRequest.requestParameters.size() == 2);
+        assertThat(pubnativeRequest.requestParameters.size() == 2).isTrue();
 
         pubnativeRequest.setParameter("ad_count", "4");
-        assertThat(pubnativeRequest.requestParameters.containsKey("ad_count"));
-        assertThat(pubnativeRequest.requestParameters.containsValue("4"));
+        assertThat(pubnativeRequest.requestParameters.containsKey("ad_count")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsValue("4")).isTrue();
 
         pubnativeRequest.setParameter("banner_size", null);
-        assertThat(!pubnativeRequest.requestParameters.containsKey("banner_size"));
+        assertThat(!pubnativeRequest.requestParameters.containsKey("banner_size")).isTrue();
     }
 
     @Test
@@ -100,8 +101,8 @@ public class PubnativeRequestTest {
         pubnativeRequest.context = context;
         pubnativeRequest.setOptionalParameters();
 
-        assertThat(pubnativeRequest.requestParameters.containsKey("ad_count"));
-        assertThat(pubnativeRequest.requestParameters.containsKey("os"));
+        assertThat(pubnativeRequest.requestParameters.containsKey("ad_count")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsKey("os")).isTrue();
     }
 
     @Test
@@ -117,7 +118,7 @@ public class PubnativeRequestTest {
         String url = pubnativeRequest.createNetworkRequest();
 
         verify(pubnativeRequest, times(1)).createNativeRequest();
-        assertThat(url.equals("Network request is created"));
+        assertThat(url.equals("Network request is created")).isTrue();
     }
 
     @Test
@@ -127,7 +128,7 @@ public class PubnativeRequestTest {
         pubnativeRequest.setParameter("ad_count", "1");
         String url = pubnativeRequest.createNativeRequest();
 
-        assertThat(url.equals("http://api.pubnative.net/api/partner/v2/promotions/native?ad_count=1"));
+        assertThat(url.equals("http://api.pubnative.net/api/partner/v2/promotions/native?ad_count=1")).isTrue();
     }
 
     @Test
@@ -139,13 +140,13 @@ public class PubnativeRequestTest {
         pubnativeRequest.setParameter("ad_count", "1");
         pubnativeRequest.onAndroidAdIdTaskFinished("1234");
 
-        assertThat(pubnativeRequest.requestParameters.containsValue("1234"));
-        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id"));
-        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_sha1"));
-        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_md5"));
+        assertThat(pubnativeRequest.requestParameters.containsValue("1234")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_sha1")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_md5")).isTrue();
 
         pubnativeRequest.onAndroidAdIdTaskFinished("");
-        assertThat(pubnativeRequest.requestParameters.containsKey("no_user_id"));
+        assertThat(pubnativeRequest.requestParameters.containsKey("no_user_id")).isTrue();
     }
 
     @Test
@@ -153,8 +154,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-
-        String response = loadJsonResponse("responseSuccess.json");
+        String response = loadJsonResponse("responseSuccess.json", pubnativeRequest.context);
         pubnativeRequest.onResponse(response);
 
         verify(pubnativeRequest, times(1)).parseResponse(response);
@@ -163,29 +163,32 @@ public class PubnativeRequestTest {
     @Test
     public void testParseResponse() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        String response = loadJsonResponse("responseSuccess.json");
-        List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
+        Context context = RuntimeEnvironment.application;
+        pubnativeRequest.context = context;
+        String response = loadJsonResponse("responseSuccess.json", pubnativeRequest.context);
 
-        assertThat(ads.size() == 1);
+        List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
+        assertThat(ads.size() == 1).isTrue();
     }
 
     @Test
     public void testPrepareExceptionFromErrorJson() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
+        Context context = RuntimeEnvironment.application;
+        pubnativeRequest.context = context;
 
-        String response = loadJsonResponse("responseFailure.json");
+        String response = loadJsonResponse("responseFailure.json", pubnativeRequest.context);
         Exception exception = pubnativeRequest.prepareExceptionFromErrorJson(response, 100);
-        assertThat(exception.getMessage().equals("error Invalid app token100"));
+        assertThat(exception.getMessage().equals("error Invalid app token100")).isTrue();
 
         exception = pubnativeRequest.prepareExceptionFromErrorJson("test", 100);
-        assertThat(exception.getMessage().equals("Value test of type java.lang.String cannot be converted to JSONObject"));
+        assertThat(exception.getMessage().equals("Value test of type java.lang.String cannot be converted to JSONObject")).isTrue();
 
         exception = pubnativeRequest.prepareExceptionFromErrorJson(null, 100);
-        assertThat(exception.getMessage().equals("Data is null"));
+        assertThat(exception.getMessage().equals("Data is null")).isTrue();
     }
 
-    private String loadJsonResponse(String path) {
-        Context context = RuntimeEnvironment.application;
+    private String loadJsonResponse(String path, Context context) {
         String json = null;
         try {
             InputStream is = context.getAssets().open(path);

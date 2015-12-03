@@ -300,18 +300,20 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      */
     protected List<PubnativeAdModel> parseResponse(String response) {
         List<PubnativeAdModel> ads = null;
-        try {
-            JSONObject jsonObject = new JSONObject(response);
-            String status = jsonObject.getString("status");
-            JSONArray resultsArray = jsonObject.optJSONArray("ads");
+        if (response != null && !TextUtils.isEmpty(response)) {
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+                String status = jsonObject.getString("status");
+                JSONArray resultsArray = jsonObject.optJSONArray("ads");
 
-            Gson gson = new Gson();
-            Type listType = new TypeToken<List<PubnativeAdModel>>() {
-            }.getType();
-            ads = gson.fromJson(resultsArray.toString(), listType);
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<PubnativeAdModel>>() {
+                }.getType();
+                ads = gson.fromJson(resultsArray.toString(), listType);
 
-        } catch (JSONException e) {
-            this.invokeOnPubnativeRequestFailure(e);
+            } catch (JSONException e) {
+                this.invokeOnPubnativeRequestFailure(e);
+            }
         }
         return ads;
     }
