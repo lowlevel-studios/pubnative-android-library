@@ -1,12 +1,9 @@
-package net.pubnative.library.utilities;
+package net.pubnative.library.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
-/**
- * Created by daffodiliphone on 01/12/15.
- */
 public class Crypto {
     /**
      * Encrypts the given input string using SHA-1 algorithm

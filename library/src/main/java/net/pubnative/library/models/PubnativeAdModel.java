@@ -1,10 +1,7 @@
-package net.pubnative.library.model;
+package net.pubnative.library.models;
 
 import java.util.List;
 
-/**
- * Created by daffodiliphone on 27/11/15.
- */
 public class PubnativeAdModel {
     public String                 title;
     public String                 description;

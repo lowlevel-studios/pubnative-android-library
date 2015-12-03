@@ -1,6 +1,5 @@
 package net.pubnative.library.request;
 
-
 import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
@@ -18,9 +17,9 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import net.pubnative.library.model.PubnativeAdModel;
-import net.pubnative.library.utilities.Crypto;
-import net.pubnative.library.utilities.SystemUtils;
+import net.pubnative.library.models.PubnativeAdModel;
+import net.pubnative.library.utils.Crypto;
+import net.pubnative.library.utils.SystemUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,13 +31,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdIDTaskListener, Response.Listener<String>, Response.ErrorListener {
-    private static final String BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
-    private static final String NATIVE_TYPE_URL =  "native";
+public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdIdListener, Response.Listener<String>, Response.ErrorListener {
+    private static final String   BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final String   NATIVE_TYPE_URL =  "native";
     protected Context             context;
     protected EndPoint            endpoint;
     protected Map<String, String> requestParameters;
@@ -83,6 +81,9 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         String KEYWORDS                   =      "keywords";
     }
 
+    /**
+     * Listener interface used to start Pubnative request with success and failure callbacks.
+     */
     public interface Listener {
         /**
          * Invoked when PubnativeRequest request is success
@@ -114,12 +115,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         if (value == null || TextUtils.isEmpty(value)) {
             requestParameters.remove(key);
         } else {
-            if (requestParameters.containsKey(key)){
-                requestParameters.remove(key);
-                requestParameters.put(key, value);
-            } else {
-                requestParameters.put(key, value);
-            }
+            requestParameters.put(key, value);
         }
     }
 
@@ -142,7 +138,8 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
             if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
                 SystemUtils.getAndroidAdID(this.context, this);
             } else {
-                createNetworkRequest();
+                String url = createNetworkRequest();
+                sendNetworkRequest(url);
             }
         }
     }
@@ -178,12 +175,18 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
             this.requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
 
-        if (!this.requestParameters.containsKey(Parameters.LAT) || !this.requestParameters.containsKey(Parameters.LONG)) {
-            if (SystemUtils.isLocationPermissionGranted(this.context)) {
-                Location location = SystemUtils.getLastLocation(this.context);
-                if (location != null) {
+        if (SystemUtils.isLocationPermissionGranted(this.context)) {
+            Location location = SystemUtils.getLastLocation(this.context);
+            if (location != null) {
+                if (!this.requestParameters.containsKey(Parameters.LAT) && !this.requestParameters.containsKey(Parameters.LONG)) {
                     this.requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
                     this.requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
+                } else {
+                    if (!this.requestParameters.containsKey(Parameters.LAT)) {
+                        this.requestParameters.remove(Parameters.LONG);
+                    } else if (!this.requestParameters.containsKey(Parameters.LONG)) {
+                        this.requestParameters.remove(Parameters.LAT);
+                    }
                 }
             }
         }
@@ -193,7 +196,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
      *  Android Advertising Id Task Listener is finished when android ad id is fetched.
      */
     @Override
-    public void onAndroidAdvertisingIDTaskFinished(String result) {
+    public void onAndroidAdIdTaskFinished(String result) {
         if (!TextUtils.isEmpty(result)) {
             this.requestParameters.put(Parameters.ANDROID_ADVERTISER_ID, result);
             this.requestParameters.put(Parameters.ANDROID_ADVERTISER_ID_SHA1, Crypto.sha1(result));
@@ -201,13 +204,14 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
         } else {
             this.requestParameters.put(Parameters.NO_USER_ID, "1");
         }
-        createNetworkRequest();
+        String url =  createNetworkRequest();
+        sendNetworkRequest(url);
     }
 
     /**
      * This function is used to create network request.
      */
-    protected void createNetworkRequest() {
+    protected String createNetworkRequest() {
         String url = null;
         if (endpoint != null) {
             switch (endpoint) {
@@ -217,8 +221,8 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIDTask.AndroidAdID
                 default:
                     throw new IllegalArgumentException(endpoint.toString());
             }
-            sendNetworkRequest(url);
         }
+        return url;
     }
 
     /**
