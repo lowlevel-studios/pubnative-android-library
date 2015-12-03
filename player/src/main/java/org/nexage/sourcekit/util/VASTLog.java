@@ -37,7 +37,8 @@ public class VASTLog {
 	}
 
 	
-	private static LOG_LEVEL LEVEL = LOG_LEVEL.error;
+	private static LOG_LEVEL LEVEL = LOG_LEVEL.debug
+			;
 
 	public static void v(String tag, String msg) {
 		if (LEVEL.getValue() <= LOG_LEVEL.verbose.getValue()) {

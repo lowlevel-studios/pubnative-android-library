@@ -352,24 +352,18 @@ public class VASTActivity extends Activity implements OnCompletionListener, OnEr
         VASTLog.d(TAG, "entered onPrepared called --(MediaPlayer callback) ....about to play");
 
         calculateAspectRatio();
+        mMediaPlayer.start();
 
         mPlayerLayout.setVisibility(View.VISIBLE);
         mPlayerLoadingBar.setVisibility(View.GONE);
         mPlayerCountDown.setProgress(0, mMediaPlayer.getDuration());
 
-        mMediaPlayer.start();
-
         startLayoutTimer();
+        startQuartileTimer();
         startVideoProgressTimer();
 
         if (!mIsProcessedImpressions) {
             processImpressions();
-        }
-
-        startQuartileTimer();
-
-        if (!mMediaPlayer.isPlaying()) {
-            mMediaPlayer.start();
         }
     }
 
@@ -660,7 +654,7 @@ public class VASTActivity extends Activity implements OnCompletionListener, OnEr
                     int firstPosition = mVideoProgressTracker.getFirst();
                     int lastPosition = mVideoProgressTracker.getLast();
 
-                    if (lastPosition > firstPosition) {
+                    if (lastPosition >= firstPosition) {
 
                         VASTLog.v(TAG, "video progressing (position:" + lastPosition + ")");
                         mVideoProgressTracker.removeFirst();
