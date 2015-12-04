@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -121,7 +120,7 @@ public class PubnativeRequestTest {
         String url = pubnativeRequest.createNetworkRequest();
 
         verify(pubnativeRequest, times(1)).createNativeRequest();
-        assertThat(url).isNot(null);
+        assertThat(url).isNotNull();
         assertThat(url).isNotEmpty();
     }
 
@@ -150,12 +149,8 @@ public class PubnativeRequestTest {
         assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_md5")).isTrue();
         verify(pubnativeRequest, times(1)).sendNetworkRequest(anyString());
 
-
         pubnativeRequest.onAndroidAdIdTaskFinished("");
         assertThat(pubnativeRequest.requestParameters.containsKey("no_user_id")).isTrue();
-
-
-
 
     }
 
@@ -170,7 +165,6 @@ public class PubnativeRequestTest {
         pubnativeRequest.onResponse(response);
 
         verify(pubnativeRequest, times(1)).parseResponse(response);
-        verify(pubnativeRequest, times(1)).listener.onPubnativeRequestSuccess(any(PubnativeRequest.class), any(List.class));
 
     }
 
