@@ -3,12 +3,14 @@ package net.pubnative.library.request;
 import android.content.Context;
 
 import junit.framework.Assert;
+
 import net.pubnative.library.BuildConfig;
 import net.pubnative.library.MyRobolectricTestRunner;
 import net.pubnative.library.models.PubnativeAdModel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -114,11 +118,11 @@ public class PubnativeRequestTest {
         pubnativeRequest.setParameter("ad_count", "1");
         pubnativeRequest.context = context;
 
-        when(pubnativeRequest.createNativeRequest()).thenReturn("Network request is created");
         String url = pubnativeRequest.createNetworkRequest();
 
         verify(pubnativeRequest, times(1)).createNativeRequest();
-        assertThat(url.equals("Network request is created")).isTrue();
+        assertThat(url).isNot(null);
+        assertThat(url).isNotEmpty();
     }
 
     @Test
@@ -144,9 +148,15 @@ public class PubnativeRequestTest {
         assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id")).isTrue();
         assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_sha1")).isTrue();
         assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_md5")).isTrue();
+        verify(pubnativeRequest, times(1)).sendNetworkRequest(anyString());
+
 
         pubnativeRequest.onAndroidAdIdTaskFinished("");
         assertThat(pubnativeRequest.requestParameters.containsKey("no_user_id")).isTrue();
+
+
+
+
     }
 
     @Test
@@ -154,10 +164,14 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-        String response = loadJsonResponse("responseSuccess.json", pubnativeRequest.context);
+        String response = loadTestJson("responseSuccess.json", pubnativeRequest.context);
+        pubnativeRequest.listener = Mockito.mock(PubnativeRequest.Listener.class);
+
         pubnativeRequest.onResponse(response);
 
         verify(pubnativeRequest, times(1)).parseResponse(response);
+        verify(pubnativeRequest, times(1)).listener.onPubnativeRequestSuccess(any(PubnativeRequest.class), any(List.class));
+
     }
 
     @Test
@@ -165,7 +179,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-        String response = loadJsonResponse("responseSuccess.json", pubnativeRequest.context);
+        String response = loadTestJson("responseSuccess.json", pubnativeRequest.context);
 
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
         assertThat(ads.size() == 1).isTrue();
@@ -177,7 +191,7 @@ public class PubnativeRequestTest {
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
 
-        String response = loadJsonResponse("responseFailure.json", pubnativeRequest.context);
+        String response = loadTestJson("responseFailure.json", pubnativeRequest.context);
         Exception exception = pubnativeRequest.prepareExceptionFromErrorJson(response, 100);
         assertThat(exception.getMessage().equals("error Invalid app token100")).isTrue();
 
@@ -188,7 +202,7 @@ public class PubnativeRequestTest {
         assertThat(exception.getMessage().equals("Data is null")).isTrue();
     }
 
-    private String loadJsonResponse(String path, Context context) {
+    private String loadTestJson(String path, Context context) {
         String json = null;
         try {
             InputStream is = context.getAssets().open(path);
