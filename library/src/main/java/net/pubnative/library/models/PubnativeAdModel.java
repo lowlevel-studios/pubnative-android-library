@@ -1,5 +1,7 @@
 package net.pubnative.library.models;
 
+import android.text.TextUtils;
+
 import java.util.List;
 
 public class PubnativeAdModel {
@@ -14,4 +16,21 @@ public class PubnativeAdModel {
     public List<PubnativeBeacon>  beacons;
     public String                 type;
     public String                 portrait_banner_url;
+
+    public String getBeacon(String beaconType) {
+
+        if (beaconType == null || TextUtils.isEmpty(beaconType) || beacons == null || beacons.isEmpty()) {
+            return null;
+        }
+
+        for (PubnativeBeacon beacon : beacons) {
+            if (beaconType.equalsIgnoreCase(beacon.type)) {
+                return beacon.url;
+            }
+        }
+        return null;
+    }
+
+
+
 }

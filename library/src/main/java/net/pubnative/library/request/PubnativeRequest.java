@@ -7,6 +7,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -38,14 +39,14 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
     private static final String   BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
     private static final String   NATIVE_TYPE_URL =  "native";
     protected Context             context;
-    protected EndPoint            endpoint;
+    protected Endpoint endpoint;
     protected Map<String, String> requestParameters;
     protected Listener            listener;
 
     /**
      * These are the various types of adds pubnative support
      */
-    public enum EndPoint {
+    public enum Endpoint {
         NATIVE
     }
 
@@ -105,13 +106,20 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
     /**
      * Sets parameters required to make the pub native request
      *
-     * @param key key name of parameter
+     * @param key   key name of parameter
      * @param value actual value of parameter
      */
     public void setParameter(String key, String value) {
+
+        if (key == null || TextUtils.isEmpty(key)) {
+            Log.e(PubnativeRequest.class.getSimpleName(),"Invalid key passed for parameter");
+            return;
+        }
+
         if (requestParameters == null) {
             requestParameters = new HashMap<String, String>();
         }
+
         if (value == null || TextUtils.isEmpty(value)) {
             requestParameters.remove(key);
         } else {
@@ -126,7 +134,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      * @param endpoint type of ad (ex: NATIVE)
      * @param listener valid listener to track ad request callbacks.
      */
-    public void start(Context context, EndPoint endpoint, @NonNull Listener listener) {
+    public void start(Context context, Endpoint endpoint, @NonNull Listener listener) {
         this.context = context;
         this.listener = listener;
         this.endpoint = endpoint;
@@ -148,6 +156,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      *  setting optional parameters to request parameters
      */
     protected void setOptionalParameters() {
+
         if (!this.requestParameters.containsKey(Parameters.BUNDLE_ID)) {
             this.requestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(this.context));
         }
@@ -168,25 +177,22 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
             DisplayMetrics dm = this.context.getResources().getDisplayMetrics();
             this.requestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
         }
+
         if (!this.requestParameters.containsKey(Parameters.DEVICE_TYPE)) {
             this.requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(this.context) ? "tablet" : "phone");
         }
+
         if (!this.requestParameters.containsKey(Parameters.LOCALE)) {
             this.requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
 
+        // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
         if (SystemUtils.isLocationPermissionGranted(this.context)) {
             Location location = SystemUtils.getLastLocation(this.context);
             if (location != null) {
                 if (!this.requestParameters.containsKey(Parameters.LAT) && !this.requestParameters.containsKey(Parameters.LONG)) {
                     this.requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
                     this.requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
-                } else {
-                    if (!this.requestParameters.containsKey(Parameters.LAT)) {
-                        this.requestParameters.remove(Parameters.LONG);
-                    } else if (!this.requestParameters.containsKey(Parameters.LONG)) {
-                        this.requestParameters.remove(Parameters.LAT);
-                    }
                 }
             }
         }

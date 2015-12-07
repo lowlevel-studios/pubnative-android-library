@@ -89,7 +89,7 @@ public class PubnativeRequestTest {
         when(pubnativeRequest.createNativeRequest()).thenReturn("Request is started");
         when(pubnativeRequest.createNetworkRequest()).thenReturn("Request is started");
 
-        pubnativeRequest.start(context, PubnativeRequest.EndPoint.NATIVE, listener);
+        pubnativeRequest.start(context, PubnativeRequest.Endpoint.NATIVE, listener);
 
         verify(pubnativeRequest, times(1)).setOptionalParameters();
         verify(pubnativeRequest, times(1)).createNetworkRequest();
@@ -113,7 +113,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
 
-        pubnativeRequest.endpoint = PubnativeRequest.EndPoint.NATIVE;
+        pubnativeRequest.endpoint = PubnativeRequest.Endpoint.NATIVE;
         pubnativeRequest.setParameter("ad_count", "1");
         pubnativeRequest.context = context;
 
