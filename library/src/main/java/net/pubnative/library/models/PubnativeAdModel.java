@@ -17,20 +17,23 @@ public class PubnativeAdModel {
     public String                 type;
     public String                 portrait_banner_url;
 
+    /**
+     * This function will return the Beacon URL on the bases of beacon type.
+     * It will travers all beacons and search for <code><beaconType<code/> beaconType.
+     * @param beaconType
+     * @return return Beacon URL or null otherwise.
+     */
     public String getBeacon(String beaconType) {
-
-        if (beaconType == null || TextUtils.isEmpty(beaconType) || beacons == null || beacons.isEmpty()) {
+        String beaconUrl = null;
+        if (TextUtils.isEmpty(beaconType) || beacons.isEmpty()) {
             return null;
         }
-
         for (PubnativeBeacon beacon : beacons) {
             if (beaconType.equalsIgnoreCase(beacon.type)) {
-                return beacon.url;
+                beaconUrl = beacon.url;
+                break;
             }
         }
-        return null;
+        return beaconUrl;
     }
-
-
-
 }

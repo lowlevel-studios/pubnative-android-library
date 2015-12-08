@@ -6,9 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.util.Log;
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 
 public class SystemUtils {
 
@@ -79,45 +77,9 @@ public class SystemUtils {
      * @param context  Context object
      * @param listener Listener to get callback when android ad id is fetched.
      */
-    public static void getAndroidAdID(Context context, AndroidAdIdTask.AndroidAdIdListener listener) {
-        new AndroidAdIdTask().setListener(listener).execute(context);
+    public static void getAndroidAdID(Context context, AndroidAdvertisingIDTask.Listener listener) {
+        new AndroidAdvertisingIDTask().setListener(listener).execute(context);
     }
 
-    public static class AndroidAdIdTask extends AsyncTask<Context, Void, String> {
-        private AndroidAdIdListener listener;
 
-        public interface AndroidAdIdListener {
-            void onAndroidAdIdTaskFinished(String result);
-        }
-
-        public AndroidAdIdTask setListener(AndroidAdIdListener listener) {
-            this.listener = listener;
-            return this;
-        }
-
-        @Override
-        protected String doInBackground(Context... contexts) {
-            String result = null;
-            Context context = contexts[0];
-            if (context != null) {
-                AdvertisingIdClient.Info adInfo = null;
-                try {
-                    adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
-                    if (adInfo != null) {
-                        result = adInfo.getId();
-                    }
-                } catch (Exception e) {
-                    Log.e("Pubnative", "Error retrieving androidAdvertisingID: " + e.toString());
-                }
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (this.listener != null) {
-                this.listener.onAndroidAdIdTaskFinished(result);
-            }
-        }
-    }
 }

@@ -2,9 +2,8 @@ package net.pubnative.library.request;
 
 import android.content.Context;
 
-import junit.framework.Assert;
-
 import net.pubnative.library.BuildConfig;
+import net.pubnative.library.Utils;
 import net.pubnative.library.PubnativeTestUtils;
 import net.pubnative.library.models.PubnativeAdModel;
 
@@ -16,7 +15,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -29,35 +27,6 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class,sdk = 19)
 public class PubnativeRequestTest {
 
-    @Test
-    public void testPunnativeRequestIsNotNull() {
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        Assert.assertNotNull("Pubnative request is not null",pubnativeRequest);
-    }
-
-    @Test
-    public void testContextIsNotNull() {
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        Context context = RuntimeEnvironment.application;
-        pubnativeRequest.context = context;
-        Assert.assertNotNull("Pubnative Request context is not null", pubnativeRequest.context);
-    }
-
-    @Test
-    public void testRequestParametersIsNotNull() {
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        Map<String, String> requestParametrs = spy(Map.class);
-        pubnativeRequest.requestParameters = requestParametrs;
-        Assert.assertNotNull("Pubnative Request requestParameters is not null", pubnativeRequest.requestParameters);
-    }
-
-    @Test
-    public void testListenerIsNotNull() {
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
-        pubnativeRequest.listener = listener;
-        Assert.assertNotNull("Pubnative Request listener is not null", pubnativeRequest.listener);
-    }
 
     @Test
     public void testSetParameter() {
@@ -74,7 +43,7 @@ public class PubnativeRequestTest {
         assertThat(pubnativeRequest.requestParameters.containsValue("4")).isTrue();
 
         pubnativeRequest.setParameter("banner_size", null);
-        assertThat(!pubnativeRequest.requestParameters.containsKey("banner_size")).isTrue();
+        assertThat(pubnativeRequest.requestParameters.containsKey("banner_size")).isFalse();
     }
 
     @Test
@@ -175,7 +144,7 @@ public class PubnativeRequestTest {
         String response = PubnativeTestUtils.getResponseJSON("success.json");
 
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
-        assertThat(ads.size() == 1).isTrue();
+        assertThat(ads.size()).isEqualTo(1);
     }
 
     @Test

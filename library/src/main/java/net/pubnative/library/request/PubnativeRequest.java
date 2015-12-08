@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.pubnative.library.models.PubnativeAdModel;
+import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
 
@@ -35,7 +36,7 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdIdListener, Response.Listener<String>, Response.ErrorListener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Response.Listener<String>, Response.ErrorListener {
     private static final String   BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
     private static final String   NATIVE_TYPE_URL =  "native";
     protected Context             context;
@@ -111,7 +112,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      */
     public void setParameter(String key, String value) {
 
-        if (key == null || TextUtils.isEmpty(key)) {
+        if (TextUtils.isEmpty(key)) {
             Log.e(PubnativeRequest.class.getSimpleName(),"Invalid key passed for parameter");
             return;
         }
@@ -120,7 +121,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
             requestParameters = new HashMap<String, String>();
         }
 
-        if (value == null || TextUtils.isEmpty(value)) {
+        if (TextUtils.isEmpty(value)) {
             requestParameters.remove(key);
         } else {
             requestParameters.put(key, value);
@@ -285,7 +286,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      */
     protected Exception prepareExceptionFromErrorJson(String data, int statusCode) {
         Exception exception = null;
-        if (data != null && !TextUtils.isEmpty(data)) {
+        if (!TextUtils.isEmpty(data)) {
             try {
                 JSONObject jsonObject = new JSONObject(data);
                 String status = jsonObject.getString("status");
@@ -306,7 +307,7 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
      */
     protected List<PubnativeAdModel> parseResponse(String response) {
         List<PubnativeAdModel> ads = null;
-        if (response != null && !TextUtils.isEmpty(response)) {
+        if (!TextUtils.isEmpty(response)) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 String status = jsonObject.getString("status");
@@ -316,7 +317,6 @@ public class PubnativeRequest implements SystemUtils.AndroidAdIdTask.AndroidAdId
                 Type listType = new TypeToken<List<PubnativeAdModel>>() {
                 }.getType();
                 ads = gson.fromJson(resultsArray.toString(), listType);
-
             } catch (JSONException e) {
                 this.invokeOnPubnativeRequestFailure(e);
             }
