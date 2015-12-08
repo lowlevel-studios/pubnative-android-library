@@ -3,7 +3,6 @@ package net.pubnative.library.request;
 import android.content.Context;
 
 import net.pubnative.library.BuildConfig;
-import net.pubnative.library.Utils;
 import net.pubnative.library.PubnativeTestUtils;
 import net.pubnative.library.models.PubnativeAdModel;
 
