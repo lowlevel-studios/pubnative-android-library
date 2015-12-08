@@ -5,17 +5,16 @@ import android.content.Context;
 import junit.framework.Assert;
 
 import net.pubnative.library.BuildConfig;
-import net.pubnative.library.MyRobolectricTestRunner;
+import net.pubnative.library.PubnativeTestUtils;
 import net.pubnative.library.models.PubnativeAdModel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MyRobolectricTestRunner.class)
+@RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class,sdk = 19)
 public class PubnativeRequestTest {
 
@@ -159,7 +158,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-        String response = loadTestJson("responseSuccess.json", pubnativeRequest.context);
+        String response = PubnativeTestUtils.getResponseJSON("success.json");
         pubnativeRequest.listener = Mockito.mock(PubnativeRequest.Listener.class);
 
         pubnativeRequest.onResponse(response);
@@ -173,7 +172,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-        String response = loadTestJson("responseSuccess.json", pubnativeRequest.context);
+        String response = PubnativeTestUtils.getResponseJSON("success.json");
 
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
         assertThat(ads.size() == 1).isTrue();
@@ -185,7 +184,7 @@ public class PubnativeRequestTest {
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
 
-        String response = loadTestJson("responseFailure.json", pubnativeRequest.context);
+        String response = PubnativeTestUtils.getResponseJSON("failure.json");
         Exception exception = pubnativeRequest.prepareExceptionFromErrorJson(response, 100);
         assertThat(exception.getMessage().equals("error Invalid app token100")).isTrue();
 
@@ -194,21 +193,5 @@ public class PubnativeRequestTest {
 
         exception = pubnativeRequest.prepareExceptionFromErrorJson(null, 100);
         assertThat(exception.getMessage().equals("Data is null")).isTrue();
-    }
-
-    private String loadTestJson(String path, Context context) {
-        String json = null;
-        try {
-            InputStream is = context.getAssets().open(path);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
     }
 }
