@@ -80,6 +80,4 @@ public class SystemUtils {
     public static void getAndroidAdID(Context context, AndroidAdvertisingIDTask.Listener listener) {
         new AndroidAdvertisingIDTask().setListener(listener).execute(context);
     }
-
-
 }
