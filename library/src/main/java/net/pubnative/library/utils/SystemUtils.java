@@ -71,13 +71,4 @@ public class SystemUtils {
         }
         return loc;
     }
-
-    /**
-     * Gives you the android advertising id.
-     * @param context  Context object
-     * @param listener Listener to get callback when android ad id is fetched.
-     */
-    public static void getAndroidAdID(Context context, AndroidAdvertisingIDTask.Listener listener) {
-        new AndroidAdvertisingIDTask().setListener(listener).execute(context);
-    }
 }

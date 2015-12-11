@@ -25,7 +25,7 @@ public class PubnativeAdModel {
      */
     public String getBeacon(String beaconType) {
         String beaconUrl = null;
-        if (TextUtils.isEmpty(beaconType) || beacons.isEmpty()) {
+        if (TextUtils.isEmpty(beaconType) || beacons.size() == 0) {
             return null;
         }
         for (PubnativeBeacon beacon : beacons) {

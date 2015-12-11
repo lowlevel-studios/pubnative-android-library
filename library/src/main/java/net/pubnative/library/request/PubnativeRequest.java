@@ -16,18 +16,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
+import net.pubnative.library.APIResponseModel;
 import net.pubnative.library.models.PubnativeAdModel;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -131,24 +129,29 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     /**
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
-     * @param context is application context
+     * @param context  is application context
      * @param endpoint type of ad (ex: NATIVE)
      * @param listener valid listener to track ad request callbacks.
      */
-    public void start(Context context, Endpoint endpoint, @NonNull Listener listener) {
+    public void start(Context context, @NonNull Endpoint endpoint, @NonNull Listener listener) {
         this.context = context;
         this.listener = listener;
         this.endpoint = endpoint;
+
+        if (endpoint == null) {
+            invokeOnPubnativeRequestFailure(new IllegalArgumentException("Invalid Endpoint: " + endpoint.toString()));
+            return;
+        }
+
         if (this.listener != null) {
             if (requestParameters == null) {
                 requestParameters = new HashMap<String, String>();
             }
             setOptionalParameters();
             if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
-                SystemUtils.getAndroidAdID(this.context, this);
+                new AndroidAdvertisingIDTask().setListener(this).execute(context);
             } else {
-                String url = createNetworkRequest();
-                sendNetworkRequest(url);
+                sendNetworkRequest();
             }
         }
     }
@@ -211,47 +214,41 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         } else {
             this.requestParameters.put(Parameters.NO_USER_ID, "1");
         }
-        String url =  createNetworkRequest();
-        sendNetworkRequest(url);
+        sendNetworkRequest();
     }
 
     /**
      * This function is used to create network request.
      */
-    protected String createNetworkRequest() {
+    protected String getRequestURL() {
         String url = null;
-        if (endpoint != null) {
-            switch (endpoint) {
-                case NATIVE:
-                        url = createNativeRequest();
-                    break;
-                default:
-                    throw new IllegalArgumentException(endpoint.toString());
-            }
+            // Will add more types of ads here in future
+        switch (endpoint) {
+            case NATIVE:
+                Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();       // creating from base url
+                uriBuilder.appendPath(NATIVE_TYPE_URL);     // Appending endpoint
+
+                for (String key : requestParameters.keySet()) {     // appending parameters
+                    String value = requestParameters.get(key);
+                    if (value != null) {
+                        uriBuilder.appendQueryParameter(key, value);
+                    }
+                }
+                url = uriBuilder.build().toString();
+                break;
+            default:
+                invokeOnPubnativeRequestFailure(new IllegalArgumentException("Invalid Endpoint: "+endpoint));
         }
         return url;
     }
 
-    /**
-     * @return url of native request
-     */
-    protected String createNativeRequest() {
-        Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
-        uriBuilder.appendPath(NATIVE_TYPE_URL);
-
-        for (String key : requestParameters.keySet()) {
-            String value = requestParameters.get(key);
-            if (value != null) {
-                uriBuilder.appendQueryParameter(key, value);
-            }
-        }
-        return uriBuilder.build().toString();
-    }
 
     /**
-     * @param url used to send network request
+     * This function will create and send the network request, It uses Volley internally for network communication.
+     * It consider that <code>endpoint<code/> is already provided so that it can prepare the request URL.
      */
-    protected void sendNetworkRequest(String url) {
+    protected void sendNetworkRequest() {
+        String url = getRequestURL();
         RequestQueue queue = Volley.newRequestQueue(this.context);
         StringRequest strRequest = new StringRequest(Request.Method.GET, url, this, this);
         queue.add(strRequest);
@@ -265,6 +262,8 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         List<PubnativeAdModel> dataModel = parseResponse(response);
         if (dataModel != null) {
             invokeOnPubnativeRequestSuccess(dataModel);
+        } else {
+            invokeOnPubnativeRequestFailure(new Exception("can't receive ads, Invalid response"));
         }
     }
 
@@ -275,7 +274,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     public void onErrorResponse(VolleyError error) {
         String data = new String(error.networkResponse.data);
         int statusCode = error.networkResponse.statusCode;
-        Exception exception = prepareExceptionFromErrorJson(data, statusCode);
+        Exception exception = getResponseException(data, statusCode);
         invokeOnPubnativeRequestFailure(exception);
     }
 
@@ -284,7 +283,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
      * @param statusCode is statusCode from volley response
      * @return exception if status is not ok and if there is error while parsing json
      */
-    protected Exception prepareExceptionFromErrorJson(String data, int statusCode) {
+    protected Exception getResponseException(String data, int statusCode) {
         Exception exception = null;
         if (!TextUtils.isEmpty(data)) {
             try {
@@ -308,18 +307,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     protected List<PubnativeAdModel> parseResponse(String response) {
         List<PubnativeAdModel> ads = null;
         if (!TextUtils.isEmpty(response)) {
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                String status = jsonObject.getString("status");
-                JSONArray resultsArray = jsonObject.optJSONArray("ads");
-
-                Gson gson = new Gson();
-                Type listType = new TypeToken<List<PubnativeAdModel>>() {
-                }.getType();
-                ads = gson.fromJson(resultsArray.toString(), listType);
-            } catch (JSONException e) {
-                this.invokeOnPubnativeRequestFailure(e);
-            }
+            Gson gson = new Gson();
+            APIResponseModel responseModel = gson.fromJson(response, APIResponseModel.class);
+            ads = (List<PubnativeAdModel>) responseModel.ads;
         }
         return ads;
     }

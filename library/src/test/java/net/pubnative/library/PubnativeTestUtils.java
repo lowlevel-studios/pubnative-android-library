@@ -11,12 +11,10 @@ import java.io.InputStreamReader;
 public class PubnativeTestUtils {
 
     public static String getResponseJSON(String jsonFile){
-
         return getStringFromJSONFile("response", jsonFile);
     }
 
     private static String getStringFromJSONFile(String folder, String jsonFile) {
-
         InputStream configStream = PubnativeTestUtils.class.getResourceAsStream("/" + folder + "/" + jsonFile);
         return readStringFromInputStream(configStream);
     }
