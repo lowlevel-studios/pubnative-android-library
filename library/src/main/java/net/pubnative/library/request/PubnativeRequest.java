@@ -35,7 +35,7 @@ import java.util.Map;
  * For every Ad request create new object of this class
  */
 public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Response.Listener<String>, Response.ErrorListener {
-    private static final String   BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
+    protected static final String   BASE_URL        =  "http://api.pubnative.net/api/partner/v2/promotions";
     private static final String   NATIVE_TYPE_URL =  "native";
     protected Context             context;
     protected Endpoint endpoint;
@@ -138,22 +138,31 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         this.listener = listener;
         this.endpoint = endpoint;
 
-        if (endpoint == null) {
-            invokeOnPubnativeRequestFailure(new IllegalArgumentException("Invalid Endpoint: " + endpoint.toString()));
+        if (this.listener == null) {
+            Log.v("","Listener can't ne null, Aborting !!");
             return;
         }
 
-        if (this.listener != null) {
-            if (requestParameters == null) {
-                requestParameters = new HashMap<String, String>();
-            }
-            setOptionalParameters();
-            if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
-                new AndroidAdvertisingIDTask().setListener(this).execute(context);
-            } else {
-                sendNetworkRequest();
-            }
+        if (endpoint == null) {
+            invokeOnPubnativeRequestFailure(new IllegalArgumentException("Invalid Endpoint"));
+            return;
         }
+
+        if (context == null) {
+            invokeOnPubnativeRequestFailure(new IllegalArgumentException("Context can not be null"));
+            return;
+        }
+
+        if (requestParameters == null) {
+            requestParameters = new HashMap<String, String>();
+        }
+        setOptionalParameters();
+        if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
+            new AndroidAdvertisingIDTask().setListener(this).execute(context);
+        } else {
+            sendNetworkRequest();
+        }
+
     }
 
     /**
@@ -223,6 +232,10 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     protected String getRequestURL() {
         String url = null;
             // Will add more types of ads here in future
+        if (endpoint == null) {
+            invokeOnPubnativeRequestFailure(new IllegalArgumentException("Invalid Endpoint: " + endpoint));
+            return null;
+        }
         switch (endpoint) {
             case NATIVE:
                 Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();       // creating from base url
@@ -249,6 +262,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
      */
     protected void sendNetworkRequest() {
         String url = getRequestURL();
+        if (url == null) {
+            return;
+        }
         RequestQueue queue = Volley.newRequestQueue(this.context);
         StringRequest strRequest = new StringRequest(Request.Method.GET, url, this, this);
         queue.add(strRequest);
