@@ -75,8 +75,7 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testStartWithNullEndpoint()
-    {
+    public void testStartWithNullEndpoint() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
@@ -87,8 +86,7 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testStartWithNullContext()
-    {
+    public void testStartWithNullContext(){
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         PubnativeRequest.Listener listener = Mockito.mock(PubnativeRequest.Listener.class);
         pubnativeRequest.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "7e746627-ebae-4c87-aea6-e7554798f0fe");
@@ -110,7 +108,7 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testResquestUrl() {
+    public void testResquestUrlValidity() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.endpoint = PubnativeRequest.Endpoint.NATIVE;
@@ -125,8 +123,7 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testInvalidEndpoint()
-    {
+    public void testInvalidEndpoint() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.endpoint = null;       // Invalid end point
@@ -137,7 +134,7 @@ public class PubnativeRequestTest {
     }
 
     @Test
-    public void testOnAndroidIdTaskFinished() {
+    public void testAdvertisingIdResponse() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.requestParameters = spy(HashMap.class);
         pubnativeRequest.onAndroidAdIdTaskFinished("1234");
@@ -147,7 +144,6 @@ public class PubnativeRequestTest {
         assertThat(pubnativeRequest.requestParameters.containsKey("android_advertiser_id_md5")).isTrue();
         verify(pubnativeRequest, times(1)).sendNetworkRequest();
     }
-
 
     @Test
     public void testAdvertisingIdResponseWithNullAdId() {
@@ -170,8 +166,7 @@ public class PubnativeRequestTest {
     }
 
     @Test
-    public void testOnResponseWithInvalidData()
-    {
+    public void testOnResponseWithInvalidData() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
@@ -182,8 +177,7 @@ public class PubnativeRequestTest {
     }
 
     @Test
-    public void testOnResponseWithNullData()
-    {
+    public void testOnResponseWithNullData() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
@@ -206,7 +200,6 @@ public class PubnativeRequestTest {
         String response = PubnativeTestUtils.getResponseJSON("failure.json");
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
         assertThat(ads).isNull();
-
     }
 
     @Test
@@ -221,8 +214,8 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
-
         String response = PubnativeTestUtils.getResponseJSON("failure.json");
+
         Exception exception = pubnativeRequest.getResponseException(response, 100);
         assertThat(exception.getMessage()).isEqualTo("error Invalid app token100");
 
@@ -234,8 +227,7 @@ public class PubnativeRequestTest {
     }
 
     @Test
-    public void testErrorResponseFromVolley()
-    {
+    public void testErrorResponseFromVolley() {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         VolleyError error = new VolleyError(new NetworkResponse(400,new byte[2], new HashMap<String, String>(),false));
         pubnativeRequest.onErrorResponse(error);
