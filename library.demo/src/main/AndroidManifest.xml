@@ -25,8 +25,7 @@
 
         <activity
             android:name="org.nexage.sourcekit.vast.activity.VASTActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:screenOrientation="landscape"/>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
 
         <activity
             android:name="net.pubnative.library.predefined.PubnativeActivity"

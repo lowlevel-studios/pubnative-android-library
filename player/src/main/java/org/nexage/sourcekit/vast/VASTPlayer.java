@@ -175,6 +175,7 @@ public class VASTPlayer {
     private void sendReady() {
 
         VASTLog.d(TAG, "sendReady");
+
         if (listener != null) {
 
             ((Activity) context).runOnUiThread(new Runnable() {
