@@ -325,7 +325,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         if (!TextUtils.isEmpty(response)) {
             Gson gson = new Gson();
             APIResponseModel responseModel = gson.fromJson(response, APIResponseModel.class);
-            ads = (List<PubnativeAdModel>) responseModel.ads;
+            ads = responseModel.ads;
         }
         return ads;
     }
