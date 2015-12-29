@@ -17,7 +17,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 
-import net.pubnative.library.APIResponseModel;
+import net.pubnative.library.APIRequestResponseModel;
 import net.pubnative.library.models.PubnativeAdModel;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
@@ -279,7 +279,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         if (dataModel != null) {
             invokeOnPubnativeRequestSuccess(dataModel);
         } else {
-            invokeOnPubnativeRequestFailure(new Exception("can't receive ads, Invalid response"));
+            invokeOnPubnativeRequestFailure(getResponseException(response,0));
         }
     }
 
@@ -324,7 +324,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         List<PubnativeAdModel> ads = null;
         if (!TextUtils.isEmpty(response)) {
             Gson gson = new Gson();
-            APIResponseModel responseModel = gson.fromJson(response, APIResponseModel.class);
+            APIRequestResponseModel responseModel = gson.fromJson(response, APIRequestResponseModel.class);
             ads = responseModel.ads;
         }
         return ads;
