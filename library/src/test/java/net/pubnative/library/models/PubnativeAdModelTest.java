@@ -1,6 +1,11 @@
 package net.pubnative.library.models;
 
+import net.pubnative.library.BuildConfig;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-/**
- * Created by davidmartin on 04/01/16.
- */
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class,
+        sdk = 21)
 public class PubnativeAdModelTest
 {
     @Test
