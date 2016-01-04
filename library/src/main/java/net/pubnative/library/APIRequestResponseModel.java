@@ -10,6 +10,12 @@ import java.util.List;
 public class APIRequestResponseModel {
 
     public String status;
-    public List<PubnativeAdModel> ads;
     public String error_message;
+    public List<PubnativeAdModel> ads;
+
+    public interface Status {
+
+        String ERROR = "error";
+        String OK = "ok";
+    }
 }
