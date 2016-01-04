@@ -1,6 +1,4 @@
-package net.pubnative.library;
-
-import net.pubnative.library.models.PubnativeAdModel;
+package net.pubnative.library.models;
 
 import java.util.List;
 
@@ -9,13 +7,13 @@ import java.util.List;
  */
 public class APIRequestResponseModel {
 
-    public String status;
-    public String error_message;
+    public String                 status;
+    public String                 error_message;
     public List<PubnativeAdModel> ads;
 
     public interface Status {
 
         String ERROR = "error";
-        String OK = "ok";
+        String OK    = "ok";
     }
 }
