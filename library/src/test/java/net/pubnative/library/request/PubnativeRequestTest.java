@@ -31,6 +31,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testParameterIsSet() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter("ad_count", "1");
         assertThat(pubnativeRequest.requestParameters.get("ad_count")).isEqualTo("1");
@@ -38,6 +39,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testWithNullParameters() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter("banner_size", null);
         assertThat(pubnativeRequest.requestParameters.containsKey("banner_size")).isFalse();
@@ -45,6 +47,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testParameterSize() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter("ad_count", "1");
         pubnativeRequest.setParameter("icon_size", "10x10");
@@ -53,6 +56,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testDuplicateParameters() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter("ad_count", "4");
         assertThat(pubnativeRequest.requestParameters.containsKey("ad_count")).isTrue();
@@ -62,6 +66,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testNetworkRequestInitiatedOnStart() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
@@ -76,6 +81,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testStartWithNullEndpoint() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
@@ -86,7 +92,8 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testStartWithNullContext(){
+    public void testStartWithNullContext() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         PubnativeRequest.Listener listener = Mockito.mock(PubnativeRequest.Listener.class);
         pubnativeRequest.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "7e746627-ebae-4c87-aea6-e7554798f0fe");
@@ -97,6 +104,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testOptionalParameters() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.setParameter("ad_count", "1");
@@ -108,7 +116,8 @@ public class PubnativeRequestTest {
 
 
     @Test
-    public void testResquestUrlValidity() {
+    public void testRequestUrlValidity() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.endpoint = PubnativeRequest.Endpoint.NATIVE;
@@ -124,6 +133,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testInvalidEndpoint() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.endpoint = null;       // Invalid end point
@@ -135,6 +145,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testAdvertisingIdResponse() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.requestParameters = spy(HashMap.class);
         pubnativeRequest.onAndroidAdIdTaskFinished("1234");
@@ -147,6 +158,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testAdvertisingIdResponseWithNullAdId() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.requestParameters = spy(HashMap.class);
         pubnativeRequest.onAndroidAdIdTaskFinished(null);
@@ -156,6 +168,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testOnResponseSuccess() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
@@ -167,6 +180,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testOnResponseWithInvalidData() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
@@ -178,6 +192,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testOnResponseWithNullData() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
@@ -188,6 +203,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testValidResponseParsing() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         String response = PubnativeTestUtils.getResponseJSON("success.json");
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
@@ -196,6 +212,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testInvalidResponseParsing() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         String response = PubnativeTestUtils.getResponseJSON("failure.json");
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(response);
@@ -204,6 +221,7 @@ public class PubnativeRequestTest {
 
     @Test
     public void testNullResponseParsing() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         List<PubnativeAdModel> ads = pubnativeRequest.parseResponse(null);
         assertThat(ads).isNull();
@@ -211,25 +229,29 @@ public class PubnativeRequestTest {
 
     @Test
     public void testPrepareExceptionFromErrorJson() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         Context context = RuntimeEnvironment.application;
         pubnativeRequest.context = context;
         String response = PubnativeTestUtils.getResponseJSON("failure.json");
 
-        Exception exception = pubnativeRequest.getResponseException(response, 100);
-        assertThat(exception.getMessage()).isEqualTo("error Invalid app token100");
+        Exception exception = pubnativeRequest.getResponseException(response);
+        assertThat(exception.getMessage()).isEqualTo("Invalid app token");
 
-        exception = pubnativeRequest.getResponseException("test", 100);
-        assertThat(exception.getMessage()).isEqualTo("Value test of type java.lang.String cannot be converted to JSONObject");
+        response = PubnativeTestUtils.getResponseJSON("failure_with_empty_status.json");
+        exception = pubnativeRequest.getResponseException(response);
+        assertThat(exception.getMessage()).isEqualTo("Request Failed, Invalid response from the server");
 
-        exception = pubnativeRequest.getResponseException(null, 100);
-        assertThat(exception.getMessage()).isEqualTo("Data is null");
+        exception = pubnativeRequest.getResponseException(null);
+        assertThat(exception.getMessage()).isEqualTo("Request Failed, Invalid response from the server");
     }
 
     @Test
     public void testErrorResponseFromVolley() {
+
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        VolleyError error = new VolleyError(new NetworkResponse(400,new byte[2], new HashMap<String, String>(),false));
+        String response = PubnativeTestUtils.getResponseJSON("failure.json");
+        VolleyError error = new VolleyError(new NetworkResponse(400, response.getBytes(), new HashMap<String, String>(), false));
         pubnativeRequest.onErrorResponse(error);
         verify(pubnativeRequest).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
