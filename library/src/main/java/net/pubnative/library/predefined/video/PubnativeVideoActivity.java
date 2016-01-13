@@ -2,7 +2,6 @@ package net.pubnative.library.predefined.video;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,16 +9,18 @@ import android.view.Window;
 import android.widget.RelativeLayout;
 
 import net.pubnative.library.R;
+import net.pubnative.library.model.APIV3VideoAd;
 import net.pubnative.player.VASTPlayer;
 import net.pubnative.player.model.VASTModel;
 
-public class PubnativeVideoActivity extends Activity implements VASTPlayer.InteractionListener, VASTPlayer.PlaybackListener, VASTPlayer.CachingListener {
+public class PubnativeVideoActivity extends Activity implements VASTPlayer.Listener {
 
     private static final String TAG = PubnativeVideoActivity.class.getName();
 
-    public static final String EXTRA_MODEL     = "com.nexage.android.vast.player.vastModel";
-    public static final String EXTRA_SKIP_NAME = "com.nexage.android.vast.player.skipName";
-    public static final String EXTRA_SKIP_TIME = "com.nexage.android.vast.player.skipTime";
+    public static final String EXTRA_MODEL         = "net.pubnative.library.predefined.video.vastModel";
+    public static final String EXTRA_SKIP_NAME     = "net.pubnative.library.predefined.video.skipName";
+    public static final String EXTRA_SKIP_TIME     = "net.pubnative.library.predefined.video.skipTime";
+    public static final String EXTRA_REVENUE_MODEL = "net.pubnative.library.predefined.video.revenue_model";
 
     private VASTPlayer mVASTPlayer;
 
@@ -29,10 +30,11 @@ public class PubnativeVideoActivity extends Activity implements VASTPlayer.Inter
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        Intent    intent   = getIntent();
-        VASTModel model    = (VASTModel) intent.getSerializableExtra(EXTRA_MODEL);
-        String    skipName = intent.getStringExtra(EXTRA_SKIP_NAME);
-        int       skipTime = intent.getIntExtra(EXTRA_SKIP_TIME, 0);
+        Intent    intent       = getIntent();
+        VASTModel model        = (VASTModel) intent.getSerializableExtra(EXTRA_MODEL);
+        String    skipName     = intent.getStringExtra(EXTRA_SKIP_NAME);
+        int       skipTime     = intent.getIntExtra(EXTRA_SKIP_TIME, 0);
+        String    revenueModel = intent.getStringExtra(EXTRA_REVENUE_MODEL);
 
         if (model == null) {
 
@@ -41,21 +43,21 @@ public class PubnativeVideoActivity extends Activity implements VASTPlayer.Inter
 
         } else {
 
+
+            // Read campaign type from revenue model
+            VASTPlayer.CampaignType campaignType = VASTPlayer.CampaignType.CPC;
+
+            if(APIV3VideoAd.RevenueModel.CPM.equals(revenueModel)) {
+
+                campaignType = VASTPlayer.CampaignType.CPM;
+            }
+
             hideTitleStatusBars();
-            initializeView(model, skipName, skipTime);
+            initializeView(model, skipName, skipTime, campaignType);
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-
-        Log.d(TAG, "onConfigurationChanged");
-        super.onConfigurationChanged(newConfig);
-
-        mVASTPlayer.rotate();
-    }
-
-    private void initializeView(VASTModel model, String skipName, int skipTime) {
+    private void initializeView(VASTModel model, String skipName, int skipTime, VASTPlayer.CampaignType campaignType) {
 
         Log.d(TAG, "initializeView");
 
@@ -63,10 +65,19 @@ public class PubnativeVideoActivity extends Activity implements VASTPlayer.Inter
         setContentView(rootView);
 
         mVASTPlayer = (VASTPlayer) rootView.findViewById(R.id.player);
-        mVASTPlayer.setInteractionListener(this);
-        mVASTPlayer.setCachingListener(this);
-        mVASTPlayer.setPlaybackListener(this);
-        mVASTPlayer.load(model, skipName, skipTime);
+        mVASTPlayer.setCampaignType(campaignType);
+        mVASTPlayer.setListener(this);
+        mVASTPlayer.setSkipName(skipName);
+        mVASTPlayer.setSkipTime(skipTime);
+        mVASTPlayer.load(model);
+    }
+
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+
+        mVASTPlayer.clean();
     }
 
     private void hideTitleStatusBars() {
@@ -77,83 +88,39 @@ public class PubnativeVideoActivity extends Activity implements VASTPlayer.Inter
         requestWindowFeature(Window.FEATURE_NO_TITLE);
     }
 
-    @Override
-    public void onVASTPlayerMute() {
+    // VASTPlayer.Listener
+    //------------------------------
 
-        Log.v(TAG, "onVASTPlayerMute");
+    @Override
+    public void onVASTPlayerLoadFinish() {
+
+        Log.v(TAG, "onVASTPlayerLoadFinish");
+        mVASTPlayer.play();
     }
 
     @Override
-    public void onVASTPlayerUnMute() {
+    public void onVASTPlayerFail(Exception exception) {
 
-        Log.v(TAG, "onVASTPlayerUnMute");
+        Log.v(TAG, "onVASTPlayerFail: " + exception);
+        finish();
+    }
+
+    @Override
+    public void onVASTPlayerPlaybackStart() {
+
+        Log.v(TAG, "onVASTPlayerPlaybackStart");
+    }
+
+    @Override
+    public void onVASTPlayerPlaybackFinish() {
+
+        Log.v(TAG, "onVASTPlayerPlaybackFinish");
     }
 
     @Override
     public void onVASTPlayerClick() {
 
         Log.v(TAG, "onVASTPlayerClick");
-
-        finish();
-    }
-
-    @Override
-    public void onVASTPlayerDismiss() {
-
-        Log.v(TAG, "onVASTPlayerDismiss");
-
-        finish();
-    }
-
-    @Override
-    public void onVASTPlayerStart() {
-
-        Log.v(TAG, "onVASTPlayerStart");
-    }
-
-    @Override
-    public void onVASTPlayerFirstQuartile() {
-
-        Log.v(TAG, "onVASTPlayerFirstQuartile");
-    }
-
-    @Override
-    public void onVASTPlayerMidpoint() {
-
-        Log.v(TAG, "onVASTPlayerMidpoint");
-    }
-
-    @Override
-    public void onVASTPlayerThirdQuartile() {
-
-        Log.v(TAG, "onVASTPlayerThirdQuartile");
-    }
-
-    @Override
-    public void onVASTPlayerCompleted() {
-
-        Log.v(TAG, "onVASTPlayerCompleted");
-    }
-
-    @Override
-    public void onVASTPlayerCachingStart() {
-
-        Log.v(TAG, "onVASTPlayerCachingStart");
-    }
-
-    @Override
-    public void onVASTPlayerCachingFinish() {
-
-        Log.v(TAG, "onVASTPlayerCachingFinish");
-
-        mVASTPlayer.play();
-    }
-
-    @Override
-    public void onVASTPlayerCachingFail() {
-
-        Log.v(TAG, "onVASTPlayerCachingFail");
-
         finish();
     }
 }

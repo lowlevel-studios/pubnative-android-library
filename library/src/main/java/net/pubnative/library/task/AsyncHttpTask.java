@@ -80,8 +80,8 @@ public class AsyncHttpTask extends AsyncTask<String, Void, String> {
                     try {
                         HttpURLConnection connection;
                         connection = (HttpURLConnection) new URL(this.httpUrl).openConnection();
-                        connection.setConnectTimeout(10000);
-                        connection.setReadTimeout(1000);
+                        connection.setConnectTimeout(3000);
+                        connection.setReadTimeout(3000);
                         connection.setInstanceFollowRedirects(true);
                         connection.connect();
                         int responseCode = connection.getResponseCode();

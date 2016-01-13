@@ -2,6 +2,7 @@ package net.pubnative.player.model;
 
 import net.pubnative.player.util.VASTLog;
 import net.pubnative.player.util.XmlTools;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -22,6 +23,8 @@ import javax.xml.xpath.XPathFactory;
 
 public class VASTModel implements Serializable {
 
+    public static String EXTENSION_POSTVIEW_BANNER = "PN-Postview-Banner";
+
     private static String TAG = VASTModel.class.getName();
 
     private static final long serialVersionUID = 4318368258447283733L;
@@ -29,19 +32,23 @@ public class VASTModel implements Serializable {
     private transient Document vastsDocument;
     private String pickedMediaFileURL = null;
 
-    // Tracking xpath expressions
-    private static final String inlineLinearTrackingXPATH     = "/VASTS/VAST/Ad/InLine/Creatives/Creative/Linear/TrackingEvents/Tracking";
-    private static final String inlineNonLinearTrackingXPATH  = "/VASTS/VAST/Ad/InLine/Creatives/Creative/NonLinearAds/TrackingEvents/Tracking";
-    private static final String wrapperLinearTrackingXPATH    = "/VASTS/VAST/Ad/Wrapper/Creatives/Creative/Linear/TrackingEvents/Tracking";
-    private static final String wrapperNonLinearTrackingXPATH = "/VASTS/VAST/Ad/Wrapper/Creatives/Creative/NonLinearAds/TrackingEvents/Tracking";
+    // Tracking XPATH
+    private static final String XPATH_INLINE_LINEAR_TRACKING     = "/VASTS/VAST/Ad/InLine/Creatives/Creative/Linear/TrackingEvents/Tracking";
+    private static final String XPATH_INLINE_NONLINEAR_TRACKING  = "/VASTS/VAST/Ad/InLine/Creatives/Creative/NonLinearAds/TrackingEvents/Tracking";
+    private static final String XPATH_WRAPPER_LINEAR_TRACKING    = "/VASTS/VAST/Ad/Wrapper/Creatives/Creative/Linear/TrackingEvents/Tracking";
+    private static final String XPATH_WRAPPER_NONLINEAR_TRACKING = "/VASTS/VAST/Ad/Wrapper/Creatives/Creative/NonLinearAds/TrackingEvents/Tracking";
 
-    private static final String combinedTrackingXPATH = inlineLinearTrackingXPATH + "|" + inlineNonLinearTrackingXPATH + "|" + wrapperLinearTrackingXPATH + "|" + wrapperNonLinearTrackingXPATH;
+    private static final String XPATH_COMBINED_TRACKING = XPATH_INLINE_LINEAR_TRACKING + "|" + XPATH_INLINE_NONLINEAR_TRACKING + "|" + XPATH_WRAPPER_LINEAR_TRACKING + "|" + XPATH_WRAPPER_NONLINEAR_TRACKING;
 
-    private static final String mediaFileXPATH   = "//MediaFile";   // Mediafile xpath expression
-    private static final String durationXPATH    = "//Duration";    // Duration xpath expression
-    private static final String videoClicksXPATH = "//VideoClicks"; // Videoclicks xpath expression
-    private static final String impressionXPATH  = "//Impression";  // Impressions xpath expression
-    private static final String errorUrlXPATH    = "//Error";       // Error url  xpath expression
+    // Direct items XPATH
+    private static final String XPATH_MEDIA_FILE   = "//MediaFile";
+    private static final String XPATH_DURATION     = "//Duration";
+    private static final String XPATH_VIDEO_CLICKS = "//VideoClicks";
+    private static final String XPATH_IMPRESSION   = "//Impression";
+    private static final String XPATH_ERROR        = "//Error";
+    private static final String XPATH_BANNER       = "//Extension[@type='{EXTENSION_TYPE}']/Banner";
+
+    private static final String EXTENSION_TYPE_KEY = "{EXTENSION_TYPE}";
 
     public VASTModel(Document vasts) {
 
@@ -64,11 +71,11 @@ public class VASTModel implements Serializable {
         XPath xpath = XPathFactory.newInstance().newXPath();
 
         try {
-            NodeList nodes = (NodeList) xpath.evaluate(combinedTrackingXPATH, vastsDocument, XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xpath.evaluate(XPATH_COMBINED_TRACKING, vastsDocument, XPathConstants.NODESET);
             Node node;
             String trackingURL;
             String eventName;
-            TRACKING_EVENTS_TYPE key = null;
+            TRACKING_EVENTS_TYPE key;
 
             if (nodes != null) {
 
@@ -124,7 +131,7 @@ public class VASTModel implements Serializable {
 
         try {
 
-            NodeList nodes = (NodeList) xpath.evaluate(mediaFileXPATH, vastsDocument, XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xpath.evaluate(XPATH_MEDIA_FILE, vastsDocument, XPathConstants.NODESET);
             Node node;
             VASTMediaFile mediaFile;
             String mediaURL;
@@ -191,7 +198,7 @@ public class VASTModel implements Serializable {
 
         try {
 
-            NodeList nodes = (NodeList) xpath.evaluate(durationXPATH, vastsDocument, XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xpath.evaluate(XPATH_DURATION, vastsDocument, XPathConstants.NODESET);
             Node node;
 
             if (nodes != null) {
@@ -211,6 +218,22 @@ public class VASTModel implements Serializable {
         return duration;
     }
 
+    public String getExtensionURL(String type) {
+
+        String result = null;
+
+        String       xPath      = XPATH_BANNER.replace(EXTENSION_TYPE_KEY, type);
+        List<String> extensions = getListFromXPath(xPath);
+
+        // We will use the first banner seen of this type
+        if (extensions.size() > 0) {
+
+            result = extensions.get(0);
+        }
+
+        return result;
+    }
+
     public VideoClicks getVideoClicks() {
 
         VASTLog.d(TAG, "getVideoClicks");
@@ -221,7 +244,7 @@ public class VASTModel implements Serializable {
 
         try {
 
-            NodeList nodes = (NodeList) xpath.evaluate(videoClicksXPATH, vastsDocument, XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xpath.evaluate(XPATH_VIDEO_CLICKS, vastsDocument, XPathConstants.NODESET);
             Node node;
 
             if (nodes != null) {
@@ -272,7 +295,7 @@ public class VASTModel implements Serializable {
 
         VASTLog.d(TAG, "getImpressions");
 
-        List<String> list = getListFromXPath(impressionXPATH);
+        List<String> list = getListFromXPath(XPATH_IMPRESSION);
 
         return list;
     }
@@ -281,7 +304,7 @@ public class VASTModel implements Serializable {
 
         VASTLog.d(TAG, "getErrorUrl");
 
-        List<String> list = getListFromXPath(errorUrlXPATH);
+        List<String> list = getListFromXPath(XPATH_ERROR);
 
         return list;
     }

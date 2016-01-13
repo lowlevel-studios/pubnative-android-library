@@ -3,50 +3,86 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/player_root">
+    android:id="@+id/player_root"
+    android:background="@android:color/black">
 
     <RelativeLayout
-        android:id="@+id/player_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/player_banner"
         android:background="@android:color/black">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/player_banner_image"
+            android:scaleType="centerCrop"/>
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/player_layout"
-        android:visibility="visible">
+        android:id="@+id/player_view"
+        android:background="@android:color/black">
 
-        <net.pubnative.player.widget.CountDownView
-            android:id="@+id/player_count_down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_margin="5dp"/>
+        <RelativeLayout
+            android:id="@+id/player_view_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_margin="5dp"
-            android:id="@+id/player_button_mute"
-            android:src="@drawable/pubnative_btn_mute"/>
+            <SurfaceView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/player_view_container_surface"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="5dp"
-            android:id="@+id/player_skip_text"
-            android:textColor="@android:color/white"
-            android:padding="10dp"
-            android:text="Skip"
-            android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/player_view_layout"
+            >
+
+            <net.pubnative.player.widget.CountDownView
+                android:id="@+id/player_view_layout_count_down"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_margin="5dp"/>
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_margin="5dp"
+                android:id="@+id/player_view_layout_mute"
+                android:src="@drawable/pubnative_btn_mute"/>
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_margin="5dp"
+                android:id="@+id/player_view_layout_learn_more"
+                android:src="@drawable/pubnative_btn_learn_more"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_margin="5dp"
+                android:id="@+id/player_view_layout_skip"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:text="Skip"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
@@ -57,7 +93,7 @@
         android:background="@android:color/black">
 
         <ProgressBar
-            android:id="@+id/player_loading_bar"
+            android:id="@+id/player_view_loader_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"/>

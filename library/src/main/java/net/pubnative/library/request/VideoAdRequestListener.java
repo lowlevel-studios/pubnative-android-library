@@ -1,6 +1,6 @@
 package net.pubnative.library.request;
 
-import net.pubnative.player.model.VASTModel;
+import net.pubnative.library.model.APIV3VideoAd;
 
 import java.util.List;
 
@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface VideoAdRequestListener extends  AdRequestListener{
 
-    void onVideoAdRequestFinished(VideoAdRequest request, List<VASTModel> ads);
+    void onVideoAdRequestFinished(VideoAdRequest request, List<APIV3VideoAd> ads);
 }

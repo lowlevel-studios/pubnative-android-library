@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 
 import net.pubnative.player.model.TRACKING_EVENTS_TYPE;
 import net.pubnative.player.model.VASTModel;
+import net.pubnative.player.util.BitmapDownloaderTask;
 import net.pubnative.player.util.HttpTools;
 import net.pubnative.player.util.VASTLog;
 import net.pubnative.player.widget.CountDownView;
@@ -28,47 +31,50 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnVideoSizeChangedListener, View.OnClickListener {
+public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompletionListener,
+                                                          MediaPlayer.OnErrorListener,
+                                                          MediaPlayer.OnPreparedListener,
+                                                          MediaPlayer.OnVideoSizeChangedListener,
+                                                          View.OnClickListener,
+                                                          SurfaceHolder.Callback {
 
     private static final String TAG = VASTPlayer.class.getName();
 
     /**
-     * Caching callbacks for caching and streaming events
+     * Player type will lead to different layouts and behaviour to improve campaign type
      */
-    public interface CachingListener {
+    public enum CampaignType {
 
-        void onVASTPlayerCachingStart();
-        void onVASTPlayerCachingFinish();
-        void onVASTPlayerCachingFail();
+        // Cost per click, this will improve player click possibilities
+        CPC,
+
+        // Cost per million (of impressions), this will improve impression behaviour (keep playing)
+        CPM
     }
 
     /**
-     * Interaction callbacks for user events on the video
+     * Callbacks for following the player behaviour
      */
-    public interface InteractionListener {
+    public interface Listener {
 
-        void onVASTPlayerMute();
-        void onVASTPlayerUnMute();
+        void onVASTPlayerLoadFinish();
+        void onVASTPlayerFail(Exception exception);
+        void onVASTPlayerPlaybackStart();
+        void onVASTPlayerPlaybackFinish();
         void onVASTPlayerClick();
-        void onVASTPlayerDismiss();
     }
 
-    /**
-     * Playback callbacks for events happened while playing the video
-     */
-    public interface PlaybackListener {
+    private enum PlayerState {
 
-        void onVASTPlayerStart();
-        void onVASTPlayerFirstQuartile();
-        void onVASTPlayerMidpoint();
-        void onVASTPlayerThirdQuartile();
-        void onVASTPlayerCompleted();
+        None,
+        Loader,
+        Ready,
+        Player,
+        Banner
     }
 
     // LISTENERS
-    private CachingListener     mCachingListener     = null;
-    private PlaybackListener    mPlaybackListener    = null;
-    private InteractionListener mInteractionListener = null;
+    private Listener mListener = null;
 
     // TIMERS
     private Timer mLayoutTimer;
@@ -87,31 +93,173 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
     // PLAYER
     private MediaPlayer   mMediaPlayer;
-    private SurfaceView   mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
 
-    // LAYOUT
+    // VIEWS
     private RelativeLayout mPlayerRoot;
-    private RelativeLayout mPlayerContainer;
-    private RelativeLayout mPlayerLayout;
+
+    // View
+    private RelativeLayout mPlayerView;
+    private RelativeLayout mPlayerViewContainer;
+    private SurfaceView    mPlayerViewContainerSurface;
+    private RelativeLayout mPlayerViewLayout;
+    private TextView       mPlayerViewLayoutSkip;
+    private ImageView      mPlayerViewLayoutMute;
+    private ImageView      mPlayerViewLayoutLearnMore;
+    private CountDownView  mPlayerViewLayoutCountDown;
     private RelativeLayout mPlayerLoader;
-    private CountDownView  mPlayerCountDown;
-    private TextView       mPlayerSkip;
-    private ImageView      mPlayerMute;
+    private RelativeLayout mPlayerBanner;
+    private ImageView      mPlayerBannerImage;
 
     // OTHERS
-    private int     mVideoHeight            = 0;
-    private int     mVideoWidth             = 0;
-    private boolean mIsSkipHidden           = true;
-    private boolean mIsVideoMute            = false;
-    private boolean mIsPlayBackError        = false;
-    private boolean mIsProcessedImpressions = false;
-    private boolean mIsCompleted            = false;
-    private int     mQuartile               = 0;
-    private boolean mIsAutoPlay             = false;
-    private boolean mIsReady                = false;
-    private boolean mIsLayoutLoaded         = false;
-    private boolean mIsSurfaceLoaded        = false;
+    private Handler      mainHandler        = null;
+    private boolean      mIsSurfaceReady    = false;
+    private int          mVideoHeight       = 0;
+    private int          mVideoWidth        = 0;
+    private boolean      mIsSkipHidden      = true;
+    private boolean      mIsVideoMute       = false;
+    private boolean      mIsCachingRequired = false;
+    private int          mQuartile          = 0;
+    private CampaignType mCampaignType      = CampaignType.CPM;
+    private PlayerState  mPlayerState       = PlayerState.None;
+
+    //=======================================================
+    // State machine
+    //=======================================================
+
+    private boolean canSetState(PlayerState playerState) {
+
+        boolean result = false;
+
+        switch (playerState) {
+
+            case None:
+                result = true;
+                break;
+            case Loader:
+                result = (mPlayerState == PlayerState.None);
+                break;
+            case Ready:
+                result = (mPlayerState == PlayerState.Loader || mPlayerState == PlayerState.Banner);
+                break;
+            case Player:
+                result = (mPlayerState == PlayerState.Ready);
+                break;
+            case Banner:
+                result = (mPlayerState == PlayerState.Player);
+                break;
+        }
+
+        return result;
+    }
+
+    /**
+     * this method controls the associated state machine of the video player behaviour
+     *
+     * @param playerState state to set
+     *
+     * @return
+     */
+    private void setState(PlayerState playerState) {
+
+        Log.v(TAG, "setState: " + playerState.name());
+
+        if (canSetState(playerState)) {
+
+            switch (playerState) {
+
+                case None:
+                    setNoneState();
+                    break;
+                case Loader:
+                    setLoaderState();
+                    break;
+                case Ready:
+                    setReadyState();
+                    break;
+                case Player:
+                    setPlayerState();
+                    break;
+                case Banner:
+                    setBannerState();
+                    break;
+            }
+
+            mPlayerState = playerState;
+        }
+    }
+
+    private void setNoneState() {
+
+        Log.v(TAG, "setNoneState");
+
+        mPlayerBanner.setVisibility(GONE);
+        mPlayerView.setVisibility(GONE);
+        mPlayerLoader.setVisibility(GONE);
+
+        /**
+         * Do not change this order, since cleaning the media player before invalidating timers
+         * could make the timers threads access an invalid media player
+         */
+        cleanMediaPlayer();
+        stopTimers();
+    }
+
+    private void setLoaderState() {
+
+        Log.v(TAG, "setLoaderState");
+
+        mPlayerBanner.setVisibility(GONE);
+        mPlayerLoader.setVisibility(VISIBLE);
+        mPlayerView.setVisibility(VISIBLE);
+
+        createMediaPlayer();
+
+        if (mIsSurfaceReady) {
+
+            startCaching();
+
+        } else {
+
+            mIsCachingRequired = true;
+            // Do nothing since surfaceCreated method will start caching automatically
+        }
+    }
+
+    private void setReadyState() {
+
+        Log.v(TAG, "setReadyState");
+    }
+
+    private void setPlayerState() {
+
+        Log.v(TAG, "setPlayerState");
+
+        mQuartile = 0;
+
+        mPlayerView.setVisibility(VISIBLE);
+        mPlayerBanner.setVisibility(GONE);
+        mPlayerLoader.setVisibility(GONE);
+
+        /**
+         * Don't change the order of this, since starting the media player after te timers could
+         * lead to an invalid mediaplayer required inside the timers.
+         */
+        calculateAspectRatio();
+        mMediaPlayer.start();
+        startTimers();
+    }
+
+    private void setBannerState() {
+
+        Log.v(TAG, "setBannerState");
+
+        mPlayerBanner.setVisibility(VISIBLE);
+        mPlayerView.setVisibility(GONE);
+        mPlayerLoader.setVisibility(GONE);
+
+        stopTimers();
+    }
 
     //=======================================================
     // Public
@@ -126,83 +274,74 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     public VASTPlayer(Context context, AttributeSet attrs) {
 
         super(context, attrs);
+
+        createLayout();
+
+        mainHandler = new Handler(getContext().getMainLooper());
     }
 
     /**
-     * Sets caching listener for callbacks related to status of video streaming
+     * Sets the campaign type of the player so it will affect
+     * the next load of the player. (whichs sets up the layout for the loaded model).
      *
-     * @param listener CachingListener
+     * @param campaignType
      */
-    public void setCachingListener(CachingListener listener) {
+    public void setCampaignType(CampaignType campaignType) {
 
-        mCachingListener = listener;
+        Log.v(TAG, "setCampaignType");
+        mCampaignType = campaignType;
     }
 
     /**
-     * Sets interaction listener for callbacks related to user interaction over the playing video
+     * Sets listener for callbacks related to status of player
      *
-     * @param listener InteractionListener
+     * @param listener Listener
      */
-    public void setInteractionListener(InteractionListener listener) {
+    public void setListener(Listener listener) {
 
-        mInteractionListener = listener;
+        Log.v(TAG, "setListener");
+        mListener = listener;
     }
 
     /**
-     * Sets playback listener for callbacks related to playback events on the video
+     * Sets skip string to be shown in the skip button
      *
-     * @param listener PlaybackListener
+     * @param skipName
      */
-    public void setPlaybackListener(PlaybackListener listener) {
+    public void setSkipName(String skipName) {
 
-        mPlaybackListener = listener;
+        Log.v(TAG, "setSkipName");
+        mSkipName = skipName;
     }
 
     /**
-     * Starts reproduction inmediately after the video is loaded
+     * Sets the amount of time that has to be played to be able to skip the video
      *
-     * @param autoPlay sets the value of the autoplay option
+     * @param skipTime
      */
-    public void setAutoPlay(boolean autoPlay) {
+    public void setSkipTime(int skipTime) {
 
-        mIsAutoPlay = autoPlay;
+        Log.v(TAG, "setSkipTime");
+        mSkipTime = skipTime;
     }
 
     /**
      * Starts loading a video VASTModel in the player, it will notify when it's ready with
      * CachingListener.onVASTPlayerCachingFinish(), so you can start video reproduction.
      *
-     * @param model    model containing the parsed VAST XML
-     * @param skipName name for the skip button
-     * @param skipTime time for the skip buttom to appear, < 0 value means
+     * @param model model containing the parsed VAST XML
      */
-    public void load(VASTModel model, String skipName, int skipTime) {
+    public void load(VASTModel model) {
 
         VASTLog.v(TAG, "load");
 
-        mVastModel = model;
-        mSkipName = skipName;
-        mSkipTime = skipTime;
+        setState(PlayerState.None);
 
-        mIsReady = false;
+        mVastModel = model;
 
         mTrackingEventMap = mVastModel.getTrackingUrls();
 
-        if (!mIsLayoutLoaded) {
-
-            mIsLayoutLoaded = true;
-            createLayout();
-        }
-
-        if (!mIsSurfaceLoaded) {
-
-            mIsSurfaceLoaded = true;
-            createSurface();
-
-        } else {
-
-            loadVideoURL(mVastModel.getPickedMediaFileURL());
-        }
+        setState(PlayerState.Loader);
     }
 
     /**
@@ -212,37 +351,7 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "play");
 
-        if (mIsReady) {
-
-            calculateAspectRatio();
-            mMediaPlayer.start();
-
-            if (mMediaPlayer.getCurrentPosition() == 0) {
-
-                mPlayerLayout.setVisibility(View.VISIBLE);
-                mPlayerLoader.setVisibility(View.GONE);
-                mPlayerCountDown.setProgress(0, mMediaPlayer.getDuration());
-
-                startLayoutTimer();
-                startQuartileTimer();
-            }
-
-        } else {
-
-            VASTLog.d(TAG, "play cannot be called before the video is ready");
-        }
-    }
-
-    /**
-     * Pauses video playback
-     */
-    public void pause() {
-
-        VASTLog.v(TAG, "pause");
-
-        mMediaPlayer.pause();
-
-        // TODO: Add pause layout
+        setState(PlayerState.Player);
     }
 
     /**
@@ -252,20 +361,14 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "stop");
 
-        cleanUpMediaPlayer();
-        stopQuartileTimer();
-        stopLayoutTimer();
-
-        // Process close event when leaving
-        if (!mIsPlayBackError) {
-
-            processEvent(TRACKING_EVENTS_TYPE.close);
-        }
+        setState(PlayerState.None);
     }
 
-    public void rotate() {
+    public void clean() {
 
-        calculateAspectRatio();
+        VASTLog.v(TAG, "clean");
+
+        setState(PlayerState.None);
     }
 
     //=======================================================
@@ -275,9 +378,9 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     // User Interaction
     //-------------------------------------------------------
 
-    public void onMuteClicked(View v) {
+    public void onMuteClick(View v) {
 
-        VASTLog.v(TAG, "onMuteClicked");
+        VASTLog.v(TAG, "onMuteClick");
 
         ImageView muteView = (ImageView) v;
 
@@ -287,35 +390,61 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
                 mMediaPlayer.setVolume(1.0f, 1.0f);
                 muteView.setImageResource(R.drawable.pubnative_btn_mute);
-                invokeOnUnMute();
+                processEvent(TRACKING_EVENTS_TYPE.unmute);
 
             } else {
 
                 mMediaPlayer.setVolume(0.0f, 0.0f);
                 muteView.setImageResource(R.drawable.pubnative_btn_unmute);
-                invokeOnMute();
+                processEvent(TRACKING_EVENTS_TYPE.mute);
             }
 
             mIsVideoMute = !mIsVideoMute;
         }
     }
 
-    public void onSkipClicked(View v) {
+    public void onSkipClick(View v) {
 
-        VASTLog.v(TAG, "onSkipClicked");
+        VASTLog.v(TAG, "onSkipClick");
 
-        invokeOnDismiss();
-        stop();
+        processEvent(TRACKING_EVENTS_TYPE.close);
+
+        mMediaPlayer.stop();
+        setState(PlayerState.Banner);
     }
 
-    public void onPlayerClicked(View v) {
+    public void onPlayerLearnMoreClick(View v) {
 
-        VASTLog.v(TAG, "onPlayerClicked");
+        VASTLog.v(TAG, "onPlayerLearnMoreClick");
 
-        invokeOnClick();
+        openOffer();
+        mMediaPlayer.stop();
+        setState(PlayerState.Banner);
+    }
+
+    public void onBannerClick(View v) {
+
+        VASTLog.v(TAG, "onBannerClick");
+
+        setState(PlayerState.Ready);
+        play();
+    }
+
+    public void onPlayerClick(View v) {
+
+        VASTLog.v(TAG, "onPlayerClick");
+
+        openOffer();
+        mMediaPlayer.stop();
+        setState(PlayerState.Banner);
+    }
+
+    private void openOffer() {
+
+        VASTLog.v(TAG, "openOffer");
 
         String clickThroughUrl = mVastModel.getVideoClicks().getClickThrough();
-        VASTLog.d(TAG, "clickThrough url: " + clickThroughUrl);
+        VASTLog.d(TAG, "openOffer - clickThrough url: " + clickThroughUrl);
 
         // Before we send the app to the click through url, we will process ClickTracking URL's.
         List<String> urls = mVastModel.getVideoClicks().getClickTracking();
@@ -323,22 +452,24 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         // Navigate to the click through url
         try {
+
             Uri uri = Uri.parse(clickThroughUrl);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             ResolveInfo resolvable = getContext().getPackageManager().resolveActivity(intent, PackageManager.GET_INTENT_FILTERS);
 
             if (resolvable == null) {
 
-                VASTLog.e(TAG, "Clickthrough error occured, uri unresolvable");
+                VASTLog.e(TAG, "openOffer -clickthrough error occured, uri unresolvable");
                 return;
 
             } else {
 
                 getContext().startActivity(intent);
-                stop();
+                invokeOnPlayerClick();
             }
 
         } catch (NullPointerException e) {
+
             VASTLog.e(TAG, e.getMessage(), e);
         }
     }
@@ -346,38 +477,70 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     // Layout
     //-------------------------------------------------------
 
-    private void createSurface() {
-
-        VASTLog.v(TAG, "createSurface");
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-
-        mSurfaceView = new SurfaceView(getContext());
-        mSurfaceView.setLayoutParams(params);
-
-        mSurfaceHolder = mSurfaceView.getHolder();
-        mSurfaceHolder.addCallback(this);
-
-        mPlayerContainer.addView(mSurfaceView);
-    }
-
     private void createLayout() {
 
         VASTLog.v(TAG, "createLayout");
 
         mPlayerRoot = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.pubnative_player_layout, null);
-        mPlayerContainer = (RelativeLayout) mPlayerRoot.findViewById(R.id.player_container);
-        mPlayerContainer.setOnClickListener(this);
-        mPlayerLayout = (RelativeLayout) mPlayerRoot.findViewById(R.id.player_layout);
+
+        mPlayerView = (RelativeLayout) mPlayerRoot.findViewById(R.id.player_view);
+
+        mPlayerViewContainer = (RelativeLayout) mPlayerView.findViewById(R.id.player_view_container);
+        mPlayerViewContainerSurface = (SurfaceView) mPlayerViewContainer.findViewById(R.id.player_view_container_surface);
+        mSurfaceHolder = mPlayerViewContainerSurface.getHolder();
+        mSurfaceHolder.addCallback(this);
+
+        mPlayerViewLayout = (RelativeLayout) mPlayerView.findViewById(R.id.player_view_layout);
+        mPlayerViewLayoutCountDown = (CountDownView) mPlayerViewLayout.findViewById(R.id.player_view_layout_count_down);
+        mPlayerViewLayoutSkip = (TextView) mPlayerViewLayout.findViewById(R.id.player_view_layout_skip);
+        mPlayerViewLayoutMute = (ImageView) mPlayerViewLayout.findViewById(R.id.player_view_layout_mute);
+        mPlayerViewLayoutLearnMore = (ImageView) mPlayerViewLayout.findViewById(R.id.player_view_layout_learn_more);
+
         mPlayerLoader = (RelativeLayout) mPlayerRoot.findViewById(R.id.player_loader);
-        mPlayerCountDown = (CountDownView) mPlayerRoot.findViewById(R.id.player_count_down);
-        mPlayerSkip = (TextView) mPlayerRoot.findViewById(R.id.player_skip_text);
-        mPlayerSkip.setText(mSkipName);
-        mPlayerSkip.setOnClickListener(this);
-        mPlayerMute = (ImageView) mPlayerRoot.findViewById(R.id.player_button_mute);
-        mPlayerMute.setOnClickListener(this);
+
+        mPlayerBanner = (RelativeLayout) mPlayerRoot.findViewById(R.id.player_banner);
+        mPlayerBannerImage = (ImageView) mPlayerBanner.findViewById(R.id.player_banner_image);
+        mPlayerBannerImage.setOnClickListener(this);
+
+        // Set campaign type behaviour
+        if (CampaignType.CPC == mCampaignType) {
+
+            mPlayerView.setOnClickListener(this);
+            mPlayerViewLayoutLearnMore.setVisibility(GONE);
+
+        } else {
+
+            mPlayerViewLayoutSkip.setText(mSkipName);
+            mPlayerViewLayoutSkip.setOnClickListener(this);
+            mPlayerViewLayoutLearnMore.setOnClickListener(this);
+        }
+
+        mPlayerViewLayoutMute.setOnClickListener(this);
 
         addView(mPlayerRoot);
+
+        mPlayerBanner.setVisibility(GONE);
+        mPlayerView.setVisibility(GONE);
+        mPlayerLoader.setVisibility(GONE);
+    }
+
+    private void startCaching() {
+
+        VASTLog.v(TAG, "startCaching");
+
+        mIsCachingRequired = false;
+
+        try {
+
+            String videoURL = mVastModel.getPickedMediaFileURL();
+            mMediaPlayer.setDataSource(videoURL);
+            mMediaPlayer.prepareAsync();
+
+        } catch (Exception exception) {
+
+            invokeOnFail(exception);
+            setState(PlayerState.None);
+        }
     }
 
     // Media player
@@ -387,79 +550,63 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "createMediaPlayer");
 
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setOnCompletionListener(this);
-        mMediaPlayer.setOnErrorListener(this);
-        mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnVideoSizeChangedListener(this);
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        if(mMediaPlayer == null) {
+
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnVideoSizeChangedListener(this);
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        }
     }
 
-    private void cleanUpMediaPlayer() {
+    private void cleanMediaPlayer() {
 
         VASTLog.v(TAG, "cleanUpMediaPlayer");
 
-        if (mMediaPlayer != null) {
-
-            if (mMediaPlayer.isPlaying()) {
-                mMediaPlayer.stop();
-            }
+        if(mMediaPlayer != null) {
 
             mMediaPlayer.setOnCompletionListener(null);
             mMediaPlayer.setOnErrorListener(null);
             mMediaPlayer.setOnPreparedListener(null);
             mMediaPlayer.setOnVideoSizeChangedListener(null);
-
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
     }
 
-    public void calculateAspectRatio() {
+    protected void calculateAspectRatio() {
 
         VASTLog.v(TAG, "calculateAspectRatio");
 
         if (mVideoWidth == 0 || mVideoHeight == 0) {
 
-            VASTLog.w(TAG, "mVideoWidth or mVideoHeight is 0, skipping calculateAspectRatio");
+            VASTLog.w(TAG, "calculateAspectRatio - video source width or height is 0, skipping...");
             return;
         }
 
         double widthRatio  = 1.0 * getWidth() / mVideoWidth;
         double heightRatio = 1.0 * getHeight() / mVideoHeight;
 
-        VASTLog.v(TAG, "calculating aspect ratio");
-
         double scale = Math.min(widthRatio, heightRatio);
 
         int surfaceWidth  = (int) (scale * mVideoWidth);
         int surfaceHeight = (int) (scale * mVideoHeight);
 
-        VASTLog.i(TAG, " screen size:   " + getWidth() + "x" + getHeight());
+        VASTLog.i(TAG, " view size:     " + getWidth() + "x" + getHeight());
         VASTLog.i(TAG, " video size:    " + mVideoWidth + "x" + mVideoHeight);
-        VASTLog.i(TAG, " widthRatio:    " + widthRatio);
-        VASTLog.i(TAG, " heightRatio:   " + heightRatio);
         VASTLog.i(TAG, " surface size:  " + surfaceWidth + "x" + surfaceHeight);
-
-//        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(surfaceWidth, surfaceHeight);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        mSurfaceView.setLayoutParams(params);
-        mSurfaceHolder.setFixedSize(surfaceWidth, surfaceHeight);
+        mPlayerViewContainerSurface.setLayoutParams(params);
 
-//        } else {
-//
-//            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(surfaceHeight, surfaceWidth);
-//            params.addRule(RelativeLayout.CENTER_IN_PARENT);
-//            mSurfaceView.setLayoutParams(params);
-//            mSurfaceHolder.setFixedSize(surfaceHeight, surfaceWidth);
-//        }
+        mSurfaceHolder.setFixedSize(surfaceWidth, surfaceHeight);
     }
 
     // Event processing
     //-------------------------------------------------------
-
     private void processEvent(TRACKING_EVENTS_TYPE eventName) {
 
         VASTLog.v(TAG, "processEvent: " + eventName);
@@ -475,11 +622,8 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "processImpressions");
 
-        if (!mIsProcessedImpressions) {
-            mIsProcessedImpressions = true;
-            List<String> impressions = mVastModel.getImpressions();
-            fireUrls(impressions);
-        }
+        List<String> impressions = mVastModel.getImpressions();
+        fireUrls(impressions);
     }
 
     private void processErrorEvent() {
@@ -512,21 +656,31 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     // Timers
     //=======================================================
 
+    private void stopTimers() {
+
+        VASTLog.v(TAG, "stopTimers");
+
+        stopQuartileTimer();
+        stopLayoutTimer();
+    }
+
+    private void startTimers() {
+
+        VASTLog.v(TAG, "startTimers");
+
+        // Stop previous timers so they don't remain hold
+        stopTimers();
+
+        // start timers
+        startQuartileTimer();
+        startLayoutTimer();
+    }
+
     // Quartile timer
     //-------------------------------------------------------
     private void startQuartileTimer() {
 
         VASTLog.v(TAG, "startQuartileTimer");
-
-        stopQuartileTimer();
-
-        if (mIsCompleted) {
-
-            VASTLog.d(TAG, "ending quartileTimer becuase the video has been replayed");
-            return;
-        }
-
-        final int videoDuration = mMediaPlayer.getDuration();
 
         mTrackingEventsTimer = new Timer();
         mTrackingEventsTimer.scheduleAtFixedRate(new TimerTask() {
@@ -537,19 +691,19 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
                 int percentage = 0;
                 try {
 
-                    int curPos = mMediaPlayer.getCurrentPosition();
-
                     // wait for the video to really start
-                    if (curPos == 0) {
+                    if (mMediaPlayer.getCurrentPosition() == 0) {
+
                         return;
                     }
 
-                    percentage = 100 * curPos / videoDuration;
+                    percentage = 100 * mMediaPlayer.getCurrentPosition() / mMediaPlayer.getDuration();
 
                 } catch (Exception e) {
 
                     VASTLog.w(TAG, "mediaPlayer.getCurrentPosition exception: " + e.getMessage());
                     cancel();
+
                     return;
                 }
 
@@ -560,26 +714,23 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
                         VASTLog.i(TAG, "Video at start: (" + percentage + "%)");
                         processImpressions();
                         processEvent(TRACKING_EVENTS_TYPE.start);
-                        invokeOnStart();
+                        invokeOnPlayerPlaybackStart();
 
                     } else if (mQuartile == 1) {
 
                         VASTLog.i(TAG, "Video at first quartile: (" + percentage + "%)");
                         processEvent(TRACKING_EVENTS_TYPE.firstQuartile);
-                        invokeOnFirstQuartile();
 
                     } else if (mQuartile == 2) {
 
                         VASTLog.i(TAG, "Video at midpoint: (" + percentage + "%)");
                         processEvent(TRACKING_EVENTS_TYPE.midpoint);
-                        invokeOnMidpoint();
 
                     } else if (mQuartile == 3) {
 
                         VASTLog.i(TAG, "Video at third quartile: (" + percentage + "%)");
                         processEvent(TRACKING_EVENTS_TYPE.thirdQuartile);
                         stopQuartileTimer();
-                        invokeOnThirdQuartile();
                     }
 
                     mQuartile++;
@@ -592,6 +743,7 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     private void stopQuartileTimer() {
 
         VASTLog.v(TAG, "stopQuartileTimer");
+
         if (mTrackingEventsTimer != null) {
 
             mTrackingEventsTimer.cancel();
@@ -606,45 +758,48 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
         VASTLog.v(TAG, "startLayoutTimer");
 
         mLayoutTimer = new Timer();
-        mLayoutTimer.schedule(new TimerTask() {
+        mLayoutTimer.scheduleAtFixedRate(new TimerTask() {
 
             @Override
             public void run() {
 
                 if (mMediaPlayer == null) {
+
+                    cancel();
                     return;
                 }
 
-                try {
+                // Execute with handler to be sure we execute this on the UIThread
+                mainHandler.post(new Runnable() {
 
-                    final int currentPosition = mMediaPlayer.getCurrentPosition();
+                    @Override
+                    public void run() {
 
-                    // Get a handler that can be used to post to the main thread
-                    Handler mainHandler = new Handler(getContext().getMainLooper());
+                        try {
 
-                    mainHandler.post(new Runnable() {
+                            if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
 
-                        @Override
-                        public void run() {
-
-                            if (mMediaPlayer != null) {
-
-                                mPlayerCountDown.setProgress(currentPosition, mMediaPlayer.getDuration());
+                                int currentPosition = mMediaPlayer.getCurrentPosition();
+                                mPlayerViewLayoutCountDown.setProgress(currentPosition, mMediaPlayer.getDuration());
 
                                 if (mSkipTime >= 0 &&
                                     mSkipTime * 1000 < currentPosition &&
                                     mIsSkipHidden) {
 
                                     mIsSkipHidden = false;
-                                    mPlayerSkip.setVisibility(View.VISIBLE);
+                                    mPlayerViewLayoutSkip.setVisibility(View.VISIBLE);
                                 }
                             }
+
+                        } catch (Exception e) {
+
+                            Log.e(TAG, "Layout timer error: " + e);
+
+                            cancel();
+                            return;
                         }
-                    });
-
-                } catch (Exception e) {
-
-                }
+                    }
+                });
             }
         }, 0, TIMER_LAYOUT_INTERVAL);
     }
@@ -653,203 +808,71 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.d(TAG, "stopLayoutTimer");
 
+        mainHandler.removeCallbacksAndMessages(null);
+
         if (mLayoutTimer != null) {
 
             mLayoutTimer.cancel();
+            mLayoutTimer = null;
         }
     }
 
-    // Caching Listener
+    // Listener helpers
     //-------------------------------------------------------
 
-    private void invokeOnCachingStart() {
+    private void invokeOnPlayerClick() {
 
-        VASTLog.v(TAG, "invokeOnCachingStart");
+        VASTLog.v(TAG, "invokeOnPlayerClick");
 
-        if (mCachingListener != null) {
+        if (mListener != null) {
 
-            mCachingListener.onVASTPlayerCachingStart();
+            mListener.onVASTPlayerClick();
         }
     }
 
-    private void invokeOnCachingFail() {
+    private void invokeOnPlayerLoadFinish() {
 
-        VASTLog.v(TAG, "invokeOnCachingFail");
+        VASTLog.v(TAG, "invokeOnPlayerLoadFinish");
 
-        if (mCachingListener != null) {
+        if (mListener != null) {
 
-            mCachingListener.onVASTPlayerCachingFail();
+            mListener.onVASTPlayerLoadFinish();
         }
     }
 
-    private void invokeOnCachingFinish() {
+    private void invokeOnFail(Exception exception) {
 
-        VASTLog.v(TAG, "invokeOnCachingFinish");
+        VASTLog.v(TAG, "invokeOnFail");
 
-        if (mCachingListener != null) {
+        if (mListener != null) {
 
-            mCachingListener.onVASTPlayerCachingFinish();
+            mListener.onVASTPlayerFail(exception);
         }
     }
 
-    // Playback Listener
-    //-------------------------------------------------------
+    private void invokeOnPlayerPlaybackStart() {
 
-    private void invokeOnStart() {
+        VASTLog.v(TAG, "invokeOnPlayerPlaybackStart");
 
-        VASTLog.v(TAG, "invokeOnStart");
+        if (mListener != null) {
 
-        if (mPlaybackListener != null) {
-
-            mPlaybackListener.onVASTPlayerStart();
+            mListener.onVASTPlayerPlaybackStart();
         }
     }
 
-    private void invokeOnFirstQuartile() {
+    private void invokeOnPlayerPlaybackFinish() {
 
-        VASTLog.v(TAG, "invokeOnFirstQuartile");
+        VASTLog.v(TAG, "invokeOnPlayerPlaybackFinish");
 
-        if (mPlaybackListener != null) {
+        if (mListener != null) {
 
-            mPlaybackListener.onVASTPlayerFirstQuartile();
-        }
-    }
-
-    private void invokeOnMidpoint() {
-
-        VASTLog.v(TAG, "invokeOnMidpoint");
-
-        if (mPlaybackListener != null) {
-
-            mPlaybackListener.onVASTPlayerMidpoint();
-        }
-    }
-
-    private void invokeOnThirdQuartile() {
-
-        VASTLog.v(TAG, "invokeOnThirdQuartile");
-
-        if (mPlaybackListener != null) {
-
-            mPlaybackListener.onVASTPlayerThirdQuartile();
-        }
-    }
-
-    private void invokeOnCompleted() {
-
-        VASTLog.v(TAG, "invokeOnCompleted");
-
-        if (mPlaybackListener != null) {
-
-            mPlaybackListener.onVASTPlayerCompleted();
-        }
-    }
-
-    // Interaction Listener
-    //-------------------------------------------------------
-
-    private void invokeOnMute() {
-
-        VASTLog.v(TAG, "invokeOnMute");
-
-        if (mInteractionListener != null) {
-
-            mInteractionListener.onVASTPlayerMute();
-        }
-    }
-
-    private void invokeOnUnMute() {
-
-        VASTLog.v(TAG, "invokeOnUnMute");
-
-        if (mInteractionListener != null) {
-
-            mInteractionListener.onVASTPlayerUnMute();
-        }
-    }
-
-    private void invokeOnClick() {
-
-        VASTLog.v(TAG, "invokeOnClick");
-
-        if (mInteractionListener != null) {
-
-            mInteractionListener.onVASTPlayerClick();
-        }
-    }
-
-    private void invokeOnDismiss() {
-
-        VASTLog.v(TAG, "invokeOnDismiss");
-
-        if (mInteractionListener != null) {
-
-            mInteractionListener.onVASTPlayerDismiss();
+            mListener.onVASTPlayerPlaybackFinish();
         }
     }
 
     //=============================================
     // CALLBACKS
     //=============================================
-
-    // SurfaceHolder.Callback
-    //---------------------------------------------
-
-    public void loadVideoURL(String url) {
-
-        VASTLog.v(TAG, "loadVideoURL: " + url);
-
-        if (mMediaPlayer == null) {
-
-            createMediaPlayer();
-        }
-
-        try {
-
-            mMediaPlayer.setDisplay(mSurfaceHolder);
-            invokeOnCachingStart();
-            mMediaPlayer.setDataSource(url);
-            mMediaPlayer.prepareAsync();
-
-        } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
-            invokeOnCachingFail();
-        }
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-        VASTLog.v(TAG, "surfaceCreated -- (SurfaceHolder callback)");
-
-        try {
-
-            mPlayerLoader.setVisibility(View.VISIBLE);
-
-            loadVideoURL(mVastModel.getPickedMediaFileURL());
-
-        } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
-            invokeOnCachingFail();
-            stop();
-        }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int arg1, int arg2, int arg3) {
-
-        VASTLog.v(TAG, "surfaceChanged -- (SurfaceHolder callback)");
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
-        VASTLog.v(TAG, "surfaceDestroyed -- (SurfaceHolder callback)");
-        cleanUpMediaPlayer();
-
-    }
 
     // MediaPlayer.OnCompletionListener
     //---------------------------------------------
@@ -858,15 +881,13 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "onCompletion -- (MediaPlayer callback)");
 
-        if (!mIsPlayBackError && !mIsCompleted) {
+        if (mQuartile > 3) {
 
-            mIsCompleted = true;
             processEvent(TRACKING_EVENTS_TYPE.complete);
-
-            invokeOnCompleted();
-
-            stop();
+            invokeOnPlayerPlaybackFinish();
         }
+
+        setState(PlayerState.Banner);
     }
 
     // MediaPlayer.OnErrorListener
@@ -875,13 +896,11 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
     public boolean onError(MediaPlayer mp, int what, int extra) {
 
         VASTLog.v(TAG, "onError -- (MediaPlayer callback)");
-        VASTLog.v(TAG, "Shutting down Activity due to Media Player errors: WHAT:" + what + ": EXTRA:" + extra + ":");
-
-        mIsPlayBackError = true;
 
         processErrorEvent();
 
-        stop();
+        invokeOnFail(new Exception("VASTPlayer error: error happened while playing the video"));
+        setState(PlayerState.Banner);
 
         return true;
     }
@@ -893,13 +912,27 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         VASTLog.v(TAG, "onPrepared --(MediaPlayer callback) ....about to play");
 
-        mIsReady = true;
+        final String bannerURLString = mVastModel.getExtensionURL(VASTModel.EXTENSION_POSTVIEW_BANNER);
 
-        invokeOnCachingFinish();
+        new BitmapDownloaderTask().setListener(new BitmapDownloaderTask.Listener() {
 
-        if (mIsAutoPlay) {
-            play();
-        }
+            @Override
+            public void onBitmapDownloaderFinished(Bitmap bitmap) {
+
+                if (bitmap != null) {
+
+                    mPlayerBannerImage.setImageBitmap(bitmap);
+                    setState(PlayerState.Ready);
+                    invokeOnPlayerLoadFinish();
+
+                } else {
+
+                    invokeOnFail(new Exception("VASTPlayer error: Background banner couldn't be downloaded: " + bannerURLString));
+                    setState(PlayerState.None);
+                }
+
+            }
+        }).execute(bannerURLString);
     }
 
     // MediaPlayer.OnVideoSizeChangedListener
@@ -911,27 +944,64 @@ public class VASTPlayer extends RelativeLayout implements SurfaceHolder.Callback
 
         mVideoWidth = width;
         mVideoHeight = height;
-
-        calculateAspectRatio();
     }
 
     // View.OnClickListener
     //---------------------------------------------
-    public void onClick(View v) {
+    public void onClick(View view) {
 
         VASTLog.v(TAG, "onClick -- (View.OnClickListener callback)");
 
-        if (mPlayerContainer == v) {
+        if (mPlayerViewContainer == view) {
 
-            onPlayerClicked(v);
+            onPlayerClick(view);
 
-        } else if (mPlayerSkip == v) {
+        } else if (mPlayerViewLayoutLearnMore == view) {
 
-            onSkipClicked(v);
+            onPlayerLearnMoreClick(view);
 
-        } else if (mPlayerMute == v) {
+        } else if (mPlayerViewLayoutSkip == view) {
 
-            onMuteClicked(v);
+            onSkipClick(view);
+
+        } else if (mPlayerViewLayoutMute == view) {
+
+            onMuteClick(view);
+
+        } else if (mPlayerBannerImage == view) {
+
+            onBannerClick(view);
         }
+    }
+
+    // SurfaceHolder.Callback
+    //---------------------------------------------
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+
+        VASTLog.v(TAG, "surfaceCreated");
+
+        mIsSurfaceReady = true;
+
+        mMediaPlayer.setDisplay(holder);
+
+        if (mIsCachingRequired) {
+
+            startCaching();
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+        VASTLog.v(TAG, "surfaceChanged");
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
+        VASTLog.v(TAG, "surfaceDestroyed");
+        mIsSurfaceReady = false;
     }
 }

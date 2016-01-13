@@ -1,9 +1,3 @@
-//
-//  XmlTools.java
-//
-//  Copyright (c) 2014 Nexage. All rights reserved.
-//
-
 package net.pubnative.player.util;
 
 import org.w3c.dom.CharacterData;
