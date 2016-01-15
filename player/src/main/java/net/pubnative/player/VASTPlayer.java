@@ -705,7 +705,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         mProgressTimer = new Timer();
         mProgressTracker = new ArrayList<Integer>();
         mProgressTimer.scheduleAtFixedRate(new TimerTask() {
-            
+
             @Override
             public void run() {
 
@@ -801,9 +801,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                 if (percentage >= 25 * mQuartile) {
 
                     if (mQuartile == 0) {
-
-                        VASTLog.v(TAG, "mediaPlayer currentPosition: " + mMediaPlayer.getCurrentPosition());
-                        VASTLog.v(TAG, "mediaPlayer duration: " + mMediaPlayer.getDuration());
 
                         VASTLog.i(TAG, "Video at start: (" + percentage + "%)");
                         processImpressions();
