@@ -424,20 +424,9 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.v(TAG, "onPlayerLearnMoreClick");
 
-//        openOffer();
-//        mMediaPlayer.stop();
-//        setState(PlayerState.Banner);
-
-        mIsBufferingShown = true;
-        mPlayerViewLoader.setVisibility(VISIBLE);
-//        mainHandler.post(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//
-//
-//            }
-//        });
+        openOffer();
+        mMediaPlayer.stop();
+        setState(PlayerState.Banner);
     }
 
     public void onBannerClick(View v) {
@@ -761,7 +750,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                                 }
                             });
                         }
-
                     }
 
                     mProgressTracker.remove(0);
