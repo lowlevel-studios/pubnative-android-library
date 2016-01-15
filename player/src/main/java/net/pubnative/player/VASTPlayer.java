@@ -86,7 +86,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private static final long TIMER_PROGRESS_INTERVAL = 50;
     private static final long TIMER_LAYOUT_INTERVAL   = 50;
 
-    private static final int MAX_PROGRESS_TRACKING_POINTS = 210;
+    private static final int MAX_PROGRESS_TRACKING_POINTS = 20;
 
     // TRACKING
     private HashMap<TRACKING_EVENTS_TYPE, List<String>> mTrackingEventMap;
@@ -717,20 +717,36 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         mProgressTracker = new ArrayList<Integer>();
         mProgressTimer.scheduleAtFixedRate(new TimerTask() {
 
-            int maxAmountInList = MAX_PROGRESS_TRACKING_POINTS - 1;
+
 
             @Override
             public void run() {
 
                 VASTLog.v(TAG, "VideoProgressTimer tick: " + mProgressTracker.size());
 
-                if (mProgressTracker.size() >= maxAmountInList) {
+                if (mProgressTracker.size() > MAX_PROGRESS_TRACKING_POINTS) {
 
                     VASTLog.v(TAG, "VideoProgressTimer configured");
                     int firstPosition = mProgressTracker.get(0);
                     int lastPosition = mProgressTracker.get(mProgressTracker.size() - 1);
 
-                    if (lastPosition <= firstPosition) {
+                    if (lastPosition > firstPosition) {
+
+                        if(mIsBufferingShown) {
+
+                            VASTLog.v(TAG, "Detected video hang passed");
+                            mIsBufferingShown = false;
+                            mainHandler.post(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    mPlayerViewLoader.setVisibility(GONE);
+                                }
+                            });
+                        }
+
+                    } else {
 
                         if(!mIsBufferingShown) {
 
@@ -746,21 +762,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                             });
                         }
 
-                    } else  {
-
-                        if(mIsBufferingShown) {
-
-                            VASTLog.v(TAG, "Detected video hang passed");
-                            mIsBufferingShown = false;
-                            mainHandler.post(new Runnable() {
-
-                                @Override
-                                public void run() {
-
-                                    mPlayerViewLoader.setVisibility(GONE);
-                                }
-                            });
-                        }
                     }
 
                     mProgressTracker.remove(0);
