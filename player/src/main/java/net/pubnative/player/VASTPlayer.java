@@ -705,17 +705,12 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         mProgressTimer = new Timer();
         mProgressTracker = new ArrayList<Integer>();
         mProgressTimer.scheduleAtFixedRate(new TimerTask() {
-
-
-
+            
             @Override
             public void run() {
 
-                VASTLog.v(TAG, "VideoProgressTimer tick: " + mProgressTracker.size());
-
                 if (mProgressTracker.size() > MAX_PROGRESS_TRACKING_POINTS) {
 
-                    VASTLog.v(TAG, "VideoProgressTimer configured");
                     int firstPosition = mProgressTracker.get(0);
                     int lastPosition = mProgressTracker.get(mProgressTracker.size() - 1);
 
@@ -723,7 +718,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
                         if(mIsBufferingShown) {
 
-                            VASTLog.v(TAG, "Detected video hang passed");
                             mIsBufferingShown = false;
                             mainHandler.post(new Runnable() {
 
@@ -739,7 +733,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
                         if(!mIsBufferingShown) {
 
-                            VASTLog.v(TAG, "Detected video hang");
                             mIsBufferingShown = true;
                             mainHandler.post(new Runnable() {
 
