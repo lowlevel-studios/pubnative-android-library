@@ -47,13 +47,8 @@ public class PubnativeVideoDelegate extends PubnativeActivityDelegate implements
 
     private void requestAd(){
 
-
-
         this.request = new VideoAdRequest(this.context);
         this.request.setParameter(PubnativeContract.Request.APP_TOKEN, this.app_token);
-        this.request.setParameter(PubnativeContract.Request.AD_COUNT, "1");
-        this.request.setParameter(PubnativeContract.Request.ICON_SIZE, "200x200");
-        this.request.setParameter(PubnativeContract.Request.BANNER_SIZE, "1200x627");
         this.request.start(this);
     }
 

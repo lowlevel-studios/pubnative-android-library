@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import net.pubnative.library.PubnativeContract;
 import net.pubnative.library.demo.R;
 import net.pubnative.library.demo.RequestData;
 import net.pubnative.library.model.APIV3VideoAd;
@@ -29,7 +30,8 @@ public class Video extends RelativeLayout implements VideoAdRequestListener,
 
     private View       progressBar;
     private VASTPlayer player;
-    private Button     request;
+    private Button     requestButton;
+    private VideoAdRequest request;
 
     public Video(Context context, AttributeSet attrs) {
 
@@ -42,8 +44,8 @@ public class Video extends RelativeLayout implements VideoAdRequestListener,
         player = (VASTPlayer) findViewById(R.id.video_player);
         player.setListener(this);
 
-        request = (Button) findViewById(R.id.video_request);
-        request.setOnClickListener(new OnClickListener() {
+        requestButton = (Button) findViewById(R.id.video_request);
+        requestButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View view) {
@@ -58,12 +60,10 @@ public class Video extends RelativeLayout implements VideoAdRequestListener,
         Log.v(TAG, "onRequestClick");
 
         progressBar.setVisibility(VISIBLE);
-        parseAd(RequestData.VIDEO_STATIC);
 
-        // TODO: Uncomment when server bet works
-//        VideoAdRequest request = new VideoAdRequest(getContext());
-//        request.setParameter(PubnativeContract.Request.APP_TOKEN, RequestData.APP_TOKEN);
-//        request.start(AdRequest.Endpoint.VIDEO, this);
+        request = new VideoAdRequest(getContext());
+        request.setParameter(PubnativeContract.Request.APP_TOKEN, RequestData.APP_TOKEN);
+        request.start(this);
     }
 
     public void parseAd(String adString) {
@@ -116,7 +116,7 @@ public class Video extends RelativeLayout implements VideoAdRequestListener,
 
         Log.v(TAG, "onAdRequestFailed: " + ex);
 
-        Toast.makeText(getContext(), "Video - Request error", Toast.LENGTH_SHORT);
+        Toast.makeText(getContext(), "Video - Request error", Toast.LENGTH_SHORT).show();
 
         progressBar.setVisibility(GONE);
     }
@@ -134,8 +134,9 @@ public class Video extends RelativeLayout implements VideoAdRequestListener,
 
         } else {
 
-            Toast.makeText(getContext(), "Video - No fill", Toast.LENGTH_SHORT);
+            Toast.makeText(getContext(), "Video - No fill", Toast.LENGTH_SHORT).show();
         }
+
 
         progressBar.setVisibility(GONE);
     }

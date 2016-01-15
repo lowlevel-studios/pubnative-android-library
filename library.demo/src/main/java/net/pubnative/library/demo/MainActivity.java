@@ -70,7 +70,7 @@ public class MainActivity extends ActionBarActivity implements PubnativeActivity
         Toast.makeText(this, "Under development", Toast.LENGTH_SHORT).show();
     }
 
-    //PubnativeActivityListener
+    // PubnativeActivityListener
     @Override
     public void onPubnativeActivityStarted(String identifier) {
 

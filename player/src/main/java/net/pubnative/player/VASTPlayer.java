@@ -26,6 +26,7 @@ import net.pubnative.player.util.HttpTools;
 import net.pubnative.player.util.VASTLog;
 import net.pubnative.player.widget.CountDownView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -78,10 +79,14 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
     // TIMERS
     private Timer mLayoutTimer;
+    private Timer mProgressTimer;
     private Timer mTrackingEventsTimer;
 
     private static final long TIMER_TRACKING_INTERVAL = 250;
+    private static final long TIMER_PROGRESS_INTERVAL = 50;
     private static final long TIMER_LAYOUT_INTERVAL   = 50;
+
+    private static final int MAX_PROGRESS_TRACKING_POINTS = 210;
 
     // TRACKING
     private HashMap<TRACKING_EVENTS_TYPE, List<String>> mTrackingEventMap;
@@ -107,21 +112,25 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private ImageView      mPlayerViewLayoutMute;
     private ImageView      mPlayerViewLayoutLearnMore;
     private CountDownView  mPlayerViewLayoutCountDown;
+    private RelativeLayout mPlayerViewLoader;
     private RelativeLayout mPlayerLoader;
     private RelativeLayout mPlayerBanner;
     private ImageView      mPlayerBannerImage;
 
     // OTHERS
-    private Handler      mainHandler        = null;
-    private boolean      mIsSurfaceReady    = false;
-    private int          mVideoHeight       = 0;
-    private int          mVideoWidth        = 0;
-    private boolean      mIsSkipHidden      = true;
-    private boolean      mIsVideoMute       = false;
-    private boolean      mIsCachingRequired = false;
-    private int          mQuartile          = 0;
-    private CampaignType mCampaignType      = CampaignType.CPM;
-    private PlayerState  mPlayerState       = PlayerState.None;
+    private Handler       mainHandler        = null;
+    private boolean       mIsSurfaceReady    = false;
+    private int           mVideoHeight       = 0;
+    private int           mVideoWidth        = 0;
+    private boolean       mIsSkipHidden      = true;
+    private boolean       mIsVideoMute       = false;
+    private boolean       mIsPlayerReady     = false;
+    private boolean       mIsCachingRequired = false;
+    private boolean       mIsBufferingShown  = false;
+    private int           mQuartile          = 0;
+    private CampaignType  mCampaignType      = CampaignType.CPM;
+    private PlayerState   mPlayerState       = PlayerState.None;
+    private List<Integer> mProgressTracker   = null;
 
     //=======================================================
     // State machine
@@ -137,7 +146,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                 result = true;
                 break;
             case Loader:
-                result = (mPlayerState == PlayerState.None);
+                result = (mPlayerState == PlayerState.None || mPlayerState == PlayerState.Banner);
                 break;
             case Ready:
                 result = (mPlayerState == PlayerState.Loader || mPlayerState == PlayerState.Banner);
@@ -201,8 +210,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
          * Do not change this order, since cleaning the media player before invalidating timers
          * could make the timers threads access an invalid media player
          */
-        cleanMediaPlayer();
         stopTimers();
+        cleanMediaPlayer();
     }
 
     private void setLoaderState() {
@@ -210,10 +219,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         Log.v(TAG, "setLoaderState");
 
         mPlayerBanner.setVisibility(GONE);
-        mPlayerLoader.setVisibility(VISIBLE);
         mPlayerView.setVisibility(VISIBLE);
-
-        createMediaPlayer();
+        mPlayerLoader.setVisibility(VISIBLE);
 
         if (mIsSurfaceReady) {
 
@@ -235,12 +242,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         Log.v(TAG, "setPlayerState");
 
-        mQuartile = 0;
-
-        mPlayerView.setVisibility(VISIBLE);
-        mPlayerBanner.setVisibility(GONE);
-        mPlayerLoader.setVisibility(GONE);
-
         /**
          * Don't change the order of this, since starting the media player after te timers could
          * lead to an invalid mediaplayer required inside the timers.
@@ -248,6 +249,10 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         calculateAspectRatio();
         mMediaPlayer.start();
         startTimers();
+
+        mPlayerBanner.setVisibility(GONE);
+        mPlayerView.setVisibility(VISIBLE);
+        mPlayerLoader.setVisibility(GONE);
     }
 
     private void setBannerState() {
@@ -338,8 +343,10 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         setState(PlayerState.None);
 
         mVastModel = model;
-
         mTrackingEventMap = mVastModel.getTrackingUrls();
+        // This createMediaPlayer is required for reuse of the VASTPlayer when
+        // still having a loaded video
+        createMediaPlayer();
 
         setState(PlayerState.Loader);
     }
@@ -417,17 +424,35 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.v(TAG, "onPlayerLearnMoreClick");
 
-        openOffer();
-        mMediaPlayer.stop();
-        setState(PlayerState.Banner);
+//        openOffer();
+//        mMediaPlayer.stop();
+//        setState(PlayerState.Banner);
+
+        mIsBufferingShown = true;
+        mPlayerViewLoader.setVisibility(VISIBLE);
+//        mainHandler.post(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//
+//
+//            }
+//        });
     }
 
     public void onBannerClick(View v) {
 
         VASTLog.v(TAG, "onBannerClick");
 
-        setState(PlayerState.Ready);
-        play();
+        if (mIsPlayerReady) {
+
+            setState(PlayerState.Ready);
+            play();
+
+        } else {
+
+            setState(PlayerState.Loader);
+        }
     }
 
     public void onPlayerClick(View v) {
@@ -490,6 +515,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         mSurfaceHolder = mPlayerViewContainerSurface.getHolder();
         mSurfaceHolder.addCallback(this);
 
+        mPlayerViewLoader = (RelativeLayout) mPlayerView.findViewById(R.id.player_view_buffering);
+
         mPlayerViewLayout = (RelativeLayout) mPlayerView.findViewById(R.id.player_view_layout);
         mPlayerViewLayoutCountDown = (CountDownView) mPlayerViewLayout.findViewById(R.id.player_view_layout_count_down);
         mPlayerViewLayoutSkip = (TextView) mPlayerViewLayout.findViewById(R.id.player_view_layout_skip);
@@ -528,8 +555,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.v(TAG, "startCaching");
 
-        mIsCachingRequired = false;
-
         try {
 
             String videoURL = mVastModel.getPickedMediaFileURL();
@@ -550,7 +575,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.v(TAG, "createMediaPlayer");
 
-        if(mMediaPlayer == null) {
+        if (mMediaPlayer == null) {
 
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnCompletionListener(this);
@@ -565,7 +590,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.v(TAG, "cleanUpMediaPlayer");
 
-        if(mMediaPlayer != null) {
+        if (mMediaPlayer != null) {
 
             mMediaPlayer.setOnCompletionListener(null);
             mMediaPlayer.setOnErrorListener(null);
@@ -573,6 +598,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
             mMediaPlayer.setOnVideoSizeChangedListener(null);
             mMediaPlayer.release();
             mMediaPlayer = null;
+
+            mIsPlayerReady = false;
         }
     }
 
@@ -662,6 +689,9 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         stopQuartileTimer();
         stopLayoutTimer();
+        stopVideoProgressTimer();
+
+        mainHandler.removeCallbacksAndMessages(null);
     }
 
     private void startTimers() {
@@ -674,6 +704,83 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         // start timers
         startQuartileTimer();
         startLayoutTimer();
+        startVideoProgressTimer();
+    }
+
+    // Progress timer
+    //-------------------------------------------------------
+    private void startVideoProgressTimer() {
+
+        VASTLog.d(TAG, "startVideoProgressTimer");
+
+        mProgressTimer = new Timer();
+        mProgressTracker = new ArrayList<Integer>();
+        mProgressTimer.scheduleAtFixedRate(new TimerTask() {
+
+            int maxAmountInList = MAX_PROGRESS_TRACKING_POINTS - 1;
+
+            @Override
+            public void run() {
+
+                VASTLog.v(TAG, "VideoProgressTimer tick: " + mProgressTracker.size());
+
+                if (mProgressTracker.size() >= maxAmountInList) {
+
+                    VASTLog.v(TAG, "VideoProgressTimer configured");
+                    int firstPosition = mProgressTracker.get(0);
+                    int lastPosition = mProgressTracker.get(mProgressTracker.size() - 1);
+
+                    if (lastPosition <= firstPosition) {
+
+                        if(!mIsBufferingShown) {
+
+                            VASTLog.v(TAG, "Detected video hang");
+                            mIsBufferingShown = true;
+                            mainHandler.post(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    mPlayerViewLoader.setVisibility(VISIBLE);
+                                }
+                            });
+                        }
+
+                    } else  {
+
+                        if(mIsBufferingShown) {
+
+                            VASTLog.v(TAG, "Detected video hang passed");
+                            mIsBufferingShown = false;
+                            mainHandler.post(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    mPlayerViewLoader.setVisibility(GONE);
+                                }
+                            });
+                        }
+                    }
+
+                    mProgressTracker.remove(0);
+                }
+
+                mProgressTracker.add(mMediaPlayer.getCurrentPosition());
+            }
+
+        }, 0, TIMER_PROGRESS_INTERVAL);
+    }
+
+    private void stopVideoProgressTimer() {
+
+        VASTLog.d(TAG, "stopVideoProgressTimer");
+
+        if (mProgressTimer != null) {
+
+            mProgressTimer.cancel();
+            mProgressTimer = null;
+        }
     }
 
     // Quartile timer
@@ -681,6 +788,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private void startQuartileTimer() {
 
         VASTLog.v(TAG, "startQuartileTimer");
+
+        mQuartile = 0;
 
         mTrackingEventsTimer = new Timer();
         mTrackingEventsTimer.scheduleAtFixedRate(new TimerTask() {
@@ -701,7 +810,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
                 } catch (Exception e) {
 
-                    VASTLog.w(TAG, "mediaPlayer.getCurrentPosition exception: " + e.getMessage());
+                    VASTLog.e(TAG, "QuartileTimer error: " + e.getMessage());
                     cancel();
 
                     return;
@@ -710,6 +819,9 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                 if (percentage >= 25 * mQuartile) {
 
                     if (mQuartile == 0) {
+
+                        VASTLog.v(TAG, "mediaPlayer currentPosition: " + mMediaPlayer.getCurrentPosition());
+                        VASTLog.v(TAG, "mediaPlayer duration: " + mMediaPlayer.getDuration());
 
                         VASTLog.i(TAG, "Video at start: (" + percentage + "%)");
                         processImpressions();
@@ -808,8 +920,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         VASTLog.d(TAG, "stopLayoutTimer");
 
-        mainHandler.removeCallbacksAndMessages(null);
-
         if (mLayoutTimer != null) {
 
             mLayoutTimer.cancel();
@@ -899,7 +1009,37 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         processErrorEvent();
 
-        invokeOnFail(new Exception("VASTPlayer error: error happened while playing the video"));
+        String exceptionMessage;
+        switch (what) {
+
+            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                exceptionMessage = "server died: ";
+                break;
+
+            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+            default:
+                exceptionMessage = "unknown: ";
+        }
+
+        switch (extra) {
+
+            case MediaPlayer.MEDIA_ERROR_IO:
+                exceptionMessage += "MEDIA_ERROR_IO";
+                break;
+            case MediaPlayer.MEDIA_ERROR_MALFORMED:
+                exceptionMessage += "MEDIA_ERROR_MALFORMED";
+                break;
+            case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+                exceptionMessage += "MEDIA_ERROR_UNSUPPORTED";
+                break;
+            case MediaPlayer.MEDIA_ERROR_TIMED_OUT:
+                exceptionMessage += "MEDIA_ERROR_TIMED_OUT";
+                break;
+            default:
+                exceptionMessage += "low-level system error";
+        }
+
+        invokeOnFail(new Exception("VASTPlayer error: " + exceptionMessage));
         setState(PlayerState.Banner);
 
         return true;
@@ -922,6 +1062,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                 if (bitmap != null) {
 
                     mPlayerBannerImage.setImageBitmap(bitmap);
+                    mIsPlayerReady = true;
                     setState(PlayerState.Ready);
                     invokeOnPlayerLoadFinish();
 
@@ -984,10 +1125,12 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         mIsSurfaceReady = true;
 
+        createMediaPlayer();
         mMediaPlayer.setDisplay(holder);
 
         if (mIsCachingRequired) {
 
+            mIsCachingRequired = false;
             startCaching();
         }
     }
@@ -1002,6 +1145,10 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     public void surfaceDestroyed(SurfaceHolder holder) {
 
         VASTLog.v(TAG, "surfaceDestroyed");
+
         mIsSurfaceReady = false;
+
+        stopTimers();
+        cleanMediaPlayer();
     }
 }
