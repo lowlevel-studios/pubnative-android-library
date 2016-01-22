@@ -41,7 +41,7 @@ public class VideoAdRequest extends AdRequest {
 
     @Override
     protected String getBaseURL(){
-        return "http://ad-server-staging-vnijnzpn9g.elasticbeanstalk.com/api/partner/v3/promotions";//"http://api.pubnative.net/api/partner/v3/promotions";
+        return "http://api.pubnative.net/api/partner/v3/promotions";
     }
 
     @Override
