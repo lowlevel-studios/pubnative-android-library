@@ -91,10 +91,10 @@ public class PubnativeRequestTest {
 
         PubnativeRequest request = spy(PubnativeRequest.class);
         request.listener = listener;
-        request.endpoint = PubnativeRequest.Endpoint.NATIVE;
+        request.type = PubnativeRequest.Type.NATIVE;
         request.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        request.start(this.applicationContext, PubnativeRequest.Endpoint.NATIVE, listener);
+        request.start(this.applicationContext, PubnativeRequest.Type.NATIVE, listener);
 
         verify(request, times(1)).setDefaultParameters();
         verify(request, times(1)).sendNetworkRequest();
@@ -121,7 +121,7 @@ public class PubnativeRequestTest {
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
         pubnativeRequest.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        pubnativeRequest.start(null, PubnativeRequest.Endpoint.NATIVE, listener);
+        pubnativeRequest.start(null, PubnativeRequest.Type.NATIVE, listener);
 
         verify(pubnativeRequest, times(1)).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
@@ -130,7 +130,7 @@ public class PubnativeRequestTest {
     public void testSetsUpDefaultParametersAutomatically() {
 
         PubnativeRequest request = spy(PubnativeRequest.class);
-        request.context = this.applicationContext;
+        request.mContext = this.applicationContext;
         request.setDefaultParameters();
 
         assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
@@ -148,7 +148,7 @@ public class PubnativeRequestTest {
         String           testKey   = "testKey";
         String           testValue = "testValue";
         PubnativeRequest request   = spy(PubnativeRequest.class);
-        request.endpoint = PubnativeRequest.Endpoint.NATIVE;
+        request.type = PubnativeRequest.Type.NATIVE;
         request.setParameter(testKey, testValue);
 
         String url = request.getRequestURL();
@@ -162,7 +162,7 @@ public class PubnativeRequestTest {
     public void testInvalidEndpointReturnsNullURL() {
 
         PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        pubnativeRequest.endpoint = null;
+        pubnativeRequest.type = null;
 
         String url = pubnativeRequest.getRequestURL();
 

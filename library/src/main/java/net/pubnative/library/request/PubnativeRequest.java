@@ -13,9 +13,8 @@ import com.google.gson.JsonSyntaxException;
 
 import net.pubnative.library.models.APIRequestResponseModel;
 import net.pubnative.library.models.PubnativeAdModel;
-import net.pubnative.library.network.Request;
-import net.pubnative.library.network.RequestManager;
-import net.pubnative.library.network.Response;
+import net.pubnative.library.network.PubnativeAPIRequest;
+import net.pubnative.library.network.PubnativeAPIResponse;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
@@ -28,22 +27,22 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Response.Listener, Response.ErrorListener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIResponse.Listener {
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
     protected static final String BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
     private static final   String NATIVE_TYPE_URL = "native";
 
-    protected Context             context;
-    protected Endpoint            endpoint;
-    protected Map<String, String> requestParameters = new HashMap<String, String>();;
+    protected Context             mContext;
+    protected Type                type;
+    protected Map<String, String> requestParameters = new HashMap<String, String>();
     protected Listener            listener;
 
     /**
      * These are the various types of adds pubnative support
      */
-    public enum Endpoint {
+    public enum Type {
 
         NATIVE,
     }
@@ -104,6 +103,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     }
 
     /**
+     * Creates object of PubnativeRequest
+     */
+    public PubnativeRequest(Context context) {
+        mContext = context;
+    }
+
+    /**
      * Sets parameters required to make the pub native request
      *
      * @param key   key name of parameter
@@ -130,26 +136,24 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
     /**
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
-     * @param context  is application context
-     * @param endpoint type of ad (ex: NATIVE)
+     * @param type type of ad (ex: NATIVE)
      * @param listener valid listener to track ad request callbacks.
      */
-    public void start(Context context, Endpoint endpoint, Listener listener) {
+    public void start(Type type, Listener listener) {
 
         if (listener != null) {
 
             this.listener = listener;
 
-            if (endpoint != null && context != null) {
+            if (type != null && mContext != null) {
 
-                this.context = context;
-                this.endpoint = endpoint;
+                this.type = type;
 
                 setDefaultParameters();
 
                 if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
 
-                    new AndroidAdvertisingIDTask().setListener(this).execute(context);
+                    new AndroidAdvertisingIDTask().setListener(this).execute(mContext);
 
                 } else {
 
@@ -163,7 +167,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         } else {
 
-            Log.e(TAG, "start - Request started without listener, dropping call");
+            Log.e(TAG, "start - PubnativeAPIRequest started without listener, dropping call");
         }
     }
 
@@ -174,7 +178,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         if (!this.requestParameters.containsKey(Parameters.BUNDLE_ID)) {
 
-            this.requestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(this.context));
+            this.requestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(mContext));
         }
 
         if (!this.requestParameters.containsKey(Parameters.OS)) {
@@ -194,13 +198,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         if (!this.requestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
 
-            DisplayMetrics dm = this.context.getResources().getDisplayMetrics();
+            DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
             this.requestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
         }
 
         if (!this.requestParameters.containsKey(Parameters.DEVICE_TYPE)) {
 
-            this.requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(this.context) ? "tablet" : "phone");
+            this.requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
         }
 
         if (!this.requestParameters.containsKey(Parameters.LOCALE)) {
@@ -209,9 +213,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         }
 
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
-        if (SystemUtils.isLocationPermissionGranted(this.context)) {
+        if (SystemUtils.isLocationPermissionGranted(mContext)) {
 
-            Location location = SystemUtils.getLastLocation(this.context);
+            Location location = SystemUtils.getLastLocation(mContext);
 
             if (location != null &&
                 !this.requestParameters.containsKey(Parameters.LAT) &&
@@ -230,11 +234,11 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         String url = null;
 
-        if (this.endpoint != null) {
+        if (this.type != null) {
 
-            switch (this.endpoint) {
+            switch (this.type) {
 
-                case NATIVE: {
+                case NATIVE:
 
                     // Creating base URI
                     Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
@@ -253,14 +257,12 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
                     // Final URL
                     url = uriBuilder.build().toString();
-                }
                 break;
 
-                default: {
+                default:
 
                     // Error: Invalid ENDPOINT
-                    Log.e(TAG, "getRequestURL - endpoint not recognized");
-                }
+                    Log.e(TAG, "getRequestURL - type not recognized");
                 break;
             }
         }
@@ -270,7 +272,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
     /**
      * This function will create and send the network request, It uses Volley internally for network communication.
-     * It consider that <code>endpoint<code/> is already provided so that it can prepare the request URL.
+     * It consider that <code>type<code/> is already provided so that it can prepare the request URL.
      */
     protected void sendNetworkRequest() {
 
@@ -282,7 +284,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         } else {
 
-            RequestManager.sendRequest(new Request(Request.Method.GET, url, this, this));
+            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, this);
         }
     }
 
@@ -300,7 +302,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
     protected void invokeOnPubnativeRequestFailure(Exception exception) {
 
-        Log.e(TAG, "Request error: " + exception);
+        Log.e(TAG, "PubnativeAPIRequest error: " + exception);
 
         if (this.listener != null) {
 
@@ -335,7 +337,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         sendNetworkRequest();
     }
 
-    // Response.Listener<String>
+    // PubnativeAPIResponse.Listener<String>
     //-----------------------------------
 
     /**
@@ -366,7 +368,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
                 } else {
 
                     // ERROR: parsing error
-                    invokeOnPubnativeRequestFailure(new Exception("Response error"));
+                    invokeOnPubnativeRequestFailure(new Exception("PubnativeAPIResponse error"));
                 }
 
             } catch (JsonSyntaxException exception) {
@@ -382,7 +384,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
         }
     }
 
-    // Response.ErrorListener
+    // PubnativeAPIResponse.ErrorListener
     //-----------------------------------
 
     /**
