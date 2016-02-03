@@ -29,7 +29,6 @@ public class Request {
         mUrl = url;
         mListener = listener;
         mErrorListener = errorListener;
-
     }
 
     public interface Method {
@@ -41,12 +40,16 @@ public class Request {
     }
 
     public URL getUrl() {
+
         try {
+
             return new URL(mUrl);
         } catch (MalformedURLException e) {
+
             e.printStackTrace();
             return null;
         }
+
     }
 
     public Response.Listener getListener() {
@@ -54,6 +57,20 @@ public class Request {
     }
 
     public Response.ErrorListener getErrorListener() {
+
         return mErrorListener;
+    }
+
+    public void deliverResponse(String response) {
+
+        mListener.onResponse(response);
+    }
+
+    public void deliverError(Exception error) {
+
+        if(mErrorListener != null) {
+
+            mErrorListener.onErrorResponse(error);
+        }
     }
 }

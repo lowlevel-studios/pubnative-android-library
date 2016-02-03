@@ -2,8 +2,6 @@ package net.pubnative.library.request;
 
 import android.content.Context;
 
-import com.android.volley.VolleyError;
-
 import net.pubnative.library.BuildConfig;
 import net.pubnative.library.PubnativeTestUtils;
 
@@ -215,9 +213,9 @@ public class PubnativeRequestTest {
     }
 
     @Test
-    public void testOnErrorResponseFromVolley() {
+    public void testOnErrorResponseFromRequestManager() {
 
-        VolleyError               error    = mock(VolleyError.class);
+        Exception               error    = mock(Exception.class);
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(PubnativeRequest.class);

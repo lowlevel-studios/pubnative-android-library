@@ -8,17 +8,14 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import net.pubnative.library.models.APIRequestResponseModel;
 import net.pubnative.library.models.PubnativeAdModel;
+import net.pubnative.library.network.Request;
+import net.pubnative.library.network.RequestManager;
+import net.pubnative.library.network.Response;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
@@ -285,9 +282,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
 
         } else {
 
-            RequestQueue queue = Volley.newRequestQueue(this.context);
-            StringRequest request = new StringRequest(Request.Method.GET, url, this, this);
-            queue.add(request);
+            RequestManager.sendRequest(new Request(Request.Method.GET, url, this, this));
         }
     }
 
@@ -394,7 +389,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Resp
      * errorListener callback calls when network request fails.
      */
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse(Exception error) {
 
         invokeOnPubnativeRequestFailure(error);
     }

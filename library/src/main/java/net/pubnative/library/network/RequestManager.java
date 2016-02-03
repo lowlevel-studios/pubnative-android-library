@@ -1,7 +1,11 @@
 package net.pubnative.library.network;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,10 +32,10 @@ public class RequestManager {
     // A queue of Runnables for requests pool
     private final BlockingQueue<Runnable> mRequestWorkQueue;
 
-    // A managed pool of background send stat threads
+    // A managed pool of background request threads
     private final ThreadPoolExecutor mRequestThreadPool;
 
-    // A queue of stat tasks. Tasks are handed to a ThreadPool.
+    // A queue of request tasks.
     private final Queue<RequestTask> mRequestTaskWorkQueue;
 
     // A single instance of RequestManager, used to implement the singleton pattern
@@ -57,7 +61,7 @@ public class RequestManager {
     }
 
     /**
-     * Constructs the work queues and thread pools used to send statistic.
+     * Constructs the work queues and thread pools used to execute request.
      */
     private RequestManager() {
 		/*
@@ -102,6 +106,17 @@ public class RequestManager {
             requestTask = new RequestTask();
         }
         requestTask.setRequest(request);
+        final Handler handler = new Handler(Looper.getMainLooper());
+        requestTask.setResponsePoster(new Executor() {
+
+            @Override
+            public void execute(Runnable runnable) {
+
+                handler.post(runnable);
+
+            }
+        });
+
         sInstance.mRequestThreadPool.execute(requestTask.getExecuteRequestRunnable());
     }
 

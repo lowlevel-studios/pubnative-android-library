@@ -1,8 +1,8 @@
 package net.pubnative.library.network;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.concurrent.Executor;
 
 /**
  * Created by jaiswal.anshuman on 2/2/2016.
@@ -14,6 +14,8 @@ public class RequestTask {
 
     //Request runnable
     private Runnable mExecuteRequestRunnable;
+
+    private Executor mResponsePoster;
 
     /**
      * @return Request runnable
@@ -41,9 +43,13 @@ public class RequestTask {
         mRequest = request;
     }
 
-    private void executeRequest() {
-        InputStream is = null;
+    public void setResponsePoster(Executor mResponsePoster) {
+        this.mResponsePoster = mResponsePoster;
+    }
 
+    private void executeRequest() {
+
+        Response response = new Response();
         try {
 
             HttpURLConnection connection = (HttpURLConnection) mRequest.getUrl().openConnection();
@@ -55,25 +61,39 @@ public class RequestTask {
             connection.connect();
 
             int responseCode = connection.getResponseCode();
-            is = connection.getInputStream();
 
             if(responseCode == -1) {
                 throw new IOException("Could not retrieve response code from HttpUrlConnection.");
             } else {
-
+                response.setResult(connection.getInputStream());
             }
-
         } catch (IOException e) {
+
             e.printStackTrace();
+            response.setError(e);
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+
+            this.mResponsePoster.execute(new ResponseDeliveryRunnable(mRequest, response));
+        }
+    }
+
+    private class ResponseDeliveryRunnable implements Runnable {
+
+        private final Request mRequest;
+        private final Response mResponse;
+
+        public ResponseDeliveryRunnable(Request request, Response response) {
+            this.mRequest = request;
+            this.mResponse = response;
         }
 
+        @Override
+        public void run() {
+            if(this.mResponse.isSuccess()) {
+                this.mRequest.deliverResponse(this.mResponse.result);
+            } else {
+                this.mRequest.deliverError(this.mResponse.error);
+            }
+        }
     }
 }
