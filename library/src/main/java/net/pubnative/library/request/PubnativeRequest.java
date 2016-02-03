@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Response.Listener<String>, Response.ErrorListener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Response.Listener, Response.ErrorListener {
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
