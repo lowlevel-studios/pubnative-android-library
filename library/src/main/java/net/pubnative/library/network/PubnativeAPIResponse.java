@@ -45,9 +45,9 @@ public class PubnativeAPIResponse {
     }
 
     public interface Listener {
-        void onResponse(PubnativeAPIRequest request, String response);
+        void onResponse(String response);
 
-        void onErrorResponse(PubnativeAPIRequest request, Exception error);
+        void onErrorResponse(Exception error);
     }
 
     public boolean isSuccess() {

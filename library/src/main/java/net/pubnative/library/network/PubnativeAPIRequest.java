@@ -53,13 +53,13 @@ public class PubnativeAPIRequest {
     public void deliverResponse(String response) {
 
         if(mListener != null)
-            mListener.onResponse(this, response);
+            mListener.onResponse(response);
     }
 
     public void deliverError(Exception error) {
 
         if(mListener != null)
-            mListener.onErrorResponse(this, error);
+            mListener.onErrorResponse(error);
     }
 
     public static void send(Method method, String URL, PubnativeAPIResponse.Listener listener) {

@@ -340,7 +340,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      * responseListener callback calls when network request gets response.
      */
     @Override
-    public void onResponse(PubnativeAPIRequest request, String response) {
+    public void onResponse(String response) {
 
         if (!TextUtils.isEmpty(response)) {
 
@@ -384,7 +384,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      * errorListener callback calls when network request fails.
      */
     @Override
-    public void onErrorResponse(PubnativeAPIRequest request, Exception error) {
+    public void onErrorResponse(Exception error) {
 
         invokeOnPubnativeRequestFailure(error);
     }
