@@ -166,7 +166,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         } else {
 
-            Log.e(TAG, "start - PubnativeAPIRequest started without listener, dropping call");
+            Log.e(TAG, "start - Request started without listener, dropping call");
         }
     }
 
@@ -364,7 +364,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
                 } else {
 
                     // ERROR: parsing error
-                    invokeOnPubnativeRequestFailure(new Exception("PubnativeAPIResponse error"));
+                    invokeOnPubnativeRequestFailure(new Exception("Response error"));
                 }
 
             } catch (JsonSyntaxException exception) {
