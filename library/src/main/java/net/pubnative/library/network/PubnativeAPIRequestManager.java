@@ -110,7 +110,6 @@ public class PubnativeAPIRequestManager {
             public void execute(Runnable runnable) {
 
                 handler.post(runnable);
-
             }
         });
 

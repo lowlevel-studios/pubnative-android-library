@@ -1,9 +1,13 @@
 package net.pubnative.library.network;
 
+import android.util.Log;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class PubnativeAPIRequest {
+
+    private static String TAG = PubnativeAPIRequest.class.getSimpleName();
 
     //timeout in ms
     public static int TIME_OUT = 10000;
@@ -36,7 +40,7 @@ public class PubnativeAPIRequest {
             return new URL(mUrl);
         } catch (MalformedURLException e) {
 
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
             return null;
         }
 
@@ -48,12 +52,14 @@ public class PubnativeAPIRequest {
 
     public void deliverResponse(String response) {
 
-        mListener.onResponse(response);
+        if(mListener != null)
+            mListener.onResponse(this, response);
     }
 
     public void deliverError(Exception error) {
 
-        mListener.onErrorResponse(error);
+        if(mListener != null)
+            mListener.onErrorResponse(this, error);
     }
 
     public static void send(Method method, String URL, PubnativeAPIResponse.Listener listener) {

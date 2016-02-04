@@ -31,13 +31,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
-    protected static final String BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
-    private static final   String NATIVE_TYPE_URL = "native";
+    protected static final String   BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final   String   NATIVE_TYPE_URL = "native";
 
-    protected Context             mContext;
-    protected Type                type;
-    protected Map<String, String> requestParameters = new HashMap<String, String>();
-    protected Listener            listener;
+    protected Context               mContext;
+    protected Type                  type;
+    protected Map<String, String>   requestParameters = new HashMap<String, String>();
+    protected RequestListener       mRequestListener;
 
     /**
      * These are the various types of adds pubnative support
@@ -81,17 +81,16 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     }
 
     /**
-     * Listener interface used to start Pubnative request with success and failure callbacks.
+     * RequestListener interface used to start Pubnative request with success and failure callbacks.
      */
-    public interface Listener {
-
+    public interface RequestListener {
         /**
          * Invoked when PubnativeRequest request is success
          *
          * @param request Request object used for making the request
          * @param ads     List of ads received
          */
-        void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads);
+        void onRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads);
 
         /**
          * Invoked when PubnativeRequest request fails
@@ -99,7 +98,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
          * @param request Request object used for making the request
          * @param ex      Exception that caused the failure
          */
-        void onPubnativeRequestFail(PubnativeRequest request, Exception ex);
+        void onRequestFailed(PubnativeRequest request, Exception ex);
     }
 
     /**
@@ -137,13 +136,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
      * @param type type of ad (ex: NATIVE)
-     * @param listener valid listener to track ad request callbacks.
+     * @param requestListener valid nativeRequestListener to track ad request callbacks.
      */
-    public void start(Type type, Listener listener) {
+    public void start(Type type, RequestListener requestListener) {
 
-        if (listener != null) {
+        if (requestListener != null) {
 
-            this.listener = listener;
+            mRequestListener = requestListener;
 
             if (type != null && mContext != null) {
 
@@ -294,9 +293,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
     protected void invokeOnPubnativeRequestSuccess(List<PubnativeAdModel> ads) {
 
-        if (this.listener != null) {
+        if (mRequestListener != null) {
 
-            this.listener.onPubnativeRequestSuccess(this, ads);
+            mRequestListener.onRequestSuccess(this, ads);
         }
     }
 
@@ -304,9 +303,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         Log.e(TAG, "PubnativeAPIRequest error: " + exception);
 
-        if (this.listener != null) {
+        if (mRequestListener != null) {
 
-            this.listener.onPubnativeRequestFail(this, exception);
+            mRequestListener.onRequestFailed(this, exception);
         }
     }
 
@@ -337,14 +336,11 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
         sendNetworkRequest();
     }
 
-    // PubnativeAPIResponse.Listener<String>
-    //-----------------------------------
-
     /**
      * responseListener callback calls when network request gets response.
      */
     @Override
-    public void onResponse(String response) {
+    public void onResponse(PubnativeAPIRequest request, String response) {
 
         if (!TextUtils.isEmpty(response)) {
 
@@ -384,14 +380,11 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
         }
     }
 
-    // PubnativeAPIResponse.ErrorListener
-    //-----------------------------------
-
     /**
      * errorListener callback calls when network request fails.
      */
     @Override
-    public void onErrorResponse(Exception error) {
+    public void onErrorResponse(PubnativeAPIRequest request, Exception error) {
 
         invokeOnPubnativeRequestFailure(error);
     }

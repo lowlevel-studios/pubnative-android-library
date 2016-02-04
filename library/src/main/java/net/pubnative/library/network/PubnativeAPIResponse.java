@@ -1,5 +1,7 @@
 package net.pubnative.library.network;
 
+import android.util.Log;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,46 +9,49 @@ import java.io.InputStream;
 
 public class PubnativeAPIResponse {
 
-    public String result;
-    public Exception error;
+    private static String TAG = PubnativeAPIResponse.class.getSimpleName();
+
+    public String mResult;
+    public Exception mError;
 
     public void setResult(String result) {
-        this.result = result;
+        mResult = result;
     }
 
     public void setResult(InputStream is) {
 
-        BufferedInputStream bis = new BufferedInputStream(is);
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        BufferedInputStream inputStream = new BufferedInputStream(is);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         try {
 
-            int result = bis.read();
+            int result = inputStream.read();
             while(result != -1) {
-                byte b = (byte)result;
-                buf.write(b);
-                result = bis.read();
+                byte byteResult = (byte)result;
+                outputStream.write(byteResult);
+                result = inputStream.read();
             }
-            this.result = buf.toString();
+            mResult = outputStream.toString();
 
         } catch (IOException e) {
-            e.printStackTrace();
-            this.error = e;
+
+            Log.e(TAG, e.getMessage());
+            mError = e;
         }
     }
 
     public void setError(Exception error) {
-        this.error = error;
+        mError = error;
     }
 
     public interface Listener {
-        void onResponse(String response);
+        void onResponse(PubnativeAPIRequest request, String response);
 
-        void onErrorResponse(Exception error);
+        void onErrorResponse(PubnativeAPIRequest request, Exception error);
     }
 
     public boolean isSuccess() {
-        return this.error == null;
+        return mError == null;
     }
 
 }

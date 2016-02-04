@@ -1,10 +1,16 @@
 package net.pubnative.library.network;
 
+import android.util.Log;
+
+import org.apache.http.HttpStatus;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 
 public class PubnativeAPIRequestTask {
+
+    private static String TAG = PubnativeAPIRequestTask.class.getSimpleName();
 
     //PubnativeAPIRequest
     private PubnativeAPIRequest mPubnativeAPIRequest;
@@ -59,18 +65,19 @@ public class PubnativeAPIRequestTask {
 
             int responseCode = connection.getResponseCode();
 
-            if(responseCode == -1) {
-                throw new IOException("Could not retrieve response code from HttpUrlConnection.");
-            } else {
+            if(responseCode == HttpStatus.SC_OK) {
                 pubnativeAPIResponse.setResult(connection.getInputStream());
+            } else {
+                throw new IOException("Could not retrieve response code from HttpUrlConnection.");
             }
         } catch (IOException e) {
 
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
             pubnativeAPIResponse.setError(e);
         } finally {
 
             this.mResponsePoster.execute(new ResponseDeliveryRunnable(mPubnativeAPIRequest, pubnativeAPIResponse));
+            PubnativeAPIRequestManager.getInstance().recycleTask(this);
         }
     }
 
@@ -87,9 +94,9 @@ public class PubnativeAPIRequestTask {
         @Override
         public void run() {
             if(this.mPubnativeAPIResponse.isSuccess()) {
-                this.mPubnativeAPIRequest.deliverResponse(this.mPubnativeAPIResponse.result);
+                this.mPubnativeAPIRequest.deliverResponse(this.mPubnativeAPIResponse.mResult);
             } else {
-                this.mPubnativeAPIRequest.deliverError(this.mPubnativeAPIResponse.error);
+                this.mPubnativeAPIRequest.deliverError(this.mPubnativeAPIResponse.mError);
             }
         }
     }
