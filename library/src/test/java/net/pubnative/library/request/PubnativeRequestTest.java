@@ -4,6 +4,8 @@ import android.content.Context;
 
 import net.pubnative.library.BuildConfig;
 import net.pubnative.library.PubnativeTestUtils;
+import net.pubnative.library.models.APIRequestResponseModel;
+import net.pubnative.library.models.PubnativeAdModel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,14 +90,14 @@ public class PubnativeRequestTest {
     @Test
     public void testNetworkRequestInitiatedOnStart() {
 
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
-        request.mRequestListener = mRequestListener;
-        request.type = PubnativeRequest.Type.NATIVE;
+        request.mListener = listener;
+        request.mType = PubnativeRequest.Type.NATIVE;
         request.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        request.start(PubnativeRequest.Type.NATIVE, mRequestListener);
+        request.start(PubnativeRequest.Type.NATIVE, listener);
 
         verify(request, times(1)).setDefaultParameters();
         verify(request, times(1)).sendNetworkRequest();
@@ -103,12 +106,12 @@ public class PubnativeRequestTest {
     @Test
     public void testStartWithNullEndpointFails() {
 
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        request.start(null, mRequestListener);
+        request.start(null, listener);
 
         verify(request, times(1)).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
@@ -116,12 +119,12 @@ public class PubnativeRequestTest {
     @Test
     public void testStartWithNullContextFails() {
 
-        PubnativeRequest.RequestListener mRequestListener = mock(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = mock(PubnativeRequest.Listener.class);
 
         PubnativeRequest pubnativeRequest = spy(new PubnativeRequest(null));
         pubnativeRequest.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        pubnativeRequest.start(PubnativeRequest.Type.NATIVE, mRequestListener);
+        pubnativeRequest.start(PubnativeRequest.Type.NATIVE, listener);
 
         verify(pubnativeRequest, times(1)).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
@@ -147,7 +150,7 @@ public class PubnativeRequestTest {
         String           testKey   = "testKey";
         String           testValue = "testValue";
         PubnativeRequest request   = spy(new PubnativeRequest(this.applicationContext));
-        request.type = PubnativeRequest.Type.NATIVE;
+        request.mType = PubnativeRequest.Type.NATIVE;
         request.setParameter(testKey, testValue);
 
         String url = request.getRequestURL();
@@ -161,7 +164,7 @@ public class PubnativeRequestTest {
     public void testInvalidEndpointReturnsNullURL() {
 
         PubnativeRequest pubnativeRequest = spy(new PubnativeRequest(this.applicationContext));
-        pubnativeRequest.type = null;
+        pubnativeRequest.mType = null;
 
         String url = pubnativeRequest.getRequestURL();
 
@@ -173,14 +176,14 @@ public class PubnativeRequestTest {
 
         String response = PubnativeTestUtils.getResponseJSON("success.json");
 
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
-        request.mRequestListener = mRequestListener;
+        request.mListener = listener;
 
         request.onResponse(response);
 
-        verify(mRequestListener, times(1)).onRequestSuccess(eq(request), any(List.class));
+        verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
 
     @Test
@@ -188,39 +191,78 @@ public class PubnativeRequestTest {
 
         String response = PubnativeTestUtils.getResponseJSON("failure.json");
 
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
-        request.mRequestListener = mRequestListener;
+        request.mListener = listener;
 
         request.onResponse(response);
 
-        verify(mRequestListener, times(1)).onRequestFailed(eq(request), any(Exception.class));
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
 
     @Test
     public void testOnResponseWithNullData() {
 
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
-        request.mRequestListener = mRequestListener;
+        request.mListener = listener;
 
         request.onResponse(null);
 
-        verify(mRequestListener, times(1)).onRequestFailed(eq(request), any(Exception.class));
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
 
     @Test
     public void testOnErrorResponseFromRequestManager() {
 
         Exception               error    = mock(Exception.class);
-        PubnativeRequest.RequestListener mRequestListener = spy(PubnativeRequest.RequestListener.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
-        request.mRequestListener = mRequestListener;
+        request.mListener = listener;
 
         request.onErrorResponse(error);
-        verify(mRequestListener, times(1)).onRequestFailed(eq(request), eq(error));
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), eq(error));
+    }
+
+    @Test
+    public void testWithValidListener() {
+
+        Exception               error    = mock(Exception.class);
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
+
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
+
+        request.onErrorResponse(error);
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), eq(error));
+
+        APIRequestResponseModel reponseModel = mock(APIRequestResponseModel.class);
+        reponseModel.ads = new ArrayList<PubnativeAdModel>();
+
+        request.onResponse("{'status': 'ok', 'ads': []}");
+        verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), eq(reponseModel.ads));
+    }
+
+    @Test
+    public void testWithNoListener() {
+
+        PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
+
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = null;
+
+        Exception               error    = mock(Exception.class);
+        request.invokeOnPubnativeRequestFailure(error);
+
+        verify(listener, times(0)).onPubnativeRequestFailed(eq(request), eq(error));
+
+        APIRequestResponseModel reponseModel = mock(APIRequestResponseModel.class);
+        reponseModel.ads = new ArrayList<PubnativeAdModel>();
+        request.invokeOnPubnativeRequestSuccess(reponseModel.ads);
+
+        verify(listener, times(0)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 }
