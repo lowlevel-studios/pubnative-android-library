@@ -81,7 +81,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     }
 
     /**
-     * RequestListener interface used to start Pubnative request with success and failure callbacks.
+     * Listener interface used to start Pubnative request with success and failure callbacks.
      */
     public interface Listener {
         /**
@@ -301,7 +301,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
     protected void invokeOnPubnativeRequestFailure(Exception exception) {
 
-        Log.e(TAG, "PubnativeAPIRequest error: " + exception);
+        Log.e(TAG, "Request error: " + exception);
 
         if (mListener != null) {
 

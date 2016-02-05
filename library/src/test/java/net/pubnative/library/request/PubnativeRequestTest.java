@@ -230,7 +230,7 @@ public class PubnativeRequestTest {
     @Test
     public void testWithValidListener() {
 
-        Exception               error    = mock(Exception.class);
+        Exception                 error    = mock(Exception.class);
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
