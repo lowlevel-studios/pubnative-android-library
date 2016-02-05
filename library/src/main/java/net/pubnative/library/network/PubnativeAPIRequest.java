@@ -10,7 +10,7 @@ public class PubnativeAPIRequest {
     private static String TAG = PubnativeAPIRequest.class.getSimpleName();
 
     //timeout in ms
-    public static int TIME_OUT = 10000;
+    public static int TIME_OUT = 3000;
 
     // request method
     private Method mMethod;
@@ -52,14 +52,16 @@ public class PubnativeAPIRequest {
 
     public void deliverResponse(String response) {
 
-        if(mListener != null)
+        if(mListener != null) {
             mListener.onResponse(response);
+        }
     }
 
     public void deliverError(Exception error) {
 
-        if(mListener != null)
+        if(mListener != null) {
             mListener.onErrorResponse(error);
+        }
     }
 
     public static void send(Method method, String URL, PubnativeAPIResponse.Listener listener) {

@@ -11,8 +11,12 @@ public class PubnativeAPIResponse {
 
     private static String TAG = PubnativeAPIResponse.class.getSimpleName();
 
-    public String mResult;
-    public Exception mError;
+    private String mResult;
+    private Exception mError;
+
+    public String getResult() {
+        return mResult;
+    }
 
     public void setResult(String result) {
         mResult = result;
@@ -31,13 +35,17 @@ public class PubnativeAPIResponse {
                 outputStream.write(byteResult);
                 result = inputStream.read();
             }
-            mResult = outputStream.toString();
+            setResult(outputStream.toString());
 
         } catch (IOException e) {
 
             Log.e(TAG, e.getMessage());
             mError = e;
         }
+    }
+
+    public Exception getError() {
+        return mError;
     }
 
     public void setError(Exception error) {
