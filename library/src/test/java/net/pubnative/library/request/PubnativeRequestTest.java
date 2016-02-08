@@ -2,8 +2,6 @@ package net.pubnative.library.request;
 
 import android.content.Context;
 
-import com.android.volley.VolleyError;
-
 import net.pubnative.library.BuildConfig;
 import net.pubnative.library.PubnativeTestUtils;
 
@@ -42,33 +40,33 @@ public class PubnativeRequestTest {
 
         String           testKey   = "testKey";
         String           testValue = "testValue";
-        PubnativeRequest request   = spy(PubnativeRequest.class);
+        PubnativeRequest request   = spy(new PubnativeRequest(this.applicationContext));
 
         request.setParameter(testKey, testValue);
 
-        assertThat(request.requestParameters.get(testKey)).isEqualTo(testValue);
+        assertThat(request.mRequestParameters.get(testKey)).isEqualTo(testValue);
     }
 
     @Test
     public void testWithNullParameters() {
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         String           testKey = "testKey";
 
         request.setParameter(testKey, null);
 
-        assertThat(request.requestParameters.containsKey(testKey)).isFalse();
+        assertThat(request.mRequestParameters.containsKey(testKey)).isFalse();
     }
 
     @Test
     public void testParameterSize() {
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
 
         request.setParameter("test1", "1");
         request.setParameter("test2", "2");
 
-        assertThat(request.requestParameters.size() == 2).isTrue();
+        assertThat(request.mRequestParameters.size() == 2).isTrue();
     }
 
     @Test
@@ -77,13 +75,13 @@ public class PubnativeRequestTest {
         String           testKey    = "testKey";
         String           testValue1 = "value1";
         String           testValue2 = "value2";
-        PubnativeRequest request    = spy(PubnativeRequest.class);
+        PubnativeRequest request    = spy(new PubnativeRequest(this.applicationContext));
 
         request.setParameter(testKey, testValue1);
         request.setParameter(testKey, testValue2);
 
-        assertThat(request.requestParameters.size()).isEqualTo(1);
-        assertThat(request.requestParameters.get(testKey)).isEqualTo(testValue2);
+        assertThat(request.mRequestParameters.size()).isEqualTo(1);
+        assertThat(request.mRequestParameters.get(testKey)).isEqualTo(testValue2);
     }
 
     @Test
@@ -91,12 +89,12 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.listener = listener;
-        request.endpoint = PubnativeRequest.Endpoint.NATIVE;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
+        request.mEndpoint = PubnativeRequest.Endpoint.NATIVE;
         request.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        request.start(this.applicationContext, PubnativeRequest.Endpoint.NATIVE, listener);
+        request.start(PubnativeRequest.Endpoint.NATIVE, listener);
 
         verify(request, times(1)).setDefaultParameters();
         verify(request, times(1)).sendNetworkRequest();
@@ -107,10 +105,10 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        request.start(this.applicationContext, null, listener);
+        request.start(null, listener);
 
         verify(request, times(1)).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
@@ -120,10 +118,10 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = mock(PubnativeRequest.Listener.class);
 
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
+        PubnativeRequest pubnativeRequest = spy(new PubnativeRequest(null));
         pubnativeRequest.setParameter(PubnativeRequest.Parameters.ANDROID_ADVERTISER_ID, "test");
 
-        pubnativeRequest.start(null, PubnativeRequest.Endpoint.NATIVE, listener);
+        pubnativeRequest.start(PubnativeRequest.Endpoint.NATIVE, listener);
 
         verify(pubnativeRequest, times(1)).invokeOnPubnativeRequestFailure(any(Exception.class));
     }
@@ -131,17 +129,16 @@ public class PubnativeRequestTest {
     @Test
     public void testSetsUpDefaultParametersAutomatically() {
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.context = this.applicationContext;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.setDefaultParameters();
 
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.OS_VERSION)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_MODEL)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_RESOLUTION)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_TYPE)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.LOCALE)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS_VERSION)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_MODEL)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_RESOLUTION)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_TYPE)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.LOCALE)).isTrue();
     }
 
     @Test
@@ -149,8 +146,8 @@ public class PubnativeRequestTest {
 
         String           testKey   = "testKey";
         String           testValue = "testValue";
-        PubnativeRequest request   = spy(PubnativeRequest.class);
-        request.endpoint = PubnativeRequest.Endpoint.NATIVE;
+        PubnativeRequest request   = spy(new PubnativeRequest(this.applicationContext));
+        request.mEndpoint = PubnativeRequest.Endpoint.NATIVE;
         request.setParameter(testKey, testValue);
 
         String url = request.getRequestURL();
@@ -163,8 +160,8 @@ public class PubnativeRequestTest {
     @Test
     public void testInvalidEndpointReturnsNullURL() {
 
-        PubnativeRequest pubnativeRequest = spy(PubnativeRequest.class);
-        pubnativeRequest.endpoint = null;
+        PubnativeRequest pubnativeRequest = spy(new PubnativeRequest(this.applicationContext));
+        pubnativeRequest.mEndpoint = null;
 
         String url = pubnativeRequest.getRequestURL();
 
@@ -178,10 +175,10 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.listener = listener;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
 
-        request.onResponse(response);
+        request.invokeOnResponse(response);
 
         verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
@@ -193,12 +190,12 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.listener = listener;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
 
-        request.onResponse(response);
+        request.invokeOnResponse(response);
 
-        verify(listener, times(1)).onPubnativeRequestFail(eq(request), any(Exception.class));
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
 
     @Test
@@ -206,24 +203,24 @@ public class PubnativeRequestTest {
 
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.listener = listener;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
 
-        request.onResponse(null);
+        request.invokeOnResponse(null);
 
-        verify(listener, times(1)).onPubnativeRequestFail(eq(request), any(Exception.class));
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
 
     @Test
-    public void testOnErrorResponseFromVolley() {
+    public void testOnErrorResponseFromRequestManager() {
 
-        VolleyError               error    = mock(VolleyError.class);
+        Exception               error    = mock(Exception.class);
         PubnativeRequest.Listener listener = spy(PubnativeRequest.Listener.class);
 
-        PubnativeRequest request = spy(PubnativeRequest.class);
-        request.listener = listener;
+        PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
+        request.mListener = listener;
 
-        request.onErrorResponse(error);
-        verify(listener, times(1)).onPubnativeRequestFail(eq(request), eq(error));
+        request.invokeOnErrorResponse(error);
+        verify(listener, times(1)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 }
