@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIRequest.APIRequestListener {
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
@@ -98,12 +98,6 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
          * @param ex      Exception that caused the failure
          */
         void onPubnativeRequestFailed(PubnativeRequest request, Exception ex);
-    }
-
-    public interface APIRequestListener {
-        void invokeOnResponse(String response);
-
-        void invokeOnErrorResponse(Exception error);
     }
 
     /**
@@ -275,7 +269,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
     }
 
     /**
-     * This function will create and send the network request, It uses Volley internally for network communication.
+     * This function will create and send the network request.
      * It consider that <code>type<code/> is already provided so that it can prepare the request URL.
      */
     protected void sendNetworkRequest() {
@@ -288,7 +282,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
 
         } else {
 
-            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, apiRequestListener);
+            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, this);
         }
     }
 
@@ -341,51 +335,48 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
         sendNetworkRequest();
     }
 
-    protected APIRequestListener apiRequestListener = new APIRequestListener() {
+    @Override
+    public void invokeOnResponse(String response) {
+        if (!TextUtils.isEmpty(response)) {
 
-        @Override
-        public void invokeOnResponse(String response) {
-            if (!TextUtils.isEmpty(response)) {
+            try {
 
-                try {
+                APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
 
-                    APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
+                if (model != null) {
 
-                    if (model != null) {
+                    if (APIRequestResponseModel.Status.OK.equals(model.status)) {
 
-                        if (APIRequestResponseModel.Status.OK.equals(model.status)) {
-
-                            // SUCCESS
-                            invokeOnPubnativeRequestSuccess(model.ads);
-
-                        } else {
-
-                            // ERROR: request error
-                            invokeOnPubnativeRequestFailure(new Exception(model.error_message));
-                        }
+                        // SUCCESS
+                        invokeOnPubnativeRequestSuccess(model.ads);
 
                     } else {
 
-                        // ERROR: parsing error
-                        invokeOnPubnativeRequestFailure(new Exception("Response error"));
+                        // ERROR: request error
+                        invokeOnPubnativeRequestFailure(new Exception(model.error_message));
                     }
 
-                } catch (JsonSyntaxException exception) {
+                } else {
 
-                    // ERROR: json error
-                    invokeOnPubnativeRequestFailure(exception);
+                    // ERROR: parsing error
+                    invokeOnPubnativeRequestFailure(new Exception("Response error"));
                 }
 
-            } else {
+            } catch (JsonSyntaxException exception) {
 
-                // ERROR: empty response
-                invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
+                // ERROR: json error
+                invokeOnPubnativeRequestFailure(exception);
             }
-        }
 
-        @Override
-        public void invokeOnErrorResponse(Exception error) {
-            invokeOnPubnativeRequestFailure(error);
+        } else {
+
+            // ERROR: empty response
+            invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
         }
-    };
+    }
+
+    @Override
+    public void invokeOnErrorResponse(Exception error) {
+        invokeOnPubnativeRequestFailure(error);
+    }
 }

@@ -3,8 +3,6 @@ package net.pubnative.library.request;
 import android.content.Context;
 
 import net.pubnative.library.BuildConfig;
-import net.pubnative.library.models.APIRequestResponseModel;
-import net.pubnative.library.models.PubnativeAdModel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +12,9 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -39,14 +39,11 @@ public class ListenerTest {
 
         PubnativeRequest.Listener   listener        = spy(PubnativeRequest.Listener.class);
         PubnativeRequest            request         = spy(new PubnativeRequest(this.applicationContext));
-        APIRequestResponseModel     reponseModel    = mock(APIRequestResponseModel.class);
 
         request.mListener = listener;
 
-        reponseModel.ads = new ArrayList<PubnativeAdModel>();
-
-        request.apiRequestListener.invokeOnResponse("{'status': 'ok', 'ads': []}");
-        verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), eq(reponseModel.ads));
+        request.invokeOnPubnativeRequestSuccess(mock(ArrayList.class));
+        verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
 
     @Test
@@ -58,7 +55,7 @@ public class ListenerTest {
 
         request.mListener = listener;
 
-        request.apiRequestListener.invokeOnErrorResponse(error);
+        request.invokeOnPubnativeRequestFailure(error);
         verify(listener, times(1)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 
@@ -67,14 +64,11 @@ public class ListenerTest {
 
         PubnativeRequest.Listener   listener        = spy(PubnativeRequest.Listener.class);
         PubnativeRequest            request         = spy(new PubnativeRequest(this.applicationContext));
-        Exception                   error           = mock(Exception.class);
-        APIRequestResponseModel     reponseModel    = mock(APIRequestResponseModel.class);
 
         request.mListener = null;
-        reponseModel.ads = new ArrayList<PubnativeAdModel>();
 
-        request.apiRequestListener.invokeOnResponse("{'status': 'ok', 'ads': []}");
-        verify(listener, times(0)).onPubnativeRequestFailed(eq(request), eq(error));
+        request.invokeOnPubnativeRequestSuccess(mock(ArrayList.class));
+        verify(listener, times(0)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
 
     @Test
@@ -86,7 +80,7 @@ public class ListenerTest {
 
         request.mListener = null;
 
-        request.apiRequestListener.invokeOnErrorResponse(error);
+        request.invokeOnPubnativeRequestFailure(error);
         verify(listener, times(0)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 }
