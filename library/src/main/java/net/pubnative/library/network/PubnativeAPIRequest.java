@@ -19,10 +19,10 @@ public class PubnativeAPIRequest {
     private String mUrl;
 
     // listener
-    private APIRequestListener mListener;
+    private Listener mListener;
 
 
-    public PubnativeAPIRequest(Method method, String url, APIRequestListener listener) {
+    public PubnativeAPIRequest(Method method, String url, Listener listener) {
 
         mMethod = method;
         mUrl = url;
@@ -33,7 +33,7 @@ public class PubnativeAPIRequest {
         GET
     }
 
-    public interface APIRequestListener {
+    public interface Listener {
         void invokeOnResponse(String response);
 
         void invokeOnErrorResponse(Exception error);
@@ -52,7 +52,7 @@ public class PubnativeAPIRequest {
 
     }
 
-    public APIRequestListener getListener() {
+    public Listener getListener() {
         return mListener;
     }
 
@@ -70,7 +70,7 @@ public class PubnativeAPIRequest {
         }
     }
 
-    public static void send(Method method, String URL, APIRequestListener listener) {
+    public static void send(Method method, String URL, Listener listener) {
 
         PubnativeAPIRequestManager.sendRequest(new PubnativeAPIRequest(method, URL, listener));
     }

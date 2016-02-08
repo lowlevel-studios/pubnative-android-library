@@ -62,25 +62,21 @@ public class ListenerTest {
     @Test
     public void testWithNoListenerForSuccess() {
 
-        PubnativeRequest.Listener   listener        = spy(PubnativeRequest.Listener.class);
         PubnativeRequest            request         = spy(new PubnativeRequest(this.applicationContext));
 
         request.mListener = null;
 
         request.invokeOnPubnativeRequestSuccess(mock(ArrayList.class));
-        verify(listener, times(0)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
 
     @Test
     public void testWithNoListenerForFailure() {
 
-        PubnativeRequest.Listener   listener    = spy(PubnativeRequest.Listener.class);
         PubnativeRequest            request     = spy(new PubnativeRequest(this.applicationContext));
         Exception                   error       = mock(Exception.class);
 
         request.mListener = null;
 
         request.invokeOnPubnativeRequestFailure(error);
-        verify(listener, times(0)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 }

@@ -44,7 +44,7 @@ public class PubnativeRequestTest {
 
         request.setParameter(testKey, testValue);
 
-        assertThat(request.requestParameters.get(testKey)).isEqualTo(testValue);
+        assertThat(request.mRequestParameters.get(testKey)).isEqualTo(testValue);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PubnativeRequestTest {
 
         request.setParameter(testKey, null);
 
-        assertThat(request.requestParameters.containsKey(testKey)).isFalse();
+        assertThat(request.mRequestParameters.containsKey(testKey)).isFalse();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class PubnativeRequestTest {
         request.setParameter("test1", "1");
         request.setParameter("test2", "2");
 
-        assertThat(request.requestParameters.size() == 2).isTrue();
+        assertThat(request.mRequestParameters.size() == 2).isTrue();
     }
 
     @Test
@@ -80,8 +80,8 @@ public class PubnativeRequestTest {
         request.setParameter(testKey, testValue1);
         request.setParameter(testKey, testValue2);
 
-        assertThat(request.requestParameters.size()).isEqualTo(1);
-        assertThat(request.requestParameters.get(testKey)).isEqualTo(testValue2);
+        assertThat(request.mRequestParameters.size()).isEqualTo(1);
+        assertThat(request.mRequestParameters.get(testKey)).isEqualTo(testValue2);
     }
 
     @Test
@@ -132,13 +132,13 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.setDefaultParameters();
 
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.OS_VERSION)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_MODEL)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_RESOLUTION)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_TYPE)).isTrue();
-        assertThat(request.requestParameters.containsKey(PubnativeRequest.Parameters.LOCALE)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS_VERSION)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_MODEL)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_RESOLUTION)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_TYPE)).isTrue();
+        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.LOCALE)).isTrue();
     }
 
     @Test

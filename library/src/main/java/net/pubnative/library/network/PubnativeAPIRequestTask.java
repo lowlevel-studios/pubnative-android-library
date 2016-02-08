@@ -66,7 +66,7 @@ public class PubnativeAPIRequestTask {
             if(responseCode == HttpURLConnection.HTTP_OK) {
                 pubnativeAPIResponse.setResult(connection.getInputStream());
             } else {
-                throw new IOException("Could not retrieve response code from HttpUrlConnection.");
+                throw new IOException("Server error: " + responseCode);
             }
         } catch (IOException e) {
 
@@ -78,14 +78,18 @@ public class PubnativeAPIRequestTask {
 
                 @Override
                 public void run() {
-                    if(pubnativeAPIResponse.isSuccess()) {
-                        mPubnativeAPIRequest.deliverResponse(pubnativeAPIResponse.getResult());
-                    } else {
-                        mPubnativeAPIRequest.deliverError(pubnativeAPIResponse.getError());
-                    }
-                    PubnativeAPIRequestManager.getInstance().recycleTask(PubnativeAPIRequestTask.this);
+                    processResponse(pubnativeAPIResponse);
                 }
             });
         }
+    }
+
+    private void processResponse(PubnativeAPIResponse pubnativeAPIResponse) {
+        if(pubnativeAPIResponse.isSuccess()) {
+            mPubnativeAPIRequest.deliverResponse(pubnativeAPIResponse.getResult());
+        } else {
+            mPubnativeAPIRequest.deliverError(pubnativeAPIResponse.getError());
+        }
+        PubnativeAPIRequestManager.getInstance().recycleTask(PubnativeAPIRequestTask.this);
     }
 }

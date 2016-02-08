@@ -26,17 +26,17 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIRequest.APIRequestListener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIRequest.Listener {
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
-    protected static final String BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
-    private static final   String NATIVE_TYPE_URL = "native";
+    protected static final String   BASE_URL            = "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final   String   NATIVE_TYPE_URL     = "native";
 
-    protected Context  mContext;
-    protected Endpoint mEndpoint;
-    protected Map<String, String> requestParameters = new HashMap<String, String>();
-    protected Listener            mListener;
+    protected Context               mContext;
+    protected Endpoint              mEndpoint;
+    protected Map<String, String>   mRequestParameters = new HashMap<String, String>();
+    protected Listener              mListener;
 
     /**
      * These are the various types of adds pubnative support
@@ -123,11 +123,11 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         if (TextUtils.isEmpty(value)) {
 
-            requestParameters.remove(key);
+            mRequestParameters.remove(key);
 
         } else {
 
-            requestParameters.put(key, value);
+            mRequestParameters.put(key, value);
         }
     }
 
@@ -149,7 +149,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
                 setDefaultParameters();
 
-                if (!requestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
+                if (!mRequestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
 
                     new AndroidAdvertisingIDTask().setListener(this).execute(mContext);
 
@@ -174,40 +174,40 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      */
     protected void setDefaultParameters() {
 
-        if (!this.requestParameters.containsKey(Parameters.BUNDLE_ID)) {
+        if (!mRequestParameters.containsKey(Parameters.BUNDLE_ID)) {
 
-            this.requestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(mContext));
+            mRequestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(mContext));
         }
 
-        if (!this.requestParameters.containsKey(Parameters.OS)) {
+        if (!mRequestParameters.containsKey(Parameters.OS)) {
 
-            this.requestParameters.put(Parameters.OS, "android");
+            mRequestParameters.put(Parameters.OS, "android");
         }
 
-        if (!this.requestParameters.containsKey(Parameters.DEVICE_MODEL)) {
+        if (!mRequestParameters.containsKey(Parameters.DEVICE_MODEL)) {
 
-            this.requestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
+            mRequestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
         }
 
-        if (!this.requestParameters.containsKey(Parameters.OS_VERSION)) {
+        if (!mRequestParameters.containsKey(Parameters.OS_VERSION)) {
 
-            this.requestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
+            mRequestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
         }
 
-        if (!this.requestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
+        if (!mRequestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
 
             DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
-            this.requestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
+            mRequestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
         }
 
-        if (!this.requestParameters.containsKey(Parameters.DEVICE_TYPE)) {
+        if (!mRequestParameters.containsKey(Parameters.DEVICE_TYPE)) {
 
-            this.requestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
+            mRequestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
         }
 
-        if (!this.requestParameters.containsKey(Parameters.LOCALE)) {
+        if (!mRequestParameters.containsKey(Parameters.LOCALE)) {
 
-            this.requestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
+            mRequestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
 
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
@@ -216,11 +216,11 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
             Location location = SystemUtils.getLastLocation(mContext);
 
             if (location != null &&
-                !this.requestParameters.containsKey(Parameters.LAT) &&
-                !this.requestParameters.containsKey(Parameters.LONG)) {
+                !mRequestParameters.containsKey(Parameters.LAT) &&
+                !mRequestParameters.containsKey(Parameters.LONG)) {
 
-                this.requestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
-                this.requestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
+                mRequestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
+                mRequestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
             }
         }
     }
@@ -243,9 +243,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
                     uriBuilder.appendPath(NATIVE_TYPE_URL);
 
                     // Appending parameters
-                    for (String key : requestParameters.keySet()) {
+                    for (String key : mRequestParameters.keySet()) {
 
-                        String value = requestParameters.get(key);
+                        String value = mRequestParameters.get(key);
 
                         if (key != null && value != null) {
 
@@ -323,13 +323,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         if (TextUtils.isEmpty(result)) {
 
-            this.requestParameters.put(Parameters.NO_USER_ID, "1");
+            mRequestParameters.put(Parameters.NO_USER_ID, "1");
 
         } else {
 
-            this.requestParameters.put(Parameters.ANDROID_ADVERTISER_ID, result);
-            this.requestParameters.put(Parameters.ANDROID_ADVERTISER_ID_SHA1, Crypto.sha1(result));
-            this.requestParameters.put(Parameters.ANDROID_ADVERTISER_ID_MD5, Crypto.md5(result));
+            mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID, result);
+            mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID_SHA1, Crypto.sha1(result));
+            mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID_MD5, Crypto.md5(result));
         }
 
         sendNetworkRequest();
