@@ -96,7 +96,7 @@ public class PubnativeAPIRequestManager {
     	/*
          * Gets a task from the pool of tasks, returning null if the pool is empty
          */
-        PubnativeAPIRequestTask pubnativeAPIRequestTask = sInstance.mPubnativeAPIRequestTaskWorkQueue.poll();
+        PubnativeAPIRequestTask pubnativeAPIRequestTask = getInstance().mPubnativeAPIRequestTaskWorkQueue.poll();
 
         // If the queue was empty, create a new task instead.
         if (null == pubnativeAPIRequestTask) {

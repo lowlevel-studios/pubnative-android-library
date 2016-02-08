@@ -2,6 +2,8 @@ package net.pubnative.library.network;
 
 import android.util.Log;
 
+import net.pubnative.library.request.PubnativeRequest;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -19,10 +21,10 @@ public class PubnativeAPIRequest {
     private String mUrl;
 
     // listener
-    private PubnativeAPIResponse.Listener mListener;
+    private PubnativeRequest.APIRequestListener mListener;
 
 
-    public PubnativeAPIRequest(Method method, String url, PubnativeAPIResponse.Listener listener) {
+    public PubnativeAPIRequest(Method method, String url, PubnativeRequest.APIRequestListener listener) {
 
         mMethod = method;
         mUrl = url;
@@ -46,25 +48,25 @@ public class PubnativeAPIRequest {
 
     }
 
-    public PubnativeAPIResponse.Listener getListener() {
+    public PubnativeRequest.APIRequestListener getListener() {
         return mListener;
     }
 
     public void deliverResponse(String response) {
 
         if(mListener != null) {
-            mListener.onResponse(response);
+            mListener.invokeOnResponse(response);
         }
     }
 
     public void deliverError(Exception error) {
 
         if(mListener != null) {
-            mListener.onErrorResponse(error);
+            mListener.invokeOnErrorResponse(error);
         }
     }
 
-    public static void send(Method method, String URL, PubnativeAPIResponse.Listener listener) {
+    public static void send(Method method, String URL, PubnativeRequest.APIRequestListener listener) {
 
         PubnativeAPIRequestManager.sendRequest(new PubnativeAPIRequest(method, URL, listener));
     }

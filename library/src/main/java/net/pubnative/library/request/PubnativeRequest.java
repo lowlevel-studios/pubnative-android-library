@@ -14,7 +14,6 @@ import com.google.gson.JsonSyntaxException;
 import net.pubnative.library.models.APIRequestResponseModel;
 import net.pubnative.library.models.PubnativeAdModel;
 import net.pubnative.library.network.PubnativeAPIRequest;
-import net.pubnative.library.network.PubnativeAPIResponse;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
@@ -27,22 +26,22 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIResponse.Listener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener {
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
     protected static final String   BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
     private static final   String   NATIVE_TYPE_URL = "native";
 
-    protected Context               mContext;
-    protected Type                  mType;
+    protected Context  mContext;
+    protected Endpoint mEndpoint;
     protected Map<String, String>   requestParameters = new HashMap<String, String>();
     protected Listener              mListener;
 
     /**
      * These are the various types of adds pubnative support
      */
-    public enum Type {
+    public enum Endpoint {
 
         NATIVE,
     }
@@ -101,6 +100,12 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
         void onPubnativeRequestFailed(PubnativeRequest request, Exception ex);
     }
 
+    public interface APIRequestListener {
+        void invokeOnResponse(String response);
+
+        void invokeOnErrorResponse(Exception error);
+    }
+
     /**
      * Creates object of PubnativeRequest
      */
@@ -135,18 +140,18 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     /**
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
-     * @param type type of ad (ex: NATIVE)
+     * @param endpoint endpoint of ad (ex: NATIVE)
      * @param listener valid nativeRequestListener to track ad request callbacks.
      */
-    public void start(Type type, Listener listener) {
+    public void start(Endpoint endpoint, Listener listener) {
 
         if (listener != null) {
 
             mListener = listener;
 
-            if (type != null && mContext != null) {
+            if (endpoint != null && mContext != null) {
 
-                mType = type;
+                mEndpoint = endpoint;
 
                 setDefaultParameters();
 
@@ -233,9 +238,9 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         String url = null;
 
-        if (mType != null) {
+        if (mEndpoint != null) {
 
-            switch (mType) {
+            switch (mEndpoint) {
 
                 case NATIVE:
 
@@ -283,7 +288,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
         } else {
 
-            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, this);
+            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, apiRequestListener);
         }
     }
 
@@ -336,56 +341,51 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
         sendNetworkRequest();
     }
 
-    /**
-     * responseListener callback calls when network request gets response.
-     */
-    @Override
-    public void onResponse(String response) {
+    protected APIRequestListener apiRequestListener = new APIRequestListener() {
 
-        if (!TextUtils.isEmpty(response)) {
+        @Override
+        public void invokeOnResponse(String response) {
+            if (!TextUtils.isEmpty(response)) {
 
-            try {
+                try {
 
-                APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
+                    APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
 
-                if (model != null) {
+                    if (model != null) {
 
-                    if (APIRequestResponseModel.Status.OK.equals(model.status)) {
+                        if (APIRequestResponseModel.Status.OK.equals(model.status)) {
 
-                        // SUCCESS
-                        invokeOnPubnativeRequestSuccess(model.ads);
+                            // SUCCESS
+                            invokeOnPubnativeRequestSuccess(model.ads);
+
+                        } else {
+
+                            // ERROR: request error
+                            invokeOnPubnativeRequestFailure(new Exception(model.error_message));
+                        }
 
                     } else {
 
-                        // ERROR: request error
-                        invokeOnPubnativeRequestFailure(new Exception(model.error_message));
+                        // ERROR: parsing error
+                        invokeOnPubnativeRequestFailure(new Exception("Response error"));
                     }
 
-                } else {
+                } catch (JsonSyntaxException exception) {
 
-                    // ERROR: parsing error
-                    invokeOnPubnativeRequestFailure(new Exception("Response error"));
+                    // ERROR: json error
+                    invokeOnPubnativeRequestFailure(exception);
                 }
 
-            } catch (JsonSyntaxException exception) {
+            } else {
 
-                // ERROR: json error
-                invokeOnPubnativeRequestFailure(exception);
+                // ERROR: empty response
+                invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
             }
-
-        } else {
-
-            // ERROR: empty response
-            invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
         }
-    }
 
-    /**
-     * errorListener callback calls when network request fails.
-     */
-    @Override
-    public void onErrorResponse(Exception error) {
-
-        invokeOnPubnativeRequestFailure(error);
-    }
+        @Override
+        public void invokeOnErrorResponse(Exception error) {
+            invokeOnPubnativeRequestFailure(error);
+        }
+    };
 }

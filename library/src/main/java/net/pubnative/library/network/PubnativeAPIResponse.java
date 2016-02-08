@@ -53,9 +53,9 @@ public class PubnativeAPIResponse {
     }
 
     public interface Listener {
-        void onResponse(String response);
+        void invokeOnResponse(String response);
 
-        void onErrorResponse(Exception error);
+        void invokeOnErrorResponse(Exception error);
     }
 
     public boolean isSuccess() {
