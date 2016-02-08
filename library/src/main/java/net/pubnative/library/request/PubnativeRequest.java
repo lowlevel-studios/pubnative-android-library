@@ -30,13 +30,13 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
 
     private static String TAG = PubnativeRequest.class.getSimpleName();
 
-    protected static final String   BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
-    private static final   String   NATIVE_TYPE_URL = "native";
+    protected static final String BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final   String NATIVE_TYPE_URL = "native";
 
     protected Context  mContext;
     protected Endpoint mEndpoint;
-    protected Map<String, String>   requestParameters = new HashMap<String, String>();
-    protected Listener              mListener;
+    protected Map<String, String> requestParameters = new HashMap<String, String>();
+    protected Listener            mListener;
 
     /**
      * These are the various types of adds pubnative support
