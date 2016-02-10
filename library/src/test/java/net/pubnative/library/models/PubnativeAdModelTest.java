@@ -43,7 +43,7 @@ public class PubnativeAdModelTest
     public void testGetBeaconWithNotContainedValueReturnsNull() {
 
         PubnativeAdModel model = spy(PubnativeAdModel.class);
-        model.beacons = mock(List.class);
+        model.setBeacons(mock(List.class));
 
         String url = model.getBeacon("");
 
@@ -63,7 +63,7 @@ public class PubnativeAdModelTest
 
         List<PubnativeBeacon> beacons = new ArrayList<PubnativeBeacon>();
         beacons.add(beacon);
-        model.beacons = beacons;
+        model.setBeacons(beacons);
 
         String url = model.getBeacon(testType);
 
