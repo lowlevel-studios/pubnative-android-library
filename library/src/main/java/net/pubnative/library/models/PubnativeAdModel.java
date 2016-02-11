@@ -1,13 +1,10 @@
 package net.pubnative.library.models;
 
-import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
-import net.pubnative.library.tracking.PubnativeTracker;
-import net.pubnative.library.utils.SystemUtils;
+import net.pubnative.library.tracking.PubnativeAdTracker;
 
 import java.util.List;
 
@@ -119,7 +116,7 @@ public class PubnativeAdModel {
      * This function will return the Beacon URL on the bases of beacon type.
      * It will traverse all beacons and search for <code><beaconType<code/> beaconType.
      *
-     * @param beaconType
+     * @param beaconType type of beacon
      *
      * @return return Beacon URL or null otherwise.
      */
@@ -142,21 +139,69 @@ public class PubnativeAdModel {
         return beaconUrl;
     }
 
+    /**
+     * Interface definition for callbacks to be invoked when impression confirmed/failed, ad clicked/clickfailed
+     */
     public interface Listener {
 
-        void onPubnativeAdModelImpressionConfirmed();
+        /**
+         * Called when impression is confirmed
+         * @param view The view where impression confirmed
+         */
+        void onPubnativeAdModelImpressionConfirmed(View view);
+
+        /**
+         * Called when error occurred while impression check
+         * @param exception error
+         */
         void onPubnativeAdModelImpressionFailed(Exception exception);
-        void onPubnativeAdModelClicked();
+
+        /**
+         * Called when click is confirmed
+         * @param view The view that was clicked
+         */
+        void onPubnativeAdModelClicked(View view);
+
+        /**
+         * Called when error occurred while click
+         * @param exception error
+         */
         void onPubnativeAdModelClickFailed(Exception exception);
     }
 
+    /**
+     * Start tracking of ad view
+     * @param view ad view
+     * @param listener listener for callbacks
+     */
     public void startTracking(View view, Listener listener) {
+
         startTracking(view, view, listener);
     }
 
+    private transient PubnativeAdTracker mPubnativeAdTracker;
+
+    /**
+     * start tracking of your ad view
+     * @param view ad view
+     * @param clickableView clickable view
+     * @param listener listener for callbacks
+     */
     public void startTracking(View view, View clickableView, Listener listener) {
 
-        new PubnativeTracker(view, clickableView, listener);
+        Log.v(TAG, "startTracking(view, clickableView, listener)");
+
+        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, listener, this);
+    }
+
+    /**
+     * stop tracking of ad view
+     */
+    public void stopTracking() {
+
+        Log.v(TAG, "stopTracking()");
+
+        mPubnativeAdTracker.stopTracking();
     }
 
 }
