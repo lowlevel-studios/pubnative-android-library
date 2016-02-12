@@ -36,7 +36,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private final ScheduledExecutorService  mExecutor;
     private boolean                         isTracked           = false;
     private boolean                         isTrackingStopped   = false;
-    private Handler                         handler;
+    private Handler                         mHandler;
 
     /**
      * Constructor
@@ -56,7 +56,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         mExecutor = Executors.newScheduledThreadPool(1);
 
-        handler = new Handler();
+        mHandler = new Handler();
 
         startTracking();
     }
@@ -148,7 +148,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         if (TextUtils.isEmpty(impressionUrl)) {
 
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));

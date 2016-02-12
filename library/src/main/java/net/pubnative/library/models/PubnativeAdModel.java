@@ -192,7 +192,7 @@ public class PubnativeAdModel {
      */
     public void startTracking(View view, View clickableView, Listener listener) throws NullPointerException {
 
-        Log.v(TAG, "startTracking(view, clickableView, listener)");
+        Log.v(TAG, "startTracking(view:" + view + ", clickableView:" + clickableView + ", listener:" + listener + ")");
 
         if(view == null) {
             throw new NullPointerException("view can't be null");

@@ -99,6 +99,12 @@ public class SystemUtils {
         return loc;
     }
 
+    /**
+     * Check the visibility of view on screen
+     * @param view ciew to be checked
+     * @param percentage how much percentage view is visible
+     * @return true if view is visible passed <code>percentage</code> on the screen false otherwise
+     */
     public static boolean isVisibleOnScreen(View view, float percentage) {
 
         int location[] = new int[2];
