@@ -16,10 +16,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class is responsible for tracking an ad. This ensures two following things:
+ * This class is responsible for tracking an ad. This ensures two things:
  * <ul>
- *     <li>impression</li>
- *     <li>click</li>
+ *     <li>impression tracking</li>
+ *     <li>click tracking</li>
  * </ul>
  */
 public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
@@ -64,6 +64,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         mExecutor.shutdownNow();
         mListener = null;
         isTrackingStopped = true;
+        mClickableView.setOnClickListener(null);
     }
 
     private void startTracking() {
@@ -106,18 +107,32 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
             mExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isTracked && SystemUtils.isVisibleOnScreen(mView, VISIBILITY_THRESHOLD)) {
-                        isTracked = true;
-                        startImpressionRequest();
-                        mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
-                        mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+                    long firstVisibleTime = System.currentTimeMillis() - 100;
+                    while(true) {
+                        if(isTracked) {
+                            return;
+                        }
+                        if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_THRESHOLD)) {
+                            if(System.currentTimeMillis() - firstVisibleTime >= 1000) {
+
+                                isTracked = true;
+                                startImpressionRequest();
+                                mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
+                                mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
                     }
+
                 }
-            }, 1, TimeUnit.SECONDS);
+            }, 100, TimeUnit.MILLISECONDS);
         }
     }
 
-    private void startImpressionRequest() {
+    protected void startImpressionRequest() {
 
         Log.v(TAG, "startImpressionRequest()");
 
@@ -151,7 +166,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         }
     }
 
-    private URLOpener.Listener urlOpenerListener = new URLOpener.Listener() {
+    protected URLOpener.Listener urlOpenerListener = new URLOpener.Listener() {
         @Override
         public void onURLOpenerStart(String url) {
 

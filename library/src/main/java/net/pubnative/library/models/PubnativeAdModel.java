@@ -174,8 +174,11 @@ public class PubnativeAdModel {
      * @param view ad view
      * @param listener listener for callbacks
      */
-    public void startTracking(View view, Listener listener) {
+    public void startTracking(View view, Listener listener) throws NullPointerException {
 
+        if(view == null) {
+            throw new NullPointerException("view can't be null");
+        }
         startTracking(view, view, listener);
     }
 
@@ -187,9 +190,17 @@ public class PubnativeAdModel {
      * @param clickableView clickable view
      * @param listener listener for callbacks
      */
-    public void startTracking(View view, View clickableView, Listener listener) {
+    public void startTracking(View view, View clickableView, Listener listener) throws NullPointerException {
 
         Log.v(TAG, "startTracking(view, clickableView, listener)");
+
+        if(view == null) {
+            throw new NullPointerException("view can't be null");
+        }
+
+        if(clickableView == null) {
+            throw new NullPointerException("clickable view can't be null");
+        }
 
         mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, listener, this);
     }
