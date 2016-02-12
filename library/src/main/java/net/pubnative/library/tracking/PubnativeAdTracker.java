@@ -1,5 +1,6 @@
 package net.pubnative.library.tracking;
 
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +36,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private final ScheduledExecutorService  mExecutor;
     private boolean                         isTracked           = false;
     private boolean                         isTrackingStopped   = false;
+    private Handler                         handler;
 
     /**
      * Constructor
@@ -53,6 +55,8 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         mViewTreeObserver = mView.getViewTreeObserver();
 
         mExecutor = Executors.newScheduledThreadPool(1);
+
+        handler = new Handler();
 
         startTracking();
     }
@@ -144,7 +148,12 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         if (TextUtils.isEmpty(impressionUrl)) {
 
-            invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));
+                }
+            });
         } else {
 
             PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, impressionUrl, this);
