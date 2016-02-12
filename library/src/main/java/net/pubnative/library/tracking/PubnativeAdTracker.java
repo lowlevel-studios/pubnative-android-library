@@ -25,18 +25,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
-    private static String                   TAG                 = PubnativeAdTracker.class.getSimpleName();
+    private static String                   TAG                             = PubnativeAdTracker.class.getSimpleName();
 
     private PubnativeAdModel.Listener       mListener;
     private View                            mView;
     private View                            mClickableView;
-    private float                           VISIBILITY_THRESHOLD = 0.50f;
     private ViewTreeObserver                mViewTreeObserver;
     private PubnativeAdModel                mPubnativeAdModel;
     private final ScheduledExecutorService  mExecutor;
-    private boolean                         isTracked           = false;
-    private boolean                         isTrackingStopped   = false;
+    private boolean                         isTracked                       = false;
+    private boolean                         isTrackingStopped               = false;
     private Handler                         mHandler;
+
+    private static final float              VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
+    private static final long               VISIBILITY_TIME_THRESHOLD       = 1000;
+    private static final long               VISIBILITY_CHECK_INTERVAL       = 200;
 
     /**
      * Constructor
@@ -102,7 +105,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     };
 
     private void checkImpression() {
-        if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_THRESHOLD)) {
+        if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
             if(isTracked || isTrackingStopped || mExecutor.isShutdown()) {
                 return;
@@ -111,28 +114,33 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
             mExecutor.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    long firstVisibleTime = System.currentTimeMillis() - 100;
-                    while(true) {
-                        if(isTracked) {
+                    long firstVisibleTime = System.currentTimeMillis() - VISIBILITY_CHECK_INTERVAL;
+
+                    while(System.currentTimeMillis() - firstVisibleTime < VISIBILITY_TIME_THRESHOLD + VISIBILITY_CHECK_INTERVAL) {
+
+                        if(isTracked || !SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
                             return;
                         }
-                        if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_THRESHOLD)) {
-                            if(System.currentTimeMillis() - firstVisibleTime >= 1000) {
 
-                                isTracked = true;
-                                startImpressionRequest();
-                                mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
-                                mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+                        if (System.currentTimeMillis() - firstVisibleTime >= VISIBILITY_TIME_THRESHOLD) {
 
-                                return;
-                            }
-                        } else {
+                            isTracked = true;
+                            startImpressionRequest();
+                            mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
+                            mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+
                             return;
+                        }
+
+                        try {
+                            Thread.sleep(VISIBILITY_CHECK_INTERVAL);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
 
                 }
-            }, 100, TimeUnit.MILLISECONDS);
+            }, VISIBILITY_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }
 
