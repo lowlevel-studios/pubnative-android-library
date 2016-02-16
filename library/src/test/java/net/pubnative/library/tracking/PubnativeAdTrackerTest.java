@@ -32,8 +32,8 @@ public class PubnativeAdTrackerTest {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
-        PubnativeBeacon             beacon      = spy(PubnativeBeacon.class);
 
+        PubnativeBeacon             beacon      = new PubnativeBeacon();
         beacon.type = "impression";
         beacon.url = "";
 
@@ -45,11 +45,11 @@ public class PubnativeAdTrackerTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
         View adView = new View(activity);
 
-        PubnativeAdTracker tracker = new PubnativeAdTracker(adView, adView, listener, model);
+        PubnativeAdTracker tracker = spy(new PubnativeAdTracker(adView, adView, listener, model));
 
         tracker.startImpressionRequest();
 
-        verify(listener, times(1)).onPubnativeAdModelImpressionFailed(any(IllegalArgumentException.class));
+        verify(listener, times(1)).onPubnativeAdModelImpressionFailed(eq(model), any(IllegalArgumentException.class));
     }
 
     @Test
@@ -61,19 +61,19 @@ public class PubnativeAdTrackerTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
         View adView = new View(activity);
 
-        PubnativeAdTracker tracker = new PubnativeAdTracker(adView, adView, listener, model);
+        PubnativeAdTracker tracker = spy(new PubnativeAdTracker(adView, adView, listener, model));
 
         tracker.invokeOnResponse("");
 
-        verify(listener, times(1)).onPubnativeAdModelImpressionConfirmed(eq(adView));
+        verify(listener, times(1)).onPubnativeAdModelImpressionConfirmed(eq(model), eq(adView));
     }
 
     @Test
     public void testImpressionFailureForNullListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeBeacon             beacon      = spy(PubnativeBeacon.class);
 
+        PubnativeBeacon             beacon      = new PubnativeBeacon();
         beacon.type = "impression";
         beacon.url = "";
 
@@ -85,7 +85,7 @@ public class PubnativeAdTrackerTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
         View adView = new View(activity);
 
-        PubnativeAdTracker tracker = new PubnativeAdTracker(adView, adView, null, model);
+        PubnativeAdTracker tracker = spy(new PubnativeAdTracker(adView, adView, null, model));
 
         tracker.startImpressionRequest();
     }
@@ -98,7 +98,7 @@ public class PubnativeAdTrackerTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
         View adView = new View(activity);
 
-        PubnativeAdTracker tracker = new PubnativeAdTracker(adView, adView, null, model);
+        PubnativeAdTracker tracker = spy(new PubnativeAdTracker(adView, adView, null, model));
 
         tracker.invokeOnResponse("");
     }

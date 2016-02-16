@@ -1,22 +1,26 @@
 package net.pubnative.library.models;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
 
 import net.pubnative.library.BuildConfig;
 
-import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
+import org.robolectric.shadows.ShadowView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -27,6 +31,14 @@ import static org.mockito.Mockito.verify;
 @Config(constants = BuildConfig.class,
         sdk = 21)
 public class PubnativeAdModelTest {
+
+    Context applicationContext;
+
+    @Before
+    public void setUp() {
+
+        this.applicationContext = RuntimeEnvironment.application.getApplicationContext();
+    }
 
     @Test
     public void testGetBeaconWithNullValueReturnsNull() {
@@ -96,10 +108,10 @@ public class PubnativeAdModelTest {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
 
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
+        View view = new View(new Activity());
+        ShadowView adView = Shadows.shadowOf(view);
 
-        model.startTracking(adView, null);
+        model.startTracking(view, null);
     }
 
     @Test
@@ -133,11 +145,8 @@ public class PubnativeAdModelTest {
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
 
-        try {
-            model.startTracking(null, listener);
-        } catch (Exception ex) {
-            assertThat(ex.getClass()).isEqualTo(NullPointerException.class);
-        }
+        model.startTracking(null, listener);
+        verify(listener, times(1)).onPubnativeAdModelImpressionFailed(eq(model), any(Exception.class));
     }
 
     @Test
