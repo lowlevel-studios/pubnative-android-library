@@ -1,4 +1,4 @@
-package net.pubnative.library.advertising;
+package net.pubnative.library.utils;
 
 import android.content.ComponentName;
 import android.content.Context;

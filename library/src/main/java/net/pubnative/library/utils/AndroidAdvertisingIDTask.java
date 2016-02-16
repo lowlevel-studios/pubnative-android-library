@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import net.pubnative.library.advertising.AdvertisingIdClient;
-
 public class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
 
     private Listener listener;
