@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-
 public class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
 
     private Listener listener;
@@ -31,7 +29,7 @@ public class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
 
             try {
 
-                AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
+                AdvertisingIdClient.AdInfo adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
 
                 if (adInfo != null) {
 
