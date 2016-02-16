@@ -148,25 +148,25 @@ public class PubnativeAdModel {
          * Called when impression is confirmed
          * @param view The view where impression confirmed
          */
-        void onPubnativeAdModelImpressionConfirmed(View view);
+        void onPubnativeAdModelImpressionConfirmed(PubnativeAdModel pubnativeAdModel, View view);
 
         /**
          * Called when error occurred while impression check
          * @param exception error
          */
-        void onPubnativeAdModelImpressionFailed(Exception exception);
+        void onPubnativeAdModelImpressionFailed(PubnativeAdModel pubnativeAdModel, Exception exception);
 
         /**
          * Called when click is confirmed
          * @param view The view that was clicked
          */
-        void onPubnativeAdModelClicked(View view);
+        void onPubnativeAdModelClicked(PubnativeAdModel pubnativeAdModel, View view);
 
         /**
          * Called when error occurred while click
          * @param exception error
          */
-        void onPubnativeAdModelClickFailed(Exception exception);
+        void onPubnativeAdModelClickFailed(PubnativeAdModel pubnativeAdModel, Exception exception);
     }
 
     /**
@@ -174,11 +174,8 @@ public class PubnativeAdModel {
      * @param view ad view
      * @param listener listener for callbacks
      */
-    public void startTracking(View view, Listener listener) throws NullPointerException {
+    public void startTracking(View view, Listener listener) {
 
-        if(view == null) {
-            throw new NullPointerException("view can't be null");
-        }
         startTracking(view, view, listener);
     }
 
@@ -193,14 +190,6 @@ public class PubnativeAdModel {
     public void startTracking(View view, View clickableView, Listener listener) throws NullPointerException {
 
         Log.v(TAG, "startTracking(view:" + view + ", clickableView:" + clickableView + ", listener:" + listener + ")");
-
-        if(view == null) {
-            throw new NullPointerException("view can't be null");
-        }
-
-        if(clickableView == null) {
-            throw new NullPointerException("clickable view can't be null");
-        }
 
         mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, listener, this);
     }

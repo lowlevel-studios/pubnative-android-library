@@ -33,8 +33,8 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private ViewTreeObserver                mViewTreeObserver;
     private PubnativeAdModel                mPubnativeAdModel;
     private final ScheduledExecutorService  mExecutor;
-    private boolean                         isTracked                       = false;
-    private boolean                         isTrackingStopped               = false;
+    private boolean                         mIsTracked                      = false;
+    private boolean                         mIsTrackingStopped              = false;
     private Handler                         mHandler;
 
     private static final float              VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
@@ -50,16 +50,29 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
      */
     public PubnativeAdTracker(View view, View clickableView, PubnativeAdModel.Listener listener, PubnativeAdModel adModel) {
 
+        mExecutor = Executors.newScheduledThreadPool(1);
+        mHandler = new Handler();
+
         mListener = listener;
+        mPubnativeAdModel = adModel;
+
+        if(view == null) {
+
+            Log.e(TAG, "PubnativeAdTracker(): view is null");
+            invokeOnImpressionFailed(new NullPointerException("view can't be null"));
+            return;
+        }
+
+        if(clickableView == null) {
+
+            Log.e(TAG, "PubnativeAdTracker(): clickable view is null");
+            invokeOnClickFailed(new NullPointerException("clickable view can't be null"));
+            return;
+        }
 
         mView = view;
         mClickableView = clickableView;
-        mPubnativeAdModel = adModel;
         mViewTreeObserver = mView.getViewTreeObserver();
-
-        mExecutor = Executors.newScheduledThreadPool(1);
-
-        mHandler = new Handler();
 
         startTracking();
     }
@@ -70,7 +83,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         mExecutor.shutdownNow();
         mListener = null;
-        isTrackingStopped = true;
+        mIsTrackingStopped = true;
         mClickableView.setOnClickListener(null);
     }
 
@@ -107,24 +120,31 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private void checkImpression() {
         if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
-            if(isTracked || isTrackingStopped || mExecutor.isShutdown()) {
+            if(mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
                 return;
             }
 
             mExecutor.schedule(new Runnable() {
                 @Override
+                // After VISIBILITY_CHECK_INTERVAL (i.e. 200ms) of view visible on screen (first time)
+                // it would be invoked. It regularly checks for visibility of view on screen on interval
+                // of 200ms (VISIBILITY_CHECK_INTERVAL) to ensure that view is visible on the screen at least for 1 sec.
                 public void run() {
+
+                    // note first visible time
                     long firstVisibleTime = System.currentTimeMillis() - VISIBILITY_CHECK_INTERVAL;
 
+                    // loop to make sure view is visible on screen for at least 1sec
                     while(System.currentTimeMillis() - firstVisibleTime < VISIBILITY_TIME_THRESHOLD + VISIBILITY_CHECK_INTERVAL) {
 
-                        if(isTracked || !SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
+                        // If view is already tracked or not visible it returns from the loop without confirming impression
+                        if(mIsTracked || !SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
                             return;
                         }
 
                         if (System.currentTimeMillis() - firstVisibleTime >= VISIBILITY_TIME_THRESHOLD) {
 
-                            isTracked = true;
+                            mIsTracked = true;
                             startImpressionRequest();
                             mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
                             mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
@@ -133,6 +153,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                         }
 
                         try {
+                            // pausing thread for 200ms (VISIBILITY_CHECK_INTERVAL)
                             Thread.sleep(VISIBILITY_CHECK_INTERVAL);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -148,7 +169,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         Log.v(TAG, "startImpressionRequest()");
 
-        if(isTrackingStopped) {
+        if(mIsTrackingStopped) {
             return;
         }
 
@@ -156,12 +177,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         if (TextUtils.isEmpty(impressionUrl)) {
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));
-                }
-            });
+            invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));
         } else {
 
             PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, impressionUrl, this);
@@ -175,7 +191,28 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         if (!TextUtils.isEmpty(mPubnativeAdModel.getClickUrl())) {
 
             URLOpener urlOpener = new URLOpener(mView.getContext());
-            urlOpener.openInBackground(mPubnativeAdModel.getClickUrl(), true, urlOpenerListener);
+            urlOpener.openInBackground(mPubnativeAdModel.getClickUrl(), true, new URLOpener.Listener() {
+
+                @Override
+                public void onURLOpenerStart(String url) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onURLOpenerRedirect(String url) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onURLOpenerFinish(String url) {
+                    invokeOnClicked();
+                }
+
+                @Override
+                public void onURLOpenerFailed(String url, Exception exception) {
+                    invokeOnClickFailed(exception);
+                }
+            });
 
         } else {
 
@@ -183,33 +220,16 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         }
     }
 
-    protected URLOpener.Listener urlOpenerListener = new URLOpener.Listener() {
-        @Override
-        public void onURLOpenerStart(String url) {
-
-        }
-
-        @Override
-        public void onURLOpenerRedirect(String url) {
-
-        }
-
-        @Override
-        public void onURLOpenerFinish(String url) {
-            invokeOnClicked();
-        }
-
-        @Override
-        public void onURLOpenerFailed(String url, Exception exception) {
-            invokeOnClickFailed(exception);
-        }
-    };
-
-    private void invokeOnImpressionFailed(Exception exception) {
+    private void invokeOnImpressionFailed(final Exception exception) {
 
         if(mListener != null) {
 
-            mListener.onPubnativeAdModelImpressionFailed(exception);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onPubnativeAdModelImpressionFailed(mPubnativeAdModel, exception);
+                }
+            });
         }
     }
 
@@ -217,21 +237,36 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         if(mListener != null) {
 
-            mListener.onPubnativeAdModelImpressionConfirmed(mView);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onPubnativeAdModelImpressionConfirmed(mPubnativeAdModel, mView);
+                }
+            });
         }
     }
 
     private void invokeOnClicked() {
         if(mListener != null) {
 
-            mListener.onPubnativeAdModelClicked(mClickableView);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onPubnativeAdModelClicked(mPubnativeAdModel, mClickableView);
+                }
+            });
         }
     }
 
-    private void invokeOnClickFailed(Exception exception) {
+    private void invokeOnClickFailed(final Exception exception) {
         if(mListener != null) {
 
-            mListener.onPubnativeAdModelClickFailed(exception);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mListener.onPubnativeAdModelClickFailed(mPubnativeAdModel, exception);
+                }
+            });
         }
     }
 
