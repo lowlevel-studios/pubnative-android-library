@@ -12,9 +12,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,10 +106,10 @@ public class PubnativeAdModelTest {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
 
-        View view = new View(new Activity());
-        ShadowView adView = Shadows.shadowOf(view);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
+        View adView = new View(activity);
 
-        model.startTracking(view, null);
+        model.startTracking(adView, null);
     }
 
     @Test
