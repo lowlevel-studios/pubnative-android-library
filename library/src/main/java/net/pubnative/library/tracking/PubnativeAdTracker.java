@@ -6,8 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import net.pubnative.library.models.PubnativeAdModel;
-import net.pubnative.library.models.PubnativeBeacon;
 import net.pubnative.library.network.PubnativeAPIRequest;
 import net.pubnative.library.utils.SystemUtils;
 
@@ -27,11 +25,10 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
     private static String                   TAG                             = PubnativeAdTracker.class.getSimpleName();
 
-    private PubnativeAdModel.Listener       mListener;
+    private Listener                        mListener;
     private View                            mView;
     private View                            mClickableView;
     private ViewTreeObserver                mViewTreeObserver;
-    private PubnativeAdModel                mPubnativeAdModel;
     private final ScheduledExecutorService  mExecutor;
     private boolean                         mIsTracked                      = false;
     private boolean                         mIsTracking                     = false;
@@ -42,20 +39,28 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private static final long               VISIBILITY_TIME_THRESHOLD       = 1000;
     private static final long               VISIBILITY_CHECK_INTERVAL       = 200;
 
+    private String                          mImpressionUrl;
+    private String                          mClickUrl;
+
+    public interface Listener {
+        void onImpressionConfirmed();
+        void onImpressionFailed(Exception exception);
+        void onClickConfirmed();
+        void onClickFailed(Exception exception);
+    }
+
     /**
      * Constructor
      * @param view ad view
      * @param clickableView clickable view
      * @param listener listener for callbacks
-     * @param adModel adModel
      */
-    public PubnativeAdTracker(View view, View clickableView, PubnativeAdModel.Listener listener, PubnativeAdModel adModel) {
+    public PubnativeAdTracker(View view, View clickableView, String impressionUrl, String clickUrl, Listener listener) {
 
         mExecutor = Executors.newScheduledThreadPool(1);
         mHandler = new Handler();
 
         mListener = listener;
-        mPubnativeAdModel = adModel;
 
         if(view == null) {
 
@@ -73,6 +78,10 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         mView = view;
         mClickableView = clickableView;
+
+        mImpressionUrl = impressionUrl;
+        mClickUrl = clickUrl;
+
         mViewTreeObserver = mView.getViewTreeObserver();
 
         startTracking();
@@ -190,14 +199,12 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
             return;
         }
 
-        String impressionUrl = mPubnativeAdModel.getBeacon(PubnativeBeacon.BeaconType.IMPRESSION);
-
-        if (TextUtils.isEmpty(impressionUrl)) {
+        if (TextUtils.isEmpty(mImpressionUrl)) {
 
             invokeOnImpressionFailed(new MalformedURLException("Can not confirm impression, no Beacon URL found"));
         } else {
 
-            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, impressionUrl, this);
+            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, mImpressionUrl, this);
         }
     }
 
@@ -205,10 +212,10 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         Log.v(TAG, "handleClickEvent()");
 
-        if (!TextUtils.isEmpty(mPubnativeAdModel.getClickUrl())) {
+        if (!TextUtils.isEmpty(mClickUrl)) {
 
             URLOpener urlOpener = new URLOpener(mView.getContext());
-            urlOpener.openInBackground(mPubnativeAdModel.getClickUrl(), true, new URLOpener.Listener() {
+            urlOpener.openInBackground(mClickUrl, true, new URLOpener.Listener() {
 
                 @Override
                 public void onURLOpenerStart(String url) {
@@ -245,7 +252,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onPubnativeAdModelImpressionFailed(mPubnativeAdModel, exception);
+                    mListener.onImpressionFailed(exception);
                 }
             }
         });
@@ -259,7 +266,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onPubnativeAdModelImpressionConfirmed(mPubnativeAdModel, mView);
+                    mListener.onImpressionConfirmed();
                 }
             }
         });
@@ -272,7 +279,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onPubnativeAdModelClicked(mPubnativeAdModel, mClickableView);
+                    mListener.onClickConfirmed();
                 }
             }
         });
@@ -285,7 +292,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onPubnativeAdModelClickFailed(mPubnativeAdModel, exception);
+                    mListener.onClickFailed(exception);
                 }
             }
         });

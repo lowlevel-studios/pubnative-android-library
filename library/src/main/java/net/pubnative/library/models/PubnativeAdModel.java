@@ -124,7 +124,7 @@ public class PubnativeAdModel {
 
         String beaconUrl = null;
 
-        if (!TextUtils.isEmpty(beaconType)) {
+        if (!TextUtils.isEmpty(beaconType) && beacons != null) {
 
             for (PubnativeBeacon beacon : beacons) {
 
@@ -187,11 +187,50 @@ public class PubnativeAdModel {
      * @param clickableView clickable view
      * @param listener listener for callbacks
      */
-    public void startTracking(View view, View clickableView, Listener listener) throws NullPointerException {
+    public void startTracking(final View view, final View clickableView, final Listener listener) {
 
         Log.v(TAG, "startTracking(view:" + view + ", clickableView:" + clickableView + ", listener:" + listener + ")");
 
-        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, listener, this);
+        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, getBeacon(PubnativeBeacon.BeaconType.IMPRESSION), getClickUrl(), new PubnativeAdTracker.Listener(){
+
+            @Override
+            public void onImpressionConfirmed() {
+
+                if(listener != null) {
+
+                    listener.onPubnativeAdModelImpressionConfirmed(PubnativeAdModel.this, view);
+                }
+            }
+
+            @Override
+            public void onImpressionFailed(Exception exception) {
+
+                if(listener != null) {
+
+                    listener.onPubnativeAdModelImpressionFailed(PubnativeAdModel.this, exception);
+                }
+            }
+
+            @Override
+            public void onClickConfirmed() {
+
+                if(listener != null) {
+
+                    listener.onPubnativeAdModelClicked(PubnativeAdModel.this, clickableView);
+                }
+
+            }
+
+            @Override
+            public void onClickFailed(Exception exception) {
+
+                if(listener != null) {
+
+                    listener.onPubnativeAdModelClickFailed(PubnativeAdModel.this, exception);
+                }
+
+            }
+        });
     }
 
     /**
