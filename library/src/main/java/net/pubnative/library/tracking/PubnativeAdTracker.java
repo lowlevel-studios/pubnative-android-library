@@ -120,20 +120,17 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private void checkImpression() {
         if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
-            if(mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
+            if (mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
                 return;
             }
 
             mExecutor.schedule(new Runnable() {
 
-                private volatile boolean execute;
                 @Override
                 // After VISIBILITY_CHECK_INTERVAL (i.e. 200ms) of view visible on screen (first time)
                 // it would be invoked. It regularly checks for visibility of view on screen on interval
                 // of 200ms (VISIBILITY_CHECK_INTERVAL) to ensure that view is visible on the screen at least for 1 sec.
                 public void run() {
-
-                    execute = true;
 
                     // note first visible time
                     long firstVisibleTime = System.currentTimeMillis() - VISIBILITY_CHECK_INTERVAL;
@@ -141,7 +138,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                     Log.v(TAG, "checkImpression(), first visible at: " + firstVisibleTime);
 
                     // loop to make sure view is visible on screen for at least 1sec
-                    while (execute && System.currentTimeMillis() - firstVisibleTime < VISIBILITY_TIME_THRESHOLD + VISIBILITY_CHECK_INTERVAL) {
+                    while (System.currentTimeMillis() - firstVisibleTime < VISIBILITY_TIME_THRESHOLD + VISIBILITY_CHECK_INTERVAL) {
 
                         Log.v(TAG, "checkImpression(), within time threshold checking. Current time is: " + System.currentTimeMillis());
 
@@ -149,7 +146,6 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                         if (mIsTracked || !SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
                             Log.v(TAG, "checkImpression(), either already tracked or not visible anymore. Already tracked is: " + mIsTracked + " & Current time is: " + System.currentTimeMillis());
-                            execute = false;
                             return;
                         }
 
@@ -162,8 +158,6 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                             mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
                             mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
 
-                            execute = false;
-
                             return;
                         }
 
@@ -173,7 +167,6 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                             Thread.sleep(VISIBILITY_CHECK_INTERVAL);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                            execute = false;
                         }
                     }
 
