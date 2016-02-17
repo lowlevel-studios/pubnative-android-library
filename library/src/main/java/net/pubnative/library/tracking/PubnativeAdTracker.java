@@ -34,6 +34,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private PubnativeAdModel                mPubnativeAdModel;
     private final ScheduledExecutorService  mExecutor;
     private boolean                         mIsTracked                      = false;
+    private boolean                         mIsTracking                     = false;
     private boolean                         mIsTrackingStopped              = false;
     private Handler                         mHandler;
 
@@ -118,11 +119,13 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     };
 
     private void checkImpression() {
+        if (mIsTracking || mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
+            return;
+        }
+
         if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
-            if (mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
-                return;
-            }
+            mIsTracking = true;
 
             mExecutor.schedule(new Runnable() {
 
@@ -146,27 +149,31 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                         if (mIsTracked || !SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
                             Log.v(TAG, "checkImpression(), either already tracked or not visible anymore. Already tracked is: " + mIsTracked + " & Current time is: " + System.currentTimeMillis());
-                            return;
+
+                            mIsTracking = false;
+                            break;
                         }
 
                         if (System.currentTimeMillis() - firstVisibleTime >= VISIBILITY_TIME_THRESHOLD) {
 
                             Log.v(TAG, "checkImpression(), it's visible more than " + VISIBILITY_TIME_THRESHOLD + "ms Current time is: " + System.currentTimeMillis());
 
+                            mIsTracking = false;
                             mIsTracked = true;
                             startImpressionRequest();
                             mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
                             mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
 
-                            return;
-                        }
-
-                        try {
-                            Log.v(TAG, "checkImpression(), thread is sleeping for " + VISIBILITY_CHECK_INTERVAL + "ms Current time is: " + System.currentTimeMillis());
-                            // pausing thread for 200ms (VISIBILITY_CHECK_INTERVAL)
-                            Thread.sleep(VISIBILITY_CHECK_INTERVAL);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            mExecutor.shutdownNow();
+                            break;
+                        } else {
+                            try {
+                                Log.v(TAG, "checkImpression(), thread is sleeping for " + VISIBILITY_CHECK_INTERVAL + "ms Current time is: " + System.currentTimeMillis());
+                                // pausing thread for 200ms (VISIBILITY_CHECK_INTERVAL)
+                                Thread.sleep(VISIBILITY_CHECK_INTERVAL);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
 
