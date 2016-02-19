@@ -79,14 +79,13 @@ public class PubnativeAdTrackerTest {
     @Test
     public void testInvalidClickUrl() {
 
-        View                        adView              = spy(new View(applicationContext));
-        PubnativeAdTracker.Listener listener            = mock(PubnativeAdTracker.Listener.class);
+        View                        adView      = spy(new View(applicationContext));
+        PubnativeAdTracker.Listener listener    = mock(PubnativeAdTracker.Listener.class);
 
-        PubnativeAdTracker          tracker             = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
+        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
 
         tracker.handleClickEvent();
 
         verify(listener, times(1)).onClickFailed(any(Exception.class));
-
     }
 }
