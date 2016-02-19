@@ -208,7 +208,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         }
     }
 
-    private void handleClickEvent() {
+    protected void handleClickEvent() {
 
         Log.v(TAG, "handleClickEvent()");
 

@@ -1,15 +1,13 @@
 package net.pubnative.library.models;
 
-import android.app.Activity;
 import android.content.Context;
-import android.view.View;
+import android.widget.ImageView;
 
 import net.pubnative.library.BuildConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -93,10 +91,8 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithValidListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
-
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+        ImageView                   adView      = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, listener);
     }
@@ -105,9 +101,7 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithNullListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
+        ImageView                   adView      = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, null);
     }
@@ -116,11 +110,9 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithClickableView() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
-
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
-        View clickableView = new View(activity);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+        ImageView                   adView      = spy(new ImageView(applicationContext));
+        ImageView                   clickableView = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, clickableView, listener);
     }
@@ -129,10 +121,8 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithoutClickableView() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
-
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+        ImageView                   adView      = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, listener);
     }
@@ -141,9 +131,10 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithNullView() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
 
         model.startTracking(null, listener);
+
         verify(listener, times(1)).onPubnativeAdModelImpressionFailed(eq(model), any(Exception.class));
     }
 
@@ -151,15 +142,11 @@ public class PubnativeAdModelTest {
     public void testStartTrackingWithNullClickableView() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = spy(PubnativeAdModel.Listener.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
 
-        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
-        View adView = new View(activity);
+        ImageView                   adView      = spy(new ImageView(applicationContext));
 
-        try {
-            model.startTracking(adView, null, listener);
-        } catch (Exception ex) {
-            assertThat(ex.getClass()).isEqualTo(NullPointerException.class);
-        }
+        model.startTracking(adView, null, listener);
+        verify(listener, times(1)).onPubnativeAdModelClickFailed(eq(model), any(Exception.class));
     }
 }
