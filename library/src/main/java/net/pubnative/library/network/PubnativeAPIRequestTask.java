@@ -66,9 +66,13 @@ public class PubnativeAPIRequestTask {
             if(responseCode == HttpURLConnection.HTTP_OK) {
                 pubnativeAPIResponse.setResult(connection.getInputStream());
             } else {
-                throw new IOException("Server error: " + responseCode);
+                throw new Exception("Server error: " + responseCode);
             }
         } catch (IOException e) {
+
+            Log.e(TAG, e.getMessage());
+            pubnativeAPIResponse.setError(e);
+        } catch (Exception e) {
 
             Log.e(TAG, e.getMessage());
             pubnativeAPIResponse.setError(e);

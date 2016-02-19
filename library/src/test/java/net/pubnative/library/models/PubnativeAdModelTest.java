@@ -1,6 +1,7 @@
 package net.pubnative.library.models;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.ImageView;
 
 import net.pubnative.library.BuildConfig;
@@ -95,6 +96,8 @@ public class PubnativeAdModelTest {
         ImageView                   adView      = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, listener);
+
+        verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
     @Test
@@ -115,6 +118,8 @@ public class PubnativeAdModelTest {
         ImageView                   clickableView = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, clickableView, listener);
+
+        verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
     @Test
@@ -125,6 +130,8 @@ public class PubnativeAdModelTest {
         ImageView                   adView      = spy(new ImageView(applicationContext));
 
         model.startTracking(adView, listener);
+
+        verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
     @Test
