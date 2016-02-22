@@ -31,8 +31,8 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private ViewTreeObserver                mViewTreeObserver;
     private final ScheduledExecutorService  mExecutor;
     private boolean                         mIsTracked                      = false;
-    private boolean                         mIsTracking                     = false;
-    private boolean                         mIsTrackingStopped              = false;
+    private boolean                         mIsTrackingInProgress           = false;
+    private boolean                         mTrackingShouldStop             = false;
     private Handler                         mHandler;
 
     private static final float              VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
@@ -43,9 +43,9 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private String                          mClickUrl;
 
     public interface Listener {
-        void onImpressionConfirmed();
+        void onImpressionConfirmed(View view);
         void onImpressionFailed(Exception exception);
-        void onClickConfirmed();
+        void onClickConfirmed(View view);
         void onClickFailed(Exception exception);
     }
 
@@ -93,7 +93,8 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         mExecutor.shutdownNow();
         mListener = null;
-        mIsTrackingStopped = true;
+        mTrackingShouldStop = true;
+        mIsTrackingInProgress = false;
         mClickableView.setOnClickListener(null);
     }
 
@@ -128,13 +129,13 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     };
 
     private void checkImpression() {
-        if (mIsTracking || mIsTracked || mIsTrackingStopped || mExecutor.isShutdown()) {
+        if (mIsTrackingInProgress || mIsTracked || mTrackingShouldStop) {
             return;
         }
 
         if (SystemUtils.isVisibleOnScreen(mView, VISIBILITY_PERCENTAGE_THRESHOLD)) {
 
-            mIsTracking = true;
+            mIsTrackingInProgress = true;
 
             mExecutor.schedule(new Runnable() {
 
@@ -159,7 +160,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                             Log.v(TAG, "checkImpression(), either already tracked or not visible anymore. Already tracked is: " + mIsTracked + " & Current time is: " + System.currentTimeMillis());
 
-                            mIsTracking = false;
+                            mIsTrackingInProgress = false;
                             break;
                         }
 
@@ -167,7 +168,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                             Log.v(TAG, "checkImpression(), it's visible more than " + VISIBILITY_TIME_THRESHOLD + "ms Current time is: " + System.currentTimeMillis());
 
-                            mIsTracking = false;
+                            mIsTrackingInProgress = false;
                             mIsTracked = true;
                             startImpressionRequest();
                             mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
@@ -195,7 +196,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
         Log.v(TAG, "startImpressionRequest()");
 
-        if(mIsTrackingStopped) {
+        if(mTrackingShouldStop) {
             return;
         }
 
@@ -266,7 +267,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onImpressionConfirmed();
+                    mListener.onImpressionConfirmed(mView);
                 }
             }
         });
@@ -279,7 +280,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                 if(mListener != null) {
 
-                    mListener.onClickConfirmed();
+                    mListener.onClickConfirmed(mClickableView);
                 }
             }
         });

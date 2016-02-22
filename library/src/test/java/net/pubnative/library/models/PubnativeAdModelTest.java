@@ -2,7 +2,6 @@ package net.pubnative.library.models;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.ImageView;
 
 import net.pubnative.library.BuildConfig;
 
@@ -20,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -93,20 +93,21 @@ public class PubnativeAdModelTest {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
         model.startTracking(adView, listener);
-
-        verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
+        model.invokeOnImpressionConfirmed(adView);
+        verify(listener, times(1)).onPubnativeAdModelImpressionConfirmed(eq(model), eq(adView));
     }
 
     @Test
     public void testStartTrackingWithNullListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
-        model.startTracking(adView, null);
+        model.startTracking(adView, adView, null);
+        model.invokeOnImpressionConfirmed(adView);
     }
 
     @Test
@@ -114,8 +115,8 @@ public class PubnativeAdModelTest {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
-        ImageView                   clickableView = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
+        View                        clickableView = spy(new View(applicationContext));
 
         model.startTracking(adView, clickableView, listener);
 
@@ -123,11 +124,24 @@ public class PubnativeAdModelTest {
     }
 
     @Test
+    public void testStartTrackingWithClickableViewForValidClickListener() {
+
+        PubnativeAdModel            model       = spy(PubnativeAdModel.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+        View                        adView      = spy(new View(applicationContext));
+        View                        clickableView = spy(new View(applicationContext));
+
+        model.startTracking(adView, clickableView, listener);
+
+        verify(adView, never()).setOnClickListener(any(View.OnClickListener.class));
+    }
+
+    @Test
     public void testStartTrackingWithoutClickableView() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
         model.startTracking(adView, listener);
 
@@ -151,7 +165,7 @@ public class PubnativeAdModelTest {
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
 
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
         model.startTracking(adView, null, listener);
         verify(listener, times(1)).onPubnativeAdModelClickFailed(eq(model), any(Exception.class));

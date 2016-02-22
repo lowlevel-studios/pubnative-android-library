@@ -2,7 +2,6 @@ package net.pubnative.library.tracking;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.ImageView;
 
 import net.pubnative.library.BuildConfig;
 
@@ -15,6 +14,7 @@ import org.robolectric.annotation.Config;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,7 +36,7 @@ public class PubnativeAdTrackerTest {
     public void testImpressionFailureForInvalidImpressionURL() {
 
         PubnativeAdTracker.Listener listener    = mock(PubnativeAdTracker.Listener.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
 
@@ -49,19 +49,19 @@ public class PubnativeAdTrackerTest {
     public void testImpressionSuccess() {
 
         PubnativeAdTracker.Listener listener    = mock(PubnativeAdTracker.Listener.class);
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
 
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
 
         tracker.invokeOnResponse("");
 
-        verify(listener, times(1)).onImpressionConfirmed();
+        verify(listener, times(1)).onImpressionConfirmed(adView);
     }
 
     @Test
     public void testImpressionFailureForNullListener() {
 
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", null));
 
         tracker.startImpressionRequest();
@@ -70,7 +70,7 @@ public class PubnativeAdTrackerTest {
     @Test
     public void testImpressionSuccessForNullListener() {
 
-        ImageView                   adView      = spy(new ImageView(applicationContext));
+        View                        adView      = spy(new View(applicationContext));
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", null));
 
         tracker.invokeOnResponse("");
@@ -87,5 +87,31 @@ public class PubnativeAdTrackerTest {
         tracker.handleClickEvent();
 
         verify(listener, times(1)).onClickFailed(any(Exception.class));
+    }
+
+    @Test
+    public void testValidClickListener() {
+
+        View                        adView          = spy(new View(applicationContext));
+        View                        clickableView   = spy(new View(applicationContext));
+
+        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, clickableView, "", "", null));
+
+        tracker.handleClickEvent();
+
+        verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
+    }
+
+    @Test
+    public void testInValidClickListener() {
+
+        View                        adView          = spy(new View(applicationContext));
+        View                        clickableView   = spy(new View(applicationContext));
+
+        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, clickableView, "", "", null));
+
+        tracker.handleClickEvent();
+
+        verify(adView, never()).setOnClickListener(any(View.OnClickListener.class));
     }
 }

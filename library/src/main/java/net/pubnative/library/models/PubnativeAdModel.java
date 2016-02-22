@@ -8,7 +8,7 @@ import net.pubnative.library.tracking.PubnativeAdTracker;
 
 import java.util.List;
 
-public class PubnativeAdModel {
+public class PubnativeAdModel implements PubnativeAdTracker.Listener {
 
     private static String           TAG = PubnativeAdModel.class.getSimpleName();
 
@@ -146,24 +146,28 @@ public class PubnativeAdModel {
 
         /**
          * Called when impression is confirmed
+         * @param pubnativeAdModel PubnativeAdModel that started tracking
          * @param view The view where impression confirmed
          */
         void onPubnativeAdModelImpressionConfirmed(PubnativeAdModel pubnativeAdModel, View view);
 
         /**
          * Called when error occurred while impression check
+         * @param pubnativeAdModel PubnativeAdModel that started tracking
          * @param exception error
          */
         void onPubnativeAdModelImpressionFailed(PubnativeAdModel pubnativeAdModel, Exception exception);
 
         /**
          * Called when click is confirmed
+         * @param pubnativeAdModel PubnativeAdModel that started tracking
          * @param view The view that was clicked
          */
         void onPubnativeAdModelClicked(PubnativeAdModel pubnativeAdModel, View view);
 
         /**
          * Called when error occurred while click
+         * @param pubnativeAdModel PubnativeAdModel that started tracking
          * @param exception error
          */
         void onPubnativeAdModelClickFailed(PubnativeAdModel pubnativeAdModel, Exception exception);
@@ -180,6 +184,7 @@ public class PubnativeAdModel {
     }
 
     private transient PubnativeAdTracker mPubnativeAdTracker;
+    private transient Listener mListener;
 
     /**
      * start tracking of your ad view
@@ -187,50 +192,17 @@ public class PubnativeAdModel {
      * @param clickableView clickable view
      * @param listener listener for callbacks
      */
-    public void startTracking(final View view, final View clickableView, final Listener listener) {
+    public void startTracking(View view, View clickableView, Listener listener) {
 
         Log.v(TAG, "startTracking(view:" + view + ", clickableView:" + clickableView + ", listener:" + listener + ")");
 
-        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, getBeacon(PubnativeBeacon.BeaconType.IMPRESSION), getClickUrl(), new PubnativeAdTracker.Listener(){
+        mListener = listener;
 
-            @Override
-            public void onImpressionConfirmed() {
+        if(mPubnativeAdTracker != null) {
+            stopTracking();
+        }
 
-                if(listener != null) {
-
-                    listener.onPubnativeAdModelImpressionConfirmed(PubnativeAdModel.this, view);
-                }
-            }
-
-            @Override
-            public void onImpressionFailed(Exception exception) {
-
-                if(listener != null) {
-
-                    listener.onPubnativeAdModelImpressionFailed(PubnativeAdModel.this, exception);
-                }
-            }
-
-            @Override
-            public void onClickConfirmed() {
-
-                if(listener != null) {
-
-                    listener.onPubnativeAdModelClicked(PubnativeAdModel.this, clickableView);
-                }
-
-            }
-
-            @Override
-            public void onClickFailed(Exception exception) {
-
-                if(listener != null) {
-
-                    listener.onPubnativeAdModelClickFailed(PubnativeAdModel.this, exception);
-                }
-
-            }
-        });
+        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, getBeacon(PubnativeBeacon.BeaconType.IMPRESSION), getClickUrl(), this);
     }
 
     /**
@@ -241,6 +213,50 @@ public class PubnativeAdModel {
         Log.v(TAG, "stopTracking()");
 
         mPubnativeAdTracker.stopTracking();
+    }
+
+    @Override
+    public void onImpressionConfirmed(View view) {
+        invokeOnImpressionConfirmed(view);
+    }
+
+    @Override
+    public void onImpressionFailed(Exception exception) {
+        invokeOnImpressionFailed(exception);
+    }
+
+    @Override
+    public void onClickConfirmed(View view) {
+        invokeOnClickConfirmed(view);
+    }
+
+    @Override
+    public void onClickFailed(Exception exception) {
+        invokeOnClickFailed(exception);
+    }
+
+    protected void invokeOnImpressionConfirmed(View view) {
+        if(mListener != null) {
+            mListener.onPubnativeAdModelImpressionConfirmed(PubnativeAdModel.this, view);
+        }
+    }
+
+    protected void invokeOnImpressionFailed(Exception exception) {
+        if(mListener != null) {
+            mListener.onPubnativeAdModelImpressionFailed(PubnativeAdModel.this, exception);
+        }
+    }
+
+    protected void invokeOnClickConfirmed(View view) {
+        if(mListener != null) {
+            mListener.onPubnativeAdModelClicked(PubnativeAdModel.this, view);
+        }
+    }
+
+    protected void invokeOnClickFailed(Exception exception) {
+        if(mListener != null) {
+            mListener.onPubnativeAdModelClickFailed(PubnativeAdModel.this, exception);
+        }
     }
 
 }

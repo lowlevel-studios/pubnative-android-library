@@ -107,6 +107,8 @@ public class SystemUtils {
      */
     public static boolean isVisibleOnScreen(View view, float percentage) {
 
+        boolean result = false;
+
         int location[] = new int[2];
 
         view.getLocationInWindow(location);
@@ -130,8 +132,6 @@ public class SystemUtils {
 
         // Create Rect with view's current position
         Rect viewRect = new Rect(topLeftX, topLeftY, bottomRightX, bottomRightY);
-        // This will store the rect which come after clipping the viewRect with the screen
-        Rect intersectionRect = new Rect();
 
         // CASE 1: When view is Invisible or has no dimensions.
         if (view.getVisibility() == View.VISIBLE && !viewRect.isEmpty()) {
@@ -139,27 +139,31 @@ public class SystemUtils {
             // CASE 2: When view is completely inside the screen.
             if (screenRect.contains(viewRect)) {
 
-                return true;
+                result = true;
+            } else {
+
+                // This will store the rect which come after clipping the viewRect with the screen
+                Rect intersectionRect = new Rect();
 
                 // CASE 3: When the view is clipped by screen, intersectionRect will hold the rect which is formed with edge of screen and visible portion of view
-            } else if (intersectionRect.setIntersect(screenRect, viewRect)) {
+                if(intersectionRect.setIntersect(screenRect, viewRect)) {
+                    // Find the area of that part of view which is visible on the screen
+                    double visibleArea = intersectionRect.height() * intersectionRect.width();
+                    double totalAreaOfView = viewRect.height() * viewRect.width();
 
-                // Find the area of that part of view which is visible on the screen
-                double visibleArea = intersectionRect.height() * intersectionRect.width();
-                double totalAreaOfView = viewRect.height() * viewRect.width();
+                    double percentageVisible = visibleArea / totalAreaOfView;
 
-                double percentageVisible = visibleArea / totalAreaOfView;
+                    // now the visible area must be 50% or greater then total area of view.
+                    if (percentageVisible >= percentage) {
 
-                // now the visible area must be 50% or greater then total area of view.
-                if (percentageVisible >= percentage) {
-
-                    return true;
+                        result = true;
+                    }
                 }
             }
         }
 
         // CASE 4: When the view is outside of screen bounds such that no part of it is visible then the default value(false) of result will return.
         // We don't need to put explicit condition for this case.
-        return false;
+        return result;
     }
 }
