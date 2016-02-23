@@ -245,7 +245,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         }
     }
 
-    private void invokeOnImpressionFailed(final Exception exception) {
+    protected void invokeOnImpressionFailed(final Exception exception) {
 
         mHandler.post(new Runnable() {
             @Override
@@ -259,7 +259,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         });
     }
 
-    private void invokeOnImpressionConfirmed() {
+    protected void invokeOnImpressionConfirmed() {
 
         mHandler.post(new Runnable() {
             @Override
@@ -273,7 +273,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         });
     }
 
-    private void invokeOnClicked() {
+    protected void invokeOnClicked() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -286,7 +286,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         });
     }
 
-    private void invokeOnClickFailed(final Exception exception) {
+    protected void invokeOnClickFailed(final Exception exception) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
