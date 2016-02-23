@@ -168,13 +168,8 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
                             Log.v(TAG, "checkImpression(), it's visible more than " + VISIBILITY_TIME_THRESHOLD + "ms Current time is: " + System.currentTimeMillis());
 
-                            mIsTrackingInProgress = false;
-                            mIsTracked = true;
+                            stopImpressionTracking();
                             startImpressionRequest();
-                            mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
-                            mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
-
-                            mExecutor.shutdownNow();
                             break;
                         } else {
                             try {
@@ -192,13 +187,18 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         }
     }
 
+    private void stopImpressionTracking() {
+        mIsTrackingInProgress = false;
+        mIsTracked = true;
+        mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
+        mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+
+        mExecutor.shutdownNow();
+    }
+
     protected void startImpressionRequest() {
 
         Log.v(TAG, "startImpressionRequest()");
-
-        if(mTrackingShouldStop) {
-            return;
-        }
 
         if (TextUtils.isEmpty(mImpressionUrl)) {
 

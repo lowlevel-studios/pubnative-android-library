@@ -184,7 +184,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
     }
 
     private transient PubnativeAdTracker mPubnativeAdTracker;
-    private transient Listener mListener;
+    protected transient Listener mListener;
 
     /**
      * start tracking of your ad view

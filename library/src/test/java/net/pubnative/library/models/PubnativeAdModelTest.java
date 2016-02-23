@@ -95,7 +95,7 @@ public class PubnativeAdModelTest {
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
         View                        adView      = spy(new View(applicationContext));
 
-        model.startTracking(adView, listener);
+        model.mListener = listener;
         model.invokeOnImpressionConfirmed(adView);
         verify(listener, times(1)).onPubnativeAdModelImpressionConfirmed(eq(model), eq(adView));
     }
@@ -106,7 +106,7 @@ public class PubnativeAdModelTest {
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         View                        adView      = spy(new View(applicationContext));
 
-        model.startTracking(adView, adView, null);
+        model.mListener = null;
         model.invokeOnImpressionConfirmed(adView);
     }
 
