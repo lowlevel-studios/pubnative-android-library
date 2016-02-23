@@ -2,7 +2,6 @@ package net.pubnative.library.network;
 
 import android.util.Log;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 
@@ -66,9 +65,9 @@ public class PubnativeAPIRequestTask {
             if(responseCode == HttpURLConnection.HTTP_OK) {
                 pubnativeAPIResponse.setResult(connection.getInputStream());
             } else {
-                throw new IOException("Server error: " + responseCode);
+                throw new Exception("Server error: " + responseCode);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
 
             Log.e(TAG, e.getMessage());
             pubnativeAPIResponse.setError(e);

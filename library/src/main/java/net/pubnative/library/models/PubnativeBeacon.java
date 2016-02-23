@@ -5,7 +5,7 @@ public class PubnativeBeacon {
     public String type;
     public String url;
 
-    interface BeaconType {
+    public interface BeaconType {
 
         String IMPRESSION = "impression";
     }
