@@ -152,4 +152,14 @@ public class PubnativeAdTrackerTest {
         tracker.invokeOnClickFailed(exception);
         verify(listener, times(1)).onClickFailed(eq(exception));
     }
+
+    @Test
+    public void testTrackerWithInvalidArguments() {
+
+        PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
+
+        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(null, null, null, null, listener));
+
+        verify(listener, times(1)).onImpressionFailed(any(Exception.class));
+    }
 }

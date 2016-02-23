@@ -25,7 +25,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
 
     private static String                   TAG                             = PubnativeAdTracker.class.getSimpleName();
 
-    private Listener                        mListener;
+    protected Listener                      mListener;
     private View                            mView;
     private View                            mClickableView;
     private ViewTreeObserver                mViewTreeObserver;
