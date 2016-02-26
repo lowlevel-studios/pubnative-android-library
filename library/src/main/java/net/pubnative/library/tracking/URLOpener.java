@@ -115,7 +115,7 @@ public class URLOpener {
                 case HttpURLConnection.HTTP_SEE_OTHER: {
 
                     String newUrl = conn.getHeaderField("Location");
-                    openProcess(newUrl, true);
+                    openProcess(newUrl, canFail);
                 }
                 break;
 
@@ -124,6 +124,9 @@ public class URLOpener {
                     if (canFail) {
 
                         invokeFail(url, new Exception("Invalid URL, Status: " + status));
+                    } else {
+
+                        openBrowser(url);
                     }
 
                     Log.e(TAG, " - Status error: " + status);
