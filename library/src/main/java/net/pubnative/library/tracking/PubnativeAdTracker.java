@@ -216,7 +216,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         if (!TextUtils.isEmpty(mClickUrl)) {
 
             URLOpener urlOpener = new URLOpener(mView.getContext());
-            urlOpener.openInBackground(mClickUrl, true, new URLOpener.Listener() {
+            urlOpener.openInBackground(mClickUrl, false, new URLOpener.Listener() {
 
                 @Override
                 public void onURLOpenerStart(String url) {
