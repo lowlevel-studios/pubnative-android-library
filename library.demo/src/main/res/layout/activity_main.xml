@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#1e1e1e">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SETTINGS"
+        android:layout_alignParentTop="true"
+        android:onClick="onSettingsClick"
+        android:background="#650067"
+        android:textColor="@android:color/white"
+        android:id="@+id/activity_main_btn_settings"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:padding="20dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/activity_main_separator"
+        >
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Native"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="false"
+            android:onClick="onNativeClick"
+            android:id="@+id/button"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Formats"
+        android:id="@+id/activity_main_separator"
+        android:layout_below="@+id/activity_main_btn_settings"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="#4b4b4b"/>
+</RelativeLayout>
