@@ -76,15 +76,21 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
-        PubnativeAdModel ad = ads.get(0);
-        mTitle.setText(ad.getTitle());
-        mDescription.setText(ad.getDescription());
-        mCTA.setText(ad.getCtaText());
-        Picasso.with(this).load(ad.getIconUrl()).into(mIcon);
-        Picasso.with(this).load(ad.getBannerUrl()).into(mBanner);
+
+        if(ads != null && ads.size() > 0) {
+            PubnativeAdModel ad = ads.get(0);
+            mTitle.setText(ad.getTitle());
+            mDescription.setText(ad.getDescription());
+            mCTA.setText(ad.getCtaText());
+            Picasso.with(this).load(ad.getIconUrl()).into(mIcon);
+            Picasso.with(this).load(ad.getBannerUrl()).into(mBanner);
+            ad.startTracking(mAdContainer, this);
+        } else {
+            Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
+        }
+
         mLoaderContainer.setVisibility(View.GONE);
         mAdContainer.setVisibility(View.VISIBLE);
-        ad.startTracking(mAdContainer, this);
     }
 
     @Override
