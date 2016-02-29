@@ -30,7 +30,7 @@ public class SettingsActivity extends Activity {
     public void onDoneClick(View view) {
 
         Log.v(TAG, "onDoneClick");
-        Settings.setAppToken((String) appToken.getText());
+        Settings.setAppToken(appToken.getText().toString());
         finish();
     }
 }
