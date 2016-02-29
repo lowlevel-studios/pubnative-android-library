@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         >
 
-        <TextView
+        <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="APP_TOKEN"
@@ -47,5 +47,6 @@
             android:layout_below="@+id/activity_settings_text_app_token"
             android:layout_marginTop="20dp"
             android:onClick="onDoneClick"/>
+
     </RelativeLayout>
 </RelativeLayout>
