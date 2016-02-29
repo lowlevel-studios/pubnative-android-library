@@ -175,6 +175,7 @@ public class PubnativeRequestTest {
     public void testSetsUpDefaultParametersAutomatically() {
 
         PubnativeRequest request = spy(PubnativeRequest.class);
+        request.mContext = this.applicationContext;
         request.setDefaultParameters();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();

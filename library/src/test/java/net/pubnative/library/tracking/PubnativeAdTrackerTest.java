@@ -60,7 +60,7 @@ public class PubnativeAdTrackerTest {
     public void testImpressionSuccessForNullListener() {
 
         View                        adView      = spy(new View(applicationContext));
-        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", null));
+        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "http://www.google.com", "http://www.google.com", null));
 
         tracker.invokeOnTrackerImpression();
     }
@@ -72,7 +72,7 @@ public class PubnativeAdTrackerTest {
         View                        clickableView   = spy(new View(applicationContext));
         PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
 
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
+        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "http://www.google.com", "http://www.google.com", listener));
 
         tracker.invokeOnTrackerImpression();
         verify(listener, times(1)).onTrackerImpression(eq(adView));
@@ -84,7 +84,7 @@ public class PubnativeAdTrackerTest {
         View                        adView      = spy(new View(applicationContext));
         PubnativeAdTracker.Listener listener    = mock(PubnativeAdTracker.Listener.class);
 
-        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
+        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "http://www.google.com", "", listener));
 
         tracker.handleClickEvent();
     }
@@ -95,8 +95,8 @@ public class PubnativeAdTrackerTest {
         View                        adView          = spy(new View(applicationContext));
         View                        clickableView   = spy(new View(applicationContext));
 
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", null));
-
+        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "http://www.google.com", "http://www.google.com", null));
+        tracker.startTracking();
         verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
@@ -106,8 +106,8 @@ public class PubnativeAdTrackerTest {
         View                        adView          = spy(new View(applicationContext));
         View                        clickableView   = spy(new View(applicationContext));
 
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", null));
-
+        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "http://www.google.com", "http://www.google.com", null));
+        tracker.startTracking();
         verify(adView, never()).setOnClickListener(any(View.OnClickListener.class));
     }
 
@@ -118,7 +118,7 @@ public class PubnativeAdTrackerTest {
         View                        clickableView   = spy(new View(applicationContext));
         PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
 
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
+        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "http://www.google.com", "http://www.google.com", listener));
 
         tracker.invokeOnTrackerClick();
         verify(listener, times(1)).onTrackerClick(eq(clickableView));

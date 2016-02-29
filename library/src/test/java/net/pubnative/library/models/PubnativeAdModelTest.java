@@ -151,6 +151,7 @@ public class PubnativeAdModelTest {
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         View clickableView = spy(new View(applicationContext));
+        model.click_url = "http://www.google.com";
         model.startTracking(adView, clickableView, listener);
         verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
@@ -172,6 +173,7 @@ public class PubnativeAdModelTest {
         PubnativeAdModel model = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
+        model.click_url = "http://www.google.com";
         model.startTracking(adView, listener);
         verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
