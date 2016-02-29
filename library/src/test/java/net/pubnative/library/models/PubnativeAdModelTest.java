@@ -109,7 +109,7 @@ public class PubnativeAdModelTest {
 
         model.mListener = listener;
         model.invokeOnClick(adView);
-        verify(listener, times(1)).onPubnativeAdModelImpression(eq(model), eq(adView));
+        verify(listener, times(1)).onPubnativeAdModelClick(eq(model), eq(adView));
     }
 
     @Test
