@@ -178,7 +178,7 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.mListener = listener;
 
-        request.invokeOnResponse(response);
+        request.onPubnativeAPIRequestResponse(response);
 
         verify(listener, times(1)).onPubnativeRequestSuccess(eq(request), any(List.class));
     }
@@ -193,7 +193,7 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.mListener = listener;
 
-        request.invokeOnResponse(response);
+        request.onPubnativeAPIRequestResponse(response);
 
         verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
@@ -206,7 +206,7 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.mListener = listener;
 
-        request.invokeOnResponse(null);
+        request.onPubnativeAPIRequestResponse(null);
 
         verify(listener, times(1)).onPubnativeRequestFailed(eq(request), any(Exception.class));
     }
@@ -220,7 +220,7 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(new PubnativeRequest(this.applicationContext));
         request.mListener = listener;
 
-        request.invokeOnErrorResponse(error);
+        request.onPubnativeAPIRequestError(error);
         verify(listener, times(1)).onPubnativeRequestFailed(eq(request), eq(error));
     }
 }

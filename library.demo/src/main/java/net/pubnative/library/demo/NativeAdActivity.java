@@ -42,9 +42,7 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_native);
         mAdContainer = (RelativeLayout) findViewById(R.id.activity_native_container_ad);
-        mAdContainer.setVisibility(View.GONE);
         mLoaderContainer = (RelativeLayout) findViewById(R.id.activity_native_container_loader);
-        mLoaderContainer.setVisibility(View.GONE);
         mTitle = (TextView) findViewById(R.id.activity_native_text_title);
         mDescription = (TextView) findViewById(R.id.activity_native_text_description);
         mCTA = (TextView) findViewById(R.id.activity_native_text_cta);
@@ -52,22 +50,22 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
         mBanner = (ImageView) findViewById(R.id.activity_native_image_banner);
     }
 
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        mAdContainer.setVisibility(View.GONE);
+        mLoaderContainer.setVisibility(View.GONE);
+    }
+
     public void onRequestClick(View v) {
 
         Log.v(TAG, "onRequestClick");
-
         mLoaderContainer.setVisibility(View.VISIBLE);
-
         PubnativeRequest request = new PubnativeRequest(this);
         request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, Settings.getAppToken());
         request.start(PubnativeRequest.Endpoint.NATIVE, this);
     }
-
-    public void onAdContainerClick(View v) {
-
-        Log.v(TAG, "onAdContainerClick");
-    }
-
     //==============================================================================================
     // Callbacks
     //==============================================================================================
@@ -78,18 +76,14 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
-
         PubnativeAdModel ad = ads.get(0);
-
         mTitle.setText(ad.getTitle());
         mDescription.setText(ad.getDescription());
         mCTA.setText(ad.getCtaText());
         Picasso.with(this).load(ad.getIconUrl()).into(mIcon);
         Picasso.with(this).load(ad.getBannerUrl()).into(mBanner);
-
         mLoaderContainer.setVisibility(View.GONE);
         mAdContainer.setVisibility(View.VISIBLE);
-
         ad.startTracking(mAdContainer, this);
     }
 
@@ -98,29 +92,28 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
 
         Log.v(TAG, "onPubnativeRequestFailed: " + ex);
         Toast.makeText(this, "ERROR: " + ex, Toast.LENGTH_SHORT);
-
         mLoaderContainer.setVisibility(View.GONE);
     }
 
     // PubnativeAdModel.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onPubnativeAdModelImpressionConfirmed(PubnativeAdModel pubnativeAdModel, View view) {
-        Log.v(TAG, "onPubnativeAdModelImpressionConfirmed");
+    public void onPubnativeAdModelImpression(PubnativeAdModel pubnativeAdModel, View view) {
+
+        Log.v(TAG, "onPubnativeAdModelImpression");
     }
 
     @Override
-    public void onPubnativeAdModelImpressionFailed(PubnativeAdModel pubnativeAdModel, Exception exception) {
-        Log.v(TAG, "onPubnativeAdModelImpressionFailed: " + exception);
+    public void onPubnativeAdModelClick(PubnativeAdModel pubnativeAdModel, View view) {
+
+        Log.v(TAG, "onPubnativeAdModelClick");
+        mLoaderContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onPubnativeAdModelClicked(PubnativeAdModel pubnativeAdModel, View view) {
-        Log.v(TAG, "onPubnativeRequestFailed");
-    }
+    public void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel) {
 
-    @Override
-    public void onPubnativeAdModelClickFailed(PubnativeAdModel pubnativeAdModel, Exception exception) {
-        Log.v(TAG, "onPubnativeAdModelClickFailed: " + exception);
+        Log.v(TAG, "onPubnativeAdModelOpenOffer");
+        mLoaderContainer.setVisibility(View.GONE);
     }
 }

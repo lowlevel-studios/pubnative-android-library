@@ -34,9 +34,9 @@ public class PubnativeAPIRequest {
     }
 
     public interface Listener {
-        void invokeOnResponse(String response);
+        void onPubnativeAPIRequestResponse(String response);
 
-        void invokeOnErrorResponse(Exception error);
+        void onPubnativeAPIRequestError(Exception error);
     }
 
     public URL getUrl() {
@@ -56,17 +56,17 @@ public class PubnativeAPIRequest {
         return mListener;
     }
 
-    public void deliverResponse(String response) {
+    public void invokeOnResponse(String response) {
 
         if(mListener != null) {
-            mListener.invokeOnResponse(response);
+            mListener.onPubnativeAPIRequestResponse(response);
         }
     }
 
-    public void deliverError(Exception error) {
+    public void invokeOnError(Exception error) {
 
         if(mListener != null) {
-            mListener.invokeOnErrorResponse(error);
+            mListener.onPubnativeAPIRequestError(error);
         }
     }
 
