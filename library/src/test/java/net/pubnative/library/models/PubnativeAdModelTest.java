@@ -89,25 +89,50 @@ public class PubnativeAdModelTest {
     }
 
     @Test
-    public void testStartTrackingWithValidListener() {
+    public void testImpressionCallbackWithValidListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
         PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
         View                        adView      = spy(new View(applicationContext));
 
         model.mListener = listener;
-        model.invokeOnImpressionConfirmed(adView);
-        verify(listener, times(1)).onPubnativeAdModelImpressionConfirmed(eq(model), eq(adView));
+        model.invokeOnImpression(adView);
+        verify(listener, times(1)).onPubnativeAdModelImpression(eq(model), eq(adView));
     }
 
     @Test
-    public void testStartTrackingWithNullListener() {
+    public void testClickCallbackWithValidListener() {
 
         PubnativeAdModel            model       = spy(PubnativeAdModel.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
         View                        adView      = spy(new View(applicationContext));
 
+        model.mListener = listener;
+        model.invokeOnClick(adView);
+        verify(listener, times(1)).onPubnativeAdModelClick(eq(model), eq(adView));
+    }
+
+    @Test
+    public void testOpenOfferCallbackWithValidListener() {
+
+        PubnativeAdModel            model       = spy(PubnativeAdModel.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+
+        model.mListener = listener;
+        model.invokeOnOpenOffer();
+        verify(listener, times(1)).onPubnativeAdModelOpenOffer(eq(model));
+    }
+
+    @Test
+    public void testCallbacksWithNullListener() {
+
+        PubnativeAdModel            model       = spy(PubnativeAdModel.class);
+        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
+
         model.mListener = null;
-        model.invokeOnImpressionConfirmed(adView);
+        model.invokeOnOpenOffer();
+        model.invokeOnClick(null);
+        model.invokeOnImpression(null);
     }
 
     @Test
@@ -146,28 +171,5 @@ public class PubnativeAdModelTest {
         model.startTracking(adView, listener);
 
         verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
-    }
-
-    @Test
-    public void testStartTrackingWithNullView() {
-
-        PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
-
-        model.startTracking(null, listener);
-
-        verify(listener, times(1)).onPubnativeAdModelImpressionFailed(eq(model), any(Exception.class));
-    }
-
-    @Test
-    public void testStartTrackingWithNullClickableView() {
-
-        PubnativeAdModel            model       = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener   listener    = mock(PubnativeAdModel.Listener.class);
-
-        View                        adView      = spy(new View(applicationContext));
-
-        model.startTracking(adView, null, listener);
-        verify(listener, times(1)).onPubnativeAdModelClickFailed(eq(model), any(Exception.class));
     }
 }

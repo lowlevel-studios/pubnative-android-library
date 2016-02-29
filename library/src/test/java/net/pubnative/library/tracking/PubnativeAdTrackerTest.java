@@ -33,18 +33,6 @@ public class PubnativeAdTrackerTest {
         this.applicationContext = RuntimeEnvironment.application.getApplicationContext();
     }
 
-    @Test
-    public void testImpressionFailureForInvalidImpressionURL() {
-
-        PubnativeAdTracker.Listener listener    = mock(PubnativeAdTracker.Listener.class);
-        View                        adView      = spy(new View(applicationContext));
-
-        PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
-
-        tracker.startImpressionRequest();
-
-        verify(listener, times(1)).onImpressionFailed(any(Exception.class));
-    }
 
     @Test
     public void testImpressionFailureForNullListener() {
@@ -61,7 +49,7 @@ public class PubnativeAdTrackerTest {
         View                        adView      = spy(new View(applicationContext));
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", null));
 
-        tracker.invokeOnImpressionConfirmed();
+        tracker.invokeOnTrackerImpression();
     }
 
     @Test
@@ -73,22 +61,8 @@ public class PubnativeAdTrackerTest {
 
         PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
 
-        tracker.invokeOnImpressionConfirmed();
-        verify(listener, times(1)).onImpressionConfirmed(eq(adView));
-    }
-
-    @Test
-    public void testOnImpressionFailed() {
-
-        View                        adView          = spy(new View(applicationContext));
-        View                        clickableView   = spy(new View(applicationContext));
-        PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
-        Exception                   exception       = mock(Exception.class);
-
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
-
-        tracker.invokeOnImpressionFailed(exception);
-        verify(listener, times(1)).onImpressionFailed(eq(exception));
+        tracker.invokeOnTrackerImpression();
+        verify(listener, times(1)).onTrackerImpression(eq(adView));
     }
 
     @Test
@@ -100,8 +74,6 @@ public class PubnativeAdTrackerTest {
         PubnativeAdTracker          tracker     = spy(new PubnativeAdTracker(adView, adView, "", "", listener));
 
         tracker.handleClickEvent();
-
-        verify(listener, times(1)).onClickFailed(any(Exception.class));
     }
 
     @Test
@@ -135,31 +107,7 @@ public class PubnativeAdTrackerTest {
 
         PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
 
-        tracker.invokeOnClicked();
-        verify(listener, times(1)).onClickConfirmed(eq(clickableView));
-    }
-
-    @Test
-    public void testOnClickFailed() {
-
-        View                        adView          = spy(new View(applicationContext));
-        View                        clickableView   = spy(new View(applicationContext));
-        PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
-        Exception                   exception       = mock(Exception.class);
-
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(adView, clickableView, "", "", listener));
-
-        tracker.invokeOnClickFailed(exception);
-        verify(listener, times(1)).onClickFailed(eq(exception));
-    }
-
-    @Test
-    public void testTrackerWithInvalidArguments() {
-
-        PubnativeAdTracker.Listener listener        = mock(PubnativeAdTracker.Listener.class);
-
-        PubnativeAdTracker          tracker         = spy(new PubnativeAdTracker(null, null, null, null, listener));
-
-        verify(listener, times(1)).onImpressionFailed(any(Exception.class));
+        tracker.invokeOnTrackerClick();
+        verify(listener, times(1)).onTrackerClick(eq(clickableView));
     }
 }

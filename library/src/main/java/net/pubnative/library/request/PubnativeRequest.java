@@ -26,23 +26,21 @@ import java.util.Map;
 /**
  * For every Ad request create new object of this class
  */
-public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, PubnativeAPIRequest.Listener {
+public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
+                                         PubnativeAPIRequest.Listener {
 
-    private static String TAG = PubnativeRequest.class.getSimpleName();
-
-    protected static final String   BASE_URL            = "http://api.pubnative.net/api/partner/v2/promotions";
-    private static final   String   NATIVE_TYPE_URL     = "native";
-
-    protected Context               mContext;
-    protected Endpoint              mEndpoint;
-    protected Map<String, String>   mRequestParameters = new HashMap<String, String>();
-    protected Listener              mListener;
+    private static         String TAG             = PubnativeRequest.class.getSimpleName();
+    protected static final String BASE_URL        = "http://api.pubnative.net/api/partner/v2/promotions";
+    private static final   String NATIVE_TYPE_URL = "native";
+    protected Context  mContext;
+    protected Endpoint mEndpoint;
+    protected Map<String, String> mRequestParameters = new HashMap<String, String>();
+    protected Listener mListener;
 
     /**
      * These are the various types of adds pubnative support
      */
     public enum Endpoint {
-
         NATIVE,
     }
 
@@ -83,6 +81,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      * Listener interface used to start Pubnative request with success and failure callbacks.
      */
     public interface Listener {
+
         /**
          * Invoked when PubnativeRequest request is success
          *
@@ -104,6 +103,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
      * Creates object of PubnativeRequest
      */
     public PubnativeRequest(Context context) {
+
         mContext = context;
     }
 
@@ -116,17 +116,12 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     public void setParameter(String key, String value) {
 
         if (TextUtils.isEmpty(key)) {
-
             Log.e(TAG, "Invalid key passed for parameter");
             return;
         }
-
         if (TextUtils.isEmpty(value)) {
-
             mRequestParameters.remove(key);
-
         } else {
-
             mRequestParameters.put(key, value);
         }
     }
@@ -140,31 +135,19 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     public void start(Endpoint endpoint, Listener listener) {
 
         if (listener != null) {
-
             mListener = listener;
-
             if (endpoint != null && mContext != null) {
-
                 mEndpoint = endpoint;
-
                 setDefaultParameters();
-
                 if (!mRequestParameters.containsKey(Parameters.ANDROID_ADVERTISER_ID)) {
-
                     new AndroidAdvertisingIDTask().setListener(this).execute(mContext);
-
                 } else {
-
                     sendNetworkRequest();
                 }
-
             } else {
-
                 invokeOnPubnativeRequestFailure(new IllegalArgumentException("start - Arguments cannot be null"));
             }
-
         } else {
-
             Log.e(TAG, "start - Request started without listener, dropping call");
         }
     }
@@ -175,50 +158,33 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     protected void setDefaultParameters() {
 
         if (!mRequestParameters.containsKey(Parameters.BUNDLE_ID)) {
-
             mRequestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(mContext));
         }
-
         if (!mRequestParameters.containsKey(Parameters.OS)) {
-
             mRequestParameters.put(Parameters.OS, "android");
         }
-
         if (!mRequestParameters.containsKey(Parameters.DEVICE_MODEL)) {
-
             mRequestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
         }
-
         if (!mRequestParameters.containsKey(Parameters.OS_VERSION)) {
-
             mRequestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
         }
-
         if (!mRequestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
-
             DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
             mRequestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
         }
-
         if (!mRequestParameters.containsKey(Parameters.DEVICE_TYPE)) {
-
             mRequestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
         }
-
         if (!mRequestParameters.containsKey(Parameters.LOCALE)) {
-
             mRequestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
-
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
         if (SystemUtils.isLocationPermissionGranted(mContext)) {
-
             Location location = SystemUtils.getLastLocation(mContext);
-
             if (location != null &&
                 !mRequestParameters.containsKey(Parameters.LAT) &&
                 !mRequestParameters.containsKey(Parameters.LONG)) {
-
                 mRequestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
                 mRequestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
             }
@@ -231,40 +197,28 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     protected String getRequestURL() {
 
         String url = null;
-
         if (mEndpoint != null) {
-
             switch (mEndpoint) {
-
                 case NATIVE:
-
                     // Creating base URI
                     Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
                     uriBuilder.appendPath(NATIVE_TYPE_URL);
-
                     // Appending parameters
                     for (String key : mRequestParameters.keySet()) {
-
                         String value = mRequestParameters.get(key);
-
                         if (key != null && value != null) {
-
                             uriBuilder.appendQueryParameter(key, value);
                         }
                     }
-
                     // Final URL
                     url = uriBuilder.build().toString();
-                break;
-
+                    break;
                 default:
-
                     // Error: Invalid ENDPOINT
                     Log.e(TAG, "getRequestURL - type not recognized");
-                break;
+                    break;
             }
         }
-
         return url;
     }
 
@@ -275,25 +229,19 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     protected void sendNetworkRequest() {
 
         String url = getRequestURL();
-
         if (url == null) {
-
             invokeOnPubnativeRequestFailure(new Exception("sendNetworkRequest - Error getting request URL"));
-
         } else {
-
             PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, url, this);
         }
     }
 
     //===================================
-    // Callback Helpers
+    // Listener Helpers
     //===================================
-
     protected void invokeOnPubnativeRequestSuccess(List<PubnativeAdModel> ads) {
 
         if (mListener != null) {
-
             mListener.onPubnativeRequestSuccess(this, ads);
         }
     }
@@ -301,82 +249,61 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener, Pubn
     protected void invokeOnPubnativeRequestFailure(Exception exception) {
 
         Log.e(TAG, "Request error: " + exception);
-
         if (mListener != null) {
-
             mListener.onPubnativeRequestFailed(this, exception);
         }
     }
 
-    //===================================
-    // Callbacks
-    //===================================
-
+    //==============================================================================================
+    // CALLBACKS
+    //==============================================================================================
     // AndroidAdvertisingIDTask.Listener
-    //-----------------------------------
-
-    /**
-     * Android Advertising Id Task Listener is finished when android ad id is fetched.
-     */
+    //----------------------------------------------------------------------------------------------
     @Override
     public void onAndroidAdIdTaskFinished(String result) {
 
         if (TextUtils.isEmpty(result)) {
-
             mRequestParameters.put(Parameters.NO_USER_ID, "1");
-
         } else {
-
             mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID, result);
             mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID_SHA1, Crypto.sha1(result));
             mRequestParameters.put(Parameters.ANDROID_ADVERTISER_ID_MD5, Crypto.md5(result));
         }
-
         sendNetworkRequest();
     }
 
+    // PubnativeAPIRequest.Listener
+    //----------------------------------------------------------------------------------------------
     @Override
-    public void invokeOnResponse(String response) {
-        if (!TextUtils.isEmpty(response)) {
+    public void onPubnativeAPIRequestResponse(String response) {
 
+        if (TextUtils.isEmpty(response)) {
+            invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
+        } else {
             try {
-
                 APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
-
                 if (model != null) {
-
                     if (APIRequestResponseModel.Status.OK.equals(model.status)) {
-
                         // SUCCESS
                         invokeOnPubnativeRequestSuccess(model.ads);
-
                     } else {
-
                         // ERROR: request error
                         invokeOnPubnativeRequestFailure(new Exception(model.error_message));
                     }
-
                 } else {
-
                     // ERROR: parsing error
                     invokeOnPubnativeRequestFailure(new Exception("Response error"));
                 }
-
             } catch (JsonSyntaxException exception) {
-
                 // ERROR: json error
                 invokeOnPubnativeRequestFailure(exception);
             }
-
-        } else {
-
-            // ERROR: empty response
-            invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
         }
     }
 
     @Override
-    public void invokeOnErrorResponse(Exception error) {
+    public void onPubnativeAPIRequestError(Exception error) {
+
         invokeOnPubnativeRequestFailure(error);
     }
 }

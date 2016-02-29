@@ -24,8 +24,7 @@
         android:id="@+id/activity_native_container_ad"
         android:layout_below="@+id/activity_native_container_btn"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        android:onClick="onAdContainerClick">
+        android:layout_margin="10dp">
 
         <ImageView
             android:layout_width="70dp"
@@ -58,7 +57,8 @@
             android:background="#45ffffff"
             android:padding="10dp"
             android:layout_margin="10dp"
-            android:ellipsize="end"/>
+            android:ellipsize="end"
+            android:singleLine="true"/>
 
         <TextView
             android:layout_width="match_parent"

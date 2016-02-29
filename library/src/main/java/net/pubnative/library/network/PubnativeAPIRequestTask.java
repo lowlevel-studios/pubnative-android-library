@@ -85,9 +85,9 @@ public class PubnativeAPIRequestTask {
 
     private void processResponse(PubnativeAPIResponse pubnativeAPIResponse) {
         if(pubnativeAPIResponse.isSuccess()) {
-            mPubnativeAPIRequest.deliverResponse(pubnativeAPIResponse.getResult());
+            mPubnativeAPIRequest.invokeOnResponse(pubnativeAPIResponse.getResult());
         } else {
-            mPubnativeAPIRequest.deliverError(pubnativeAPIResponse.getError());
+            mPubnativeAPIRequest.invokeOnError(pubnativeAPIResponse.getError());
         }
         PubnativeAPIRequestManager.getInstance().recycleTask(PubnativeAPIRequestTask.this);
     }
