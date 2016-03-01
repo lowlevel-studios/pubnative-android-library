@@ -1,3 +1,26 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2016 PubNative GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
 package net.pubnative.library.tracking;
 
 import android.os.Handler;
@@ -14,16 +37,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * This class is responsible for tracking an ad. This ensures two things:
- * <ul>
- * <li>impression tracking</li>
- * <li>click tracking</li>
- * </ul>
- */
-public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
+public class PubnativeAdTracker implements PubnativeAPIRequest.Listener,
+                                           URLDriller.Listener {
 
-    private static String TAG = PubnativeAdTracker.class.getSimpleName();
+    private static       String TAG                             = PubnativeAdTracker.class.getSimpleName();
+    private static final float  VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
+    private static final long   VISIBILITY_TIME_THRESHOLD       = 1000;
+    private static final long   VISIBILITY_CHECK_INTERVAL       = 200;
     protected     Listener                 mListener;
     private       View                     mView;
     private       View                     mClickableView;
@@ -32,21 +52,40 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     private boolean mIsTracked            = false;
     private boolean mIsTrackingInProgress = false;
     private boolean mTrackingShouldStop   = false;
-    private Handler mHandler;
-    private static final float VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
-    private static final long  VISIBILITY_TIME_THRESHOLD       = 1000;
-    private static final long  VISIBILITY_CHECK_INTERVAL       = 200;
-    private String mImpressionUrl;
-    private String mClickUrl;
+    private Handler mHandler              = null;
+    private String  mImpressionUrl        = null;
+    private String  mClickUrl             = null;
+    //==============================================================================================
+    // LISTENER
+    //==============================================================================================
 
+    /**
+     * Listener for callbacks about tracking behaviour
+     */
     public interface Listener {
 
+        /**
+         * Calledn when the impression is detected
+         *
+         * @param view view where the impression was deteted
+         */
         void onTrackerImpression(View view);
 
+        /**
+         * Called when the click is detected
+         *
+         * @param view view where the click was detected
+         */
         void onTrackerClick(View view);
 
+        /**
+         * Called when the tracker is opening the offer in another
+         */
         void onTrackerOpenOffer();
     }
+    //==============================================================================================
+    // PUBLIC
+    //==============================================================================================
 
     /**
      * Constructor
@@ -73,9 +112,11 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         mImpressionUrl = impressionUrl;
         mClickUrl = clickUrl;
         mViewTreeObserver = mView.getViewTreeObserver();
-        startTracking();
     }
 
+    /**
+     * This method stops tracking of the configured view
+     */
     public void stopTracking() {
 
         Log.v(TAG, "stopTracking");
@@ -86,21 +127,37 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         mClickableView.setOnClickListener(null);
     }
 
-    private void startTracking() {
+    /**
+     * This method starts tracking of the configured view
+     */
+    public void startTracking() {
 
         Log.v(TAG, "startTracking");
-        mViewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener);
-        mViewTreeObserver.addOnScrollChangedListener(onScrollChangedListener);
-        mClickableView.setOnClickListener(new View.OnClickListener() {
+        // Impression tracking
+        if (TextUtils.isEmpty(mImpressionUrl)) {
+            Log.e(TAG, "startImpressionRequest - Error: provided impressionURL is null or empty, won't track impression");
+        } else {
+            mViewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener);
+            mViewTreeObserver.addOnScrollChangedListener(onScrollChangedListener);
+        }
+        // Click tracking
+        if (TextUtils.isEmpty(mClickUrl)) {
+            Log.e(TAG, "startImpressionRequest - Error: provided clickURL is null or empty, clicks won't be tracked");
+        } else {
+            mClickableView.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
+                @Override
+                public void onClick(View view) {
 
-                handleClickEvent();
-            }
-        });
+                    handleClickEvent();
+                }
+            });
+        }
     }
 
+    //==============================================================================================
+    // Private
+    //==============================================================================================
     private ViewTreeObserver.OnGlobalLayoutListener  onGlobalLayoutListener  = new ViewTreeObserver.OnGlobalLayoutListener() {
 
         @Override
@@ -147,7 +204,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
                         if (System.currentTimeMillis() - firstVisibleTime >= VISIBILITY_TIME_THRESHOLD) {
                             Log.v(TAG, "checkImpression - , it's visible more than " + VISIBILITY_TIME_THRESHOLD + "ms Current time is: " + System.currentTimeMillis());
                             stopImpressionTracking();
-                            startImpressionRequest();
+                            PubnativeAPIRequest.send(mImpressionUrl, PubnativeAdTracker.this);
                             break;
                         } else {
                             try {
@@ -173,16 +230,6 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         mExecutor.shutdownNow();
     }
 
-    protected void startImpressionRequest() {
-
-        Log.v(TAG, "startImpressionRequest");
-        if (TextUtils.isEmpty(mImpressionUrl)) {
-            Log.e(TAG, "startImpressionRequest - Error: provided impressionURL is null or empty");
-        } else {
-            PubnativeAPIRequest.send(PubnativeAPIRequest.Method.GET, mImpressionUrl, this);
-        }
-    }
-
     protected void handleClickEvent() {
 
         Log.v(TAG, "handleClickEvent");
@@ -191,36 +238,13 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         } else {
             invokeOnTrackerClick();
             URLDriller driller = new URLDriller();
-            driller.setListener(new URLDriller.Listener() {
-
-                @Override
-                public void onURLDrillerStart(String url) {
-
-                    Log.v(TAG, "onURLDrillerStart");
-                }
-
-                @Override
-                public void onURLDrillerRedirect(String url) {
-
-                    Log.v(TAG, "onURLDrillerRedirect");
-                }
-
-                @Override
-                public void onURLDrillerFinish(String url) {
-
-                    Log.v(TAG, "onURLDrillerFinish");
-                    invokeOnTrackerOpenOffer();
-                }
-
-                @Override
-                public void onURLDrillerFail(String url, Exception exception) {
-
-                    Log.v(TAG, "onURLDrillerFail");
-                }
-            });
+            driller.setListener(this);
             driller.drill(mView.getContext(), mClickUrl);
         }
     }
+    //==============================================================================================
+    // Listener helpers
+    //==============================================================================================
 
     protected void invokeOnTrackerImpression() {
 
@@ -264,7 +288,6 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
         });
     }
 
-
     //==============================================================================================
     // CALLBACKS
     //==============================================================================================
@@ -272,12 +295,41 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener {
     //----------------------------------------------------------------------------------------------
     @Override
     public void onPubnativeAPIRequestResponse(String response) {
+
         Log.v(TAG, "onPubnativeAPIRequestResponse");
         invokeOnTrackerImpression();
     }
 
     @Override
     public void onPubnativeAPIRequestError(Exception error) {
+
         Log.e(TAG, "onPubnativeAPIRequestError: " + error);
+    }
+
+    // URLDriller.Listener
+    //----------------------------------------------------------------------------------------------
+    @Override
+    public void onURLDrillerStart(String url) {
+
+        Log.v(TAG, "onURLDrillerStart");
+    }
+
+    @Override
+    public void onURLDrillerRedirect(String url) {
+
+        Log.v(TAG, "onURLDrillerRedirect");
+    }
+
+    @Override
+    public void onURLDrillerFinish(String url) {
+
+        Log.v(TAG, "onURLDrillerFinish");
+        invokeOnTrackerOpenOffer();
+    }
+
+    @Override
+    public void onURLDrillerFail(String url, Exception exception) {
+
+        Log.v(TAG, "onURLDrillerFail");
     }
 }

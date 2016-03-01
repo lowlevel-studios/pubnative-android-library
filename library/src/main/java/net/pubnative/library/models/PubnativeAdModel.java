@@ -1,3 +1,26 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2016 PubNative GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
 package net.pubnative.library.models;
 
 import android.text.TextUtils;
@@ -10,18 +33,17 @@ import java.util.List;
 
 public class PubnativeAdModel implements PubnativeAdTracker.Listener {
 
-    private static String TAG = PubnativeAdModel.class.getSimpleName();
-    private String                title;
-    private String                description;
-    private String                cta_text;
-    private String                icon_url;
-    private String                banner_url;
-    private String                click_url;
-    private String                revenue_model;
-    private int                   points;
-    private List<PubnativeBeacon> beacons;
-    private String                type;
-    private String                portrait_banner_url;
+    private static String                TAG                 = PubnativeAdModel.class.getSimpleName();
+    protected      String                title               = null;
+    protected      String                description         = null;
+    protected      String                cta_text            = null;
+    protected      String                icon_url            = null;
+    protected      String                banner_url          = null;
+    protected      String                click_url           = null;
+    protected      String                revenue_model       = null;
+    protected      String                type                = null;
+    protected      String                portrait_banner_url = null;
+    protected      List<PubnativeBeacon> beacons             = null;
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -56,119 +78,68 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
     }
 
     protected transient Listener mListener;
-
     //==============================================================================================
     // Fields
     //==============================================================================================
 
     public String getTitle() {
 
+        Log.v(TAG, "getTitle");
         return title;
-    }
-
-    public void setTitle(String title) {
-
-        this.title = title;
     }
 
     public String getDescription() {
 
+        Log.v(TAG, "getDescription");
         return description;
-    }
-
-    public void setDescription(String description) {
-
-        this.description = description;
     }
 
     public String getCtaText() {
 
+        Log.v(TAG, "getCtaText");
         return cta_text;
-    }
-
-    public void setCtaText(String cta_text) {
-
-        this.cta_text = cta_text;
     }
 
     public String getIconUrl() {
 
+        Log.v(TAG, "getIconUrl");
         return icon_url;
-    }
-
-    public void setIconUrl(String icon_url) {
-
-        this.icon_url = icon_url;
     }
 
     public String getBannerUrl() {
 
+        Log.v(TAG, "getBannerUrl");
         return banner_url;
-    }
-
-    public void setBannerUrl(String banner_url) {
-
-        this.banner_url = banner_url;
     }
 
     public String getClickUrl() {
 
+        Log.v(TAG, "getClickUrl");
         return click_url;
-    }
-
-    public void setClickUrl(String click_url) {
-
-        this.click_url = click_url;
     }
 
     public String getRevenueModel() {
 
+        Log.v(TAG, "getRevenueModel");
         return revenue_model;
-    }
-
-    public void setRevenueModel(String revenue_model) {
-
-        this.revenue_model = revenue_model;
-    }
-
-    public int getPoints() {
-
-        return points;
-    }
-
-    public void setPoints(int points) {
-
-        this.points = points;
     }
 
     public List<PubnativeBeacon> getBeacons() {
 
+        Log.v(TAG, "getBeacons");
         return beacons;
-    }
-
-    public void setBeacons(List<PubnativeBeacon> beacons) {
-
-        this.beacons = beacons;
     }
 
     public String getType() {
 
+        Log.v(TAG, "getType");
         return type;
-    }
-
-    public void setType(String type) {
-
-        this.type = type;
     }
 
     public String getPortraitBannerUrl() {
 
+        Log.v(TAG, "getPortraitBannerUrl");
         return portrait_banner_url;
-    }
-
-    public void setPortraitBannerUrl(String portrait_banner_url) {
-
-        this.portrait_banner_url = portrait_banner_url;
     }
     //==============================================================================================
     // Helpers
@@ -184,6 +155,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
      */
     public String getBeacon(String beaconType) {
 
+        Log.v(TAG, "getBeacon: " + beaconType);
         String beaconUrl = null;
         if (!TextUtils.isEmpty(beaconType) && beacons != null) {
             for (PubnativeBeacon beacon : beacons) {
@@ -195,6 +167,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
         }
         return beaconUrl;
     }
+
     //==============================================================================================
     // Tracking
     //==============================================================================================
@@ -208,6 +181,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
      */
     public void startTracking(View view, Listener listener) {
 
+        Log.v(TAG, "startTracking(View, Listener)");
         startTracking(view, view, listener);
     }
 
@@ -220,12 +194,14 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
      */
     public void startTracking(View view, View clickableView, Listener listener) {
 
-        Log.v(TAG, "startTracking(view:" + view + ", clickableView:" + clickableView + ", listener:" + listener + ")");
+        Log.v(TAG, "startTracking(View, View, Listener)");
         mListener = listener;
         if (mPubnativeAdTracker != null) {
             stopTracking();
         }
-        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, getBeacon(PubnativeBeacon.BeaconType.IMPRESSION), getClickUrl(), this);
+        String impressionURL = getBeacon(PubnativeBeacon.BeaconType.IMPRESSION);
+        mPubnativeAdTracker = new PubnativeAdTracker(view, clickableView, impressionURL, getClickUrl(), this);
+        mPubnativeAdTracker.startTracking();
     }
 
     /**
@@ -233,7 +209,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
      */
     public void stopTracking() {
 
-        Log.v(TAG, "stopTracking()");
+        Log.v(TAG, "stopTracking");
         mPubnativeAdTracker.stopTracking();
     }
 
@@ -242,6 +218,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
     //==============================================================================================
     protected void invokeOnImpression(View view) {
 
+        Log.v(TAG, "invokeOnImpression");
         if (mListener != null) {
             mListener.onPubnativeAdModelImpression(PubnativeAdModel.this, view);
         }
@@ -249,6 +226,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
 
     protected void invokeOnClick(View view) {
 
+        Log.v(TAG, "invokeOnClick");
         if (mListener != null) {
             mListener.onPubnativeAdModelClick(PubnativeAdModel.this, view);
         }
@@ -256,6 +234,7 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
 
     protected void invokeOnOpenOffer() {
 
+        Log.v(TAG, "invokeOnOpenOffer");
         if (mListener != null) {
             mListener.onPubnativeAdModelOpenOffer(this);
         }
@@ -269,18 +248,21 @@ public class PubnativeAdModel implements PubnativeAdTracker.Listener {
     @Override
     public void onTrackerImpression(View view) {
 
+        Log.v(TAG, "onTrackerImpression");
         invokeOnImpression(view);
     }
 
     @Override
     public void onTrackerClick(View view) {
 
+        Log.v(TAG, "onTrackerClick");
         invokeOnClick(view);
     }
 
     @Override
     public void onTrackerOpenOffer() {
 
+        Log.v(TAG, "onTrackerOpenOffer");
         invokeOnOpenOffer();
     }
 }

@@ -1,12 +1,35 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2016 PubNative GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
 package net.pubnative.library.utils;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
 
-    private Listener listener;
+    private static final String TAG = AndroidAdvertisingIDTask.class.getSimpleName();
+    private Listener mListener;
 
     public interface Listener {
 
@@ -15,42 +38,34 @@ public class AndroidAdvertisingIDTask extends AsyncTask<Context, Void, String> {
 
     public AndroidAdvertisingIDTask setListener(Listener listener) {
 
-        this.listener = listener;
+        mListener = listener;
         return this;
     }
 
     @Override
     protected String doInBackground(Context... contexts) {
 
-        String  result  = null;
+        String result = null;
         Context context = contexts[0];
-
-        if (context != null && this.listener != null) {
-
-            try {
-
-                AdvertisingIdClient.AdInfo adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
-
-                if (adInfo != null) {
-
-                    result = adInfo.getId();
-                }
-
-            } catch (Exception e) {
-
-                Log.e("Pubnative", "Error retrieving androidAdvertisingID: " + e.toString());
+        if (context != null && mListener != null) {
+            AdvertisingIdClient.AdInfo adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context);
+            if (adInfo.isLimitAdTrackingEnabled()) {
+                result = adInfo.getId();
             }
         }
-
         return result;
     }
 
     @Override
     protected void onPostExecute(String result) {
 
-        if (this.listener != null) {
+        invokeFinish(result);
+    }
 
-            this.listener.onAndroidAdIdTaskFinished(result);
+    protected void invokeFinish(String result) {
+
+        if (mListener != null) {
+            mListener.onAndroidAdIdTaskFinished(result);
         }
     }
 }
