@@ -45,7 +45,7 @@ public class ImpressionUrlTrackingManager {
     private static final    String SHARED_FILE          = "net.pubnative.library.tracking.ImpressionUrlTrackingManager";
     private static final    String CURRENT_URLS_SET     = "current_urls";
     private static final    String PENDING_URLS_SET     = "pending_urls";
-    private static final    long DISCARD_TIME_THRESHOLD = 30000;
+    private static final    long DISCARD_TIME_THRESHOLD = 30 * 60 * 1000; // 30 minutes
 
     private static boolean  mIsTracking                 = false;
 
@@ -78,6 +78,23 @@ public class ImpressionUrlTrackingManager {
     }
 
     /**
+     * This method is used to save and update values in preference
+     *
+     * @param sharedList Trackingurl object
+     * @param context context
+     * @param set key for preference value
+     */
+    private synchronized static void setSharedList(TrackingUrls sharedList, Context context, String set) {
+        Log.v(TAG, "ImpressionUrlTrackingManager: setSharedList");
+        Gson gson = new Gson();
+        String sharedListString = gson.toJson(sharedList);
+
+        SharedPreferences.Editor editablePreferences = context.getSharedPreferences(SHARED_FILE, 0).edit();
+        editablePreferences.putString(set, sharedListString);
+        editablePreferences.apply();
+    }
+
+    /**
      * This method used to store url as list in sharedPreference
      *
      * @param context context
@@ -86,11 +103,13 @@ public class ImpressionUrlTrackingManager {
      */
     private static void putToSharedList(final Context context, String set, String value) {
         Log.v(TAG, "ImpressionUrlTrackingManager: putToSharedList");
-        TrackingUrls sharedList = getTrackingUrl(set, context);
+
+        TrackingUrls sharedList = getTrackingUrlList(set, context);
         List<ImpressionUrlModel> list = sharedList.getUrlList();
 
         if (list == null) {
-            Log.e(TAG, "ImpressionUrlTrackingManager: list is null");
+            Log.w(TAG, "ImpressionUrlTrackingManager: list is null");
+
             list = new ArrayList<ImpressionUrlModel>();
             list.add(new ImpressionUrlModel(value, new Date().getTime()));
         } else {
@@ -112,10 +131,10 @@ public class ImpressionUrlTrackingManager {
      * @param set key for preference value
      * @param value Ad impression url value
      */
-
     private static void removeFromSharedList(final Context context, String set, String value) {
         Log.v(TAG, "ImpressionUrlTrackingManager: removeFromSharedList");
-        TrackingUrls sharedList = getTrackingUrl(set, context);
+
+        TrackingUrls sharedList = getTrackingUrlList(set, context);
 
         List<ImpressionUrlModel> list = sharedList.getUrlList();
         if (list != null && list.size() > 0) {
@@ -139,9 +158,9 @@ public class ImpressionUrlTrackingManager {
      * @param context context
      * @return TrackingUrls object
      */
+    private static TrackingUrls getTrackingUrlList(String set, Context context) {
+        Log.v(TAG, "ImpressionUrlTrackingManager: getTrackingUrlList");
 
-    private static TrackingUrls getTrackingUrl(String set, Context context) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: getTrackingUrl");
         TrackingUrls sharedList = ImpressionUrlTrackingManager.getSharedList(context, set);
         if (sharedList == null) {
             Log.e(TAG, "ImpressionUrlTrackingManager: sharedList is null");
@@ -152,42 +171,25 @@ public class ImpressionUrlTrackingManager {
     }
 
     /**
-     * This method is used to save and update values in preference
-     *
-     * @param sharedList Trackingurl object
-     * @param context context
-     * @param set key for preference value
-     */
-    private synchronized static void setSharedList(TrackingUrls sharedList, Context context, String set) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: setSharedList");
-        Gson gson = new Gson();
-        String sharedListString = gson.toJson(sharedList);
-
-        SharedPreferences.Editor editablePreferences = context.getSharedPreferences(SHARED_FILE, 0).edit();
-        editablePreferences.putString(set, sharedListString);
-        editablePreferences.apply();
-    }
-
-    /**
      * This method is used, when old impression request failed and stored in pending list,
      * to restart impression request for old urls
      *
      * @param context  context
-     * @param isFailed to check request failed or succes true: failed,  false: success
+     * @param isFailedPrevious to check request failed or success true: failed,  false: success
      */
-    private static void restartImpressionRequest(Context context, boolean isFailed) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: restartImpressionRequest");
+    private static void nextImpressionRequest(Context context, boolean isFailedPrevious) {
+        Log.v(TAG, "ImpressionUrlTrackingManager: nextImpressionRequest");
         mIsTracking = false;
 
-        String currentUrl = getUrl(context, CURRENT_URLS_SET);
+        String currentUrl = getValidImpressionUrl(context, CURRENT_URLS_SET);
         removeFromSharedList(context, currentUrl, CURRENT_URLS_SET);
 
-        if (isFailed) {
+        if (isFailedPrevious) {
             // current url request failed add to pending list
             putToSharedList(context, currentUrl, PENDING_URLS_SET);
         }
 
-        String impressionUrl = getUrl(context, PENDING_URLS_SET);
+        String impressionUrl = getValidImpressionUrl(context, PENDING_URLS_SET);
         if (!TextUtils.isEmpty(impressionUrl)) {
             TrackImpressionUrl(context, impressionUrl);
         }
@@ -200,8 +202,8 @@ public class ImpressionUrlTrackingManager {
      * @param set     set Key for preference value
      * @return impression url
      */
-    private static String getUrl(Context context, String set) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: getUrl");
+    private static String getValidImpressionUrl(Context context, String set) {
+        Log.v(TAG, "ImpressionUrlTrackingManager: getValidImpressionUrl");
 
         TrackingUrls impressionUrl = ImpressionUrlTrackingManager.getSharedList(context, set);
         List<ImpressionUrlModel> urlList = impressionUrl.getUrlList();
@@ -257,13 +259,13 @@ public class ImpressionUrlTrackingManager {
             @Override
             public void onPubnativeAPIRequestResponse(String response) {
                 Log.v(TAG, "ImpressionUrlTrackingManager: onPubnativeAPIRequestResponse");
-                restartImpressionRequest(context, false);
+                nextImpressionRequest(context, false);
             }
 
             @Override
             public void onPubnativeAPIRequestError(Exception error) {
                 Log.v(TAG, "ImpressionUrlTrackingManager: onPubnativeAPIRequestError");
-                restartImpressionRequest(context, true);
+                nextImpressionRequest(context, true);
             }
         });
     }
