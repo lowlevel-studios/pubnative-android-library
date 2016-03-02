@@ -29,7 +29,7 @@ import java.util.Date;
 
 public class TrackingURLModel {
 
-    private static final    String TAG                     = TrackingURLModel.class.getSimpleName();
+    private static final    String TAG              = TrackingURLModel.class.getSimpleName();
 
     protected               String url;
     protected               long trackingStartTime;
@@ -40,11 +40,8 @@ public class TrackingURLModel {
      *
      * @param url Ad impression tracking url
      */
-
     public TrackingURLModel(String url) {
         this(url, new Date().getTime());
-
-        Log.v(TAG, "TrackingURLModel(String url)");
     }
 
     /**
@@ -53,10 +50,9 @@ public class TrackingURLModel {
      * @param url           Ad impression tracking url
      * @param startTime     Impression url tracking startTime
      */
-
     public TrackingURLModel(String url, long startTime) {
 
-        Log.v(TAG, "TrackingURLModel(String url, long startTime): ");
+        Log.v(TAG, "TrackingURLModel(String url, long startTime)");
 
         this.url = url;
         this.trackingStartTime = startTime;
@@ -73,7 +69,7 @@ public class TrackingURLModel {
      */
     public long getTrackingStartTime() {
 
-        Log.v(TAG, "getTrackingStartTime");
+        Log.v(TAG, "getTrackingStartTime()");
 
         return trackingStartTime;
     }
@@ -83,12 +79,10 @@ public class TrackingURLModel {
      *
      * @return String Ad impression tracking url
      */
-
     public String getUrl() {
 
-        Log.v(TAG, "getUrl");
+        Log.v(TAG, "getUrl()");
 
         return url;
     }
-
 }
