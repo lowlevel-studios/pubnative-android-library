@@ -41,8 +41,8 @@ public class PubnativeTrackingManager {
 
     private static final String  TAG                 = PubnativeTrackingManager.class.getSimpleName();
     private static final String  SHARED_PREFERENCES  = "net.pubnative.library.tracking.PubnativeTrackingManager";
-    private static final String  SHARED_PENDING_URLS = "pending_urls";
-    private static final String  SHARED_FAILED_URLS  = "pending_urls";
+    private static final String  SHARED_PENDING_LIST = "pending";
+    private static final String  SHARED_FAILED_LIST  = "failed";
     private static final long    ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
     private static       boolean sIsTracking         = false;
     //==============================================================================================
@@ -69,7 +69,7 @@ public class PubnativeTrackingManager {
             PubnativeTrackingURLModel model = new PubnativeTrackingURLModel();
             model.url = url;
             model.startTimestamp = System.currentTimeMillis();
-            enqueueItem(context, SHARED_PENDING_URLS, model);
+            enqueueItem(context, SHARED_PENDING_LIST, model);
             // 3. Try doing next item
             trackNextItem(context);
         }
@@ -86,7 +86,7 @@ public class PubnativeTrackingManager {
         } else {
             sIsTracking = true;
             // Extract pending item
-            final PubnativeTrackingURLModel model = dequeueItem(context, SHARED_PENDING_URLS);
+            final PubnativeTrackingURLModel model = dequeueItem(context, SHARED_PENDING_LIST);
             if (model == null) {
                 Log.v(TAG, "trackNextItem - tracking finished, no more items to track");
                 sIsTracking = false;
@@ -109,7 +109,7 @@ public class PubnativeTrackingManager {
 
                             Log.e(TAG, "onPubnativeAPIRequestError " + error);
                             // Since this failed, we re-enqueue it
-                            enqueueItem(context, SHARED_FAILED_URLS, model);
+                            enqueueItem(context, SHARED_FAILED_LIST, model);
                             trackNextItem(context);
                         }
                     });
@@ -124,10 +124,10 @@ public class PubnativeTrackingManager {
     protected static void enqueueFailedList(Context context) {
 
         Log.v(TAG, "enqueueFailedList");
-        List<PubnativeTrackingURLModel> failedList = getList(context, SHARED_FAILED_URLS);
-        List<PubnativeTrackingURLModel> pendingList = getList(context, SHARED_PENDING_URLS);
+        List<PubnativeTrackingURLModel> failedList = getList(context, SHARED_FAILED_LIST);
+        List<PubnativeTrackingURLModel> pendingList = getList(context, SHARED_PENDING_LIST);
         pendingList.addAll(failedList);
-        setList(context, SHARED_PENDING_URLS, failedList);
+        setList(context, SHARED_PENDING_LIST, failedList);
     }
 
     protected static void enqueueItem(Context context, String listKey, PubnativeTrackingURLModel model) {
