@@ -42,7 +42,7 @@ public class PubnativeTrackingManager {
     private static final String  TAG                 = PubnativeTrackingManager.class.getSimpleName();
     private static final String  SHARED_PREFERENCES  = "net.pubnative.library.tracking.PubnativeTrackingManager";
     private static final String  SHARED_PENDING_URLS = "pending_urls";
-    private static final String  SHARED_FAILED_URLS = "pending_urls";
+    private static final String  SHARED_FAILED_URLS  = "pending_urls";
     private static final long    ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
     private static       boolean sIsTracking         = false;
     //==============================================================================================
@@ -84,33 +84,36 @@ public class PubnativeTrackingManager {
         if (sIsTracking) {
             Log.w(TAG, "trackNextItem - Currently tracking, dropping the call, will be resumed soon");
         } else {
-
             sIsTracking = true;
-
             // Extract pending item
             final PubnativeTrackingURLModel model = dequeueItem(context, SHARED_PENDING_URLS);
-            if(model.startTimestamp + ITEM_VALIDITY_TIME < System.currentTimeMillis()) {
-                // Discard item, let's go for the next one
-                trackNextItem(context);
+            if (model == null) {
+                Log.v(TAG, "trackNextItem - tracking finished, no more items to track");
+                sIsTracking = false;
             } else {
-                PubnativeAPIRequest.send(model.url, new PubnativeAPIRequest.Listener() {
+                if (model.startTimestamp + ITEM_VALIDITY_TIME < System.currentTimeMillis()) {
+                    // Discard item, let's go for the next one
+                    trackNextItem(context);
+                } else {
+                    PubnativeAPIRequest.send(model.url, new PubnativeAPIRequest.Listener() {
 
-                    @Override
-                    public void onPubnativeAPIRequestResponse(String response) {
+                        @Override
+                        public void onPubnativeAPIRequestResponse(String response) {
 
-                        Log.v(TAG, "onPubnativeAPIRequestResponse" + response);
-                        trackNextItem(context);
-                    }
+                            Log.v(TAG, "onPubnativeAPIRequestResponse" + response);
+                            trackNextItem(context);
+                        }
 
-                    @Override
-                    public void onPubnativeAPIRequestError(Exception error) {
+                        @Override
+                        public void onPubnativeAPIRequestError(Exception error) {
 
-                        Log.e(TAG, "onPubnativeAPIRequestError " + error);
-                        // Since this failed, we re-enqueue it
-                        enqueueItem(context, SHARED_FAILED_URLS, model);
-                        trackNextItem(context);
-                    }
-                });
+                            Log.e(TAG, "onPubnativeAPIRequestError " + error);
+                            // Since this failed, we re-enqueue it
+                            enqueueItem(context, SHARED_FAILED_URLS, model);
+                            trackNextItem(context);
+                        }
+                    });
+                }
             }
         }
     }
