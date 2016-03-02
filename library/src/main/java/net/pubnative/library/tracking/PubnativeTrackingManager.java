@@ -78,7 +78,7 @@ public class PubnativeTrackingManager {
     //==============================================================================================
     // PRIVATE
     //==============================================================================================
-    protected static void trackNextItem(final Context context) {
+    protected synchronized static void trackNextItem(final Context context) {
 
         Log.v(TAG, "trackNextItem");
         if (sIsTracking) {
