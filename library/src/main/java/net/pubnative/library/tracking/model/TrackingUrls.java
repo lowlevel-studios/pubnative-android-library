@@ -23,6 +23,7 @@
 
 package net.pubnative.library.tracking.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrackingUrls {
@@ -30,6 +31,9 @@ public class TrackingUrls {
     protected List<ImpressionUrlModel> urlList;
 
     public List<ImpressionUrlModel> getUrlList() {
+        if(urlList == null) {
+            urlList = new ArrayList<ImpressionUrlModel>();
+        }
         return urlList;
     }
 

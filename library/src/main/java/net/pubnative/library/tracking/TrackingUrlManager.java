@@ -32,22 +32,59 @@ import com.google.gson.Gson;
 
 import net.pubnative.library.network.PubnativeAPIRequest;
 import net.pubnative.library.tracking.model.ImpressionUrlModel;
-import net.pubnative.library.tracking.model.TrackingUrls;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class ImpressionUrlTrackingManager {
+public class TrackingUrlManager {
 
-    private static          String TAG                  = ImpressionUrlTrackingManager.class.getSimpleName();
-    private static final    String SHARED_FILE          = "net.pubnative.library.tracking.ImpressionUrlTrackingManager";
-    private static final    String CURRENT_URLS_SET     = "current_urls";
-    private static final    String PENDING_URLS_SET     = "pending_urls";
-    private static final    long DISCARD_TIME_THRESHOLD = 30 * 60 * 1000; // 30 minutes
+    private static final String TAG                  = TrackingUrlManager.class.getSimpleName();
+    private static final String SHARED_FILE          = "net.pubnative.library.tracking.TrackingUrlManager";
+    private static final String CURRENT_URLS_SET     = "current_urls";
+    private static final String PENDING_URLS_SET     = "pending_urls";
+    private static final long DISCARD_TIME_THRESHOLD = 1800000; // 30 minutes
 
-    private static boolean  mIsTracking                 = false;
+    private static boolean  sIsTracking              = false;
+
+    //==============================================================================================
+    // PUBLIC
+    //==============================================================================================
+
+    /**
+     * This method is used to send impression request
+     *
+     * @param context context
+     * @param impressionUrl Ad impression url fro request
+     */
+    public synchronized static void TrackImpressionUrl(final Context context, final String impressionUrl) {
+
+        Log.v(TAG, "TrackImpressionUrl(Context context, String impressionUrl)");
+
+        if (sIsTracking) {
+            // previous request in process, return and store url in pending list
+            TrackingUrlManager.putToSharedList(context, PENDING_URLS_SET, impressionUrl);
+            return;
+        }
+
+        sIsTracking = true;
+        TrackingUrlManager.putToSharedList(context, CURRENT_URLS_SET, impressionUrl);
+
+        PubnativeAPIRequest.send(impressionUrl, new PubnativeAPIRequest.Listener() {
+
+            @Override
+            public void onPubnativeAPIRequestResponse(String response) {
+                Log.v(TAG, "TrackingUrlManager: onPubnativeAPIRequestResponse");
+                nextImpressionRequest(context, false);
+            }
+
+            @Override
+            public void onPubnativeAPIRequestError(Exception error) {
+                Log.v(TAG, "TrackingUrlManager: onPubnativeAPIRequestError");
+                nextImpressionRequest(context, true);
+            }
+        });
+    }
 
     //==============================================================================================
     // PRIVATE
@@ -57,21 +94,18 @@ public class ImpressionUrlTrackingManager {
      * This method returns Trackingurl stored as List in sharedPreference
      *
      * @param context context
-     * @param set key for preference value
+     * @param listKey key for preference value
      * @return TrackingUrl TrackingUrl object
      */
-    private static TrackingUrls getSharedList(final Context context, String set) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: getSharedList");
+    private static List<ImpressionUrlModel> getSharedList(Context context, String listKey) {
+        Log.v(TAG, "TrackingUrlManager: getSharedList");
 
-        TrackingUrls result = null;
+        List<ImpressionUrlModel> result = null;
         SharedPreferences preferences = context.getSharedPreferences(SHARED_FILE, 0);
 
-        if (preferences != null && preferences.contains(set)) {
-            String sharedListString = preferences.getString(set, null);
-            if (sharedListString != null) {
-                Gson gson = new Gson();
-                result = gson.fromJson(sharedListString, TrackingUrls.class);
-            }
+        String sharedListString = preferences.getString(listKey, null);
+        if (sharedListString != null) {
+            result = new Gson().fromJson(sharedListString, List.class);
         }
 
         return result;
@@ -84,10 +118,9 @@ public class ImpressionUrlTrackingManager {
      * @param context context
      * @param set key for preference value
      */
-    private synchronized static void setSharedList(TrackingUrls sharedList, Context context, String set) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: setSharedList");
-        Gson gson = new Gson();
-        String sharedListString = gson.toJson(sharedList);
+    private synchronized static void setSharedList(List<ImpressionUrlModel> sharedList, Context context, String set) {
+        Log.v(TAG, "TrackingUrlManager: setSharedList");
+        String sharedListString = new Gson().toJson(sharedList);
 
         SharedPreferences.Editor editablePreferences = context.getSharedPreferences(SHARED_FILE, 0).edit();
         editablePreferences.putString(set, sharedListString);
@@ -102,26 +135,23 @@ public class ImpressionUrlTrackingManager {
      * @param value Ad impression url value
      */
     private static void putToSharedList(final Context context, String set, String value) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: putToSharedList");
+        Log.v(TAG, "TrackingUrlManager: putToSharedList");
 
-        TrackingUrls sharedList = getTrackingUrlList(set, context);
-        List<ImpressionUrlModel> list = sharedList.getUrlList();
+        //TrackingUrls sharedList = getTrackingUrlList(set, context);
+        List<ImpressionUrlModel> list = getSharedList(context, set);//sharedList.getUrlList();
 
-        if (list == null) {
-            Log.w(TAG, "ImpressionUrlTrackingManager: list is null");
-
+        if(list == null) {
             list = new ArrayList<ImpressionUrlModel>();
-            list.add(new ImpressionUrlModel(value, new Date().getTime()));
-        } else {
-            for (ImpressionUrlModel item : list) {
-                if (!item.getURL().equalsIgnoreCase(value)) {
-                    list.add(new ImpressionUrlModel(value, new Date().getTime()));
-                }
+        }
+
+        for (ImpressionUrlModel item : list) {
+            if (!item.getURL().equalsIgnoreCase(value)) {
+                list.add(new ImpressionUrlModel(value));
             }
         }
 
-        sharedList.setUrlList(list);
-        setSharedList(sharedList, context, set);
+        //sharedList.setUrlList(list);
+        setSharedList(list, context, set);
     }
 
     /**
@@ -132,11 +162,11 @@ public class ImpressionUrlTrackingManager {
      * @param value Ad impression url value
      */
     private static void removeFromSharedList(final Context context, String set, String value) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: removeFromSharedList");
+        Log.v(TAG, "TrackingUrlManager: removeFromSharedList");
 
-        TrackingUrls sharedList = getTrackingUrlList(set, context);
+        //TrackingUrls sharedList = getTrackingUrlList(set, context);
 
-        List<ImpressionUrlModel> list = sharedList.getUrlList();
+        List<ImpressionUrlModel> list = getSharedList(context, set);//sharedList.getUrlList();
         if (list != null && list.size() > 0) {
 
             Iterator<ImpressionUrlModel> iterator = list.iterator();
@@ -147,8 +177,8 @@ public class ImpressionUrlTrackingManager {
                 }
             }
         }
-        sharedList.setUrlList(list);
-        setSharedList(sharedList, context, set);
+        //sharedList.setUrlList(list);
+        setSharedList(list, context, set);
     }
 
     /**
@@ -158,17 +188,17 @@ public class ImpressionUrlTrackingManager {
      * @param context context
      * @return TrackingUrls object
      */
-    private static TrackingUrls getTrackingUrlList(String set, Context context) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: getTrackingUrlList");
+    /*private static TrackingUrls getTrackingUrlList(String set, Context context) {
+        Log.v(TAG, "TrackingUrlManager: getTrackingUrlList");
 
-        TrackingUrls sharedList = ImpressionUrlTrackingManager.getSharedList(context, set);
+        TrackingUrls sharedList = getSharedList(context, set);
         if (sharedList == null) {
-            Log.e(TAG, "ImpressionUrlTrackingManager: sharedList is null");
+            Log.e(TAG, "TrackingUrlManager: sharedList is null");
             sharedList = new TrackingUrls();
         }
 
         return sharedList;
-    }
+    }*/
 
     /**
      * This method is used, when old impression request failed and stored in pending list,
@@ -178,8 +208,8 @@ public class ImpressionUrlTrackingManager {
      * @param isFailedPrevious to check request failed or success true: failed,  false: success
      */
     private static void nextImpressionRequest(Context context, boolean isFailedPrevious) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: nextImpressionRequest");
-        mIsTracking = false;
+        Log.v(TAG, "TrackingUrlManager: nextImpressionRequest");
+        sIsTracking = false;
 
         String currentUrl = getValidImpressionUrl(context, CURRENT_URLS_SET);
         removeFromSharedList(context, currentUrl, CURRENT_URLS_SET);
@@ -203,10 +233,9 @@ public class ImpressionUrlTrackingManager {
      * @return impression url
      */
     private static String getValidImpressionUrl(Context context, String set) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: getValidImpressionUrl");
+        Log.v(TAG, "TrackingUrlManager: getValidImpressionUrl");
 
-        TrackingUrls impressionUrl = ImpressionUrlTrackingManager.getSharedList(context, set);
-        List<ImpressionUrlModel> urlList = impressionUrl.getUrlList();
+        List<ImpressionUrlModel> urlList = getSharedList(context, set);//sharedList.getUrlList();
 
         if (urlList != null && urlList.size() > 0) {
             Iterator<ImpressionUrlModel> itr = urlList.iterator();
@@ -223,50 +252,12 @@ public class ImpressionUrlTrackingManager {
             }
 
             //update pending list in preferences
-            impressionUrl.setUrlList(urlList);
-            setSharedList(impressionUrl, context, PENDING_URLS_SET);
+            setSharedList(urlList, context, PENDING_URLS_SET);
 
             if (impressionUrlModel != null) {
                 return impressionUrlModel.getURL();
             }
         }
         return "";
-    }
-
-    //==============================================================================================
-    // PUBLIC
-    //==============================================================================================
-
-    /**
-     * This method is used to send impression request
-     *
-     * @param context context
-     * @param impressionUrl Ad impression url fro request
-     */
-    public synchronized static void TrackImpressionUrl(final Context context, final String impressionUrl) {
-        Log.v(TAG, "ImpressionUrlTrackingManager: TrackImpressionUrl");
-        if (mIsTracking) {
-            // previous request in process, return and store url in pending list
-            ImpressionUrlTrackingManager.putToSharedList(context, PENDING_URLS_SET, impressionUrl);
-            return;
-        }
-
-        mIsTracking = true;
-        ImpressionUrlTrackingManager.putToSharedList(context, CURRENT_URLS_SET, impressionUrl);
-
-        PubnativeAPIRequest.send(impressionUrl, new PubnativeAPIRequest.Listener() {
-
-            @Override
-            public void onPubnativeAPIRequestResponse(String response) {
-                Log.v(TAG, "ImpressionUrlTrackingManager: onPubnativeAPIRequestResponse");
-                nextImpressionRequest(context, false);
-            }
-
-            @Override
-            public void onPubnativeAPIRequestError(Exception error) {
-                Log.v(TAG, "ImpressionUrlTrackingManager: onPubnativeAPIRequestError");
-                nextImpressionRequest(context, true);
-            }
-        });
     }
 }

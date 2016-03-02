@@ -204,7 +204,7 @@ public class PubnativeAdTracker implements PubnativeAPIRequest.Listener,
                         if (System.currentTimeMillis() - firstVisibleTime >= VISIBILITY_TIME_THRESHOLD) {
                             Log.v(TAG, "checkImpression - , it's visible more than " + VISIBILITY_TIME_THRESHOLD + "ms Current time is: " + System.currentTimeMillis());
                             stopImpressionTracking();
-                            ImpressionUrlTrackingManager.TrackImpressionUrl(mView.getContext(), mImpressionUrl);
+                            TrackingUrlManager.TrackImpressionUrl(mView.getContext(), mImpressionUrl);
                             break;
                         } else {
                             try {

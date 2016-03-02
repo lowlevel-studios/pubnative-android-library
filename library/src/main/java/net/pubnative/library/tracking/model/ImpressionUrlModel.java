@@ -23,6 +23,8 @@
 
 package net.pubnative.library.tracking.model;
 
+import java.util.Date;
+
 public class ImpressionUrlModel {
 
     protected String URL;
@@ -34,6 +36,10 @@ public class ImpressionUrlModel {
 
     public String getURL() {
         return URL;
+    }
+
+    public ImpressionUrlModel(String url) {
+        this(url, new Date().getTime());
     }
 
     public ImpressionUrlModel(String url, long time) {
