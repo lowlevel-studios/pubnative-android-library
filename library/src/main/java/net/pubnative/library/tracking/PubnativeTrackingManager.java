@@ -92,7 +92,8 @@ public class PubnativeTrackingManager {
                 sIsTracking = false;
             } else {
                 if (model.startTimestamp + ITEM_VALIDITY_TIME < System.currentTimeMillis()) {
-                    // Discard item, let's go for the next one
+                    Log.v(TAG, "trackNextItem - discarding item");
+                    sIsTracking = false;
                     trackNextItem(context);
                 } else {
                     PubnativeAPIRequest.send(model.url, new PubnativeAPIRequest.Listener() {
