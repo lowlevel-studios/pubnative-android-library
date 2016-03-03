@@ -91,7 +91,7 @@ public class PubnativeAPIRequestTask {
                 throw new Exception("Server error: " + responseCode);
             }
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.toString());
             pubnativeAPIResponse.setError(e);
         } finally {
             mResponsePoster.execute(new Runnable() {
