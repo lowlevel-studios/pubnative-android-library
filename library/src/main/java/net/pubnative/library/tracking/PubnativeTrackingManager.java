@@ -101,6 +101,7 @@ public class PubnativeTrackingManager {
                         public void onPubnativeAPIRequestResponse(String response) {
 
                             Log.v(TAG, "onPubnativeAPIRequestResponse" + response);
+                            sIsTracking = false;
                             trackNextItem(context);
                         }
 
@@ -110,6 +111,7 @@ public class PubnativeTrackingManager {
                             Log.e(TAG, "onPubnativeAPIRequestError " + error);
                             // Since this failed, we re-enqueue it
                             enqueueItem(context, SHARED_FAILED_LIST, model);
+                            sIsTracking = false;
                             trackNextItem(context);
                         }
                     });
