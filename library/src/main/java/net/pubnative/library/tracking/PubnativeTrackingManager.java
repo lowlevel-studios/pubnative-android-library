@@ -127,26 +127,28 @@ public class PubnativeTrackingManager {
         List<PubnativeTrackingURLModel> failedList = getList(context, SHARED_FAILED_LIST);
         List<PubnativeTrackingURLModel> pendingList = getList(context, SHARED_PENDING_LIST);
         pendingList.addAll(failedList);
-        setList(context, SHARED_PENDING_LIST, failedList);
+        setList(context, SHARED_PENDING_LIST, pendingList);
+        failedList.clear();
+        setList(context, SHARED_FAILED_LIST, failedList);
     }
 
     protected static void enqueueItem(Context context, String listKey, PubnativeTrackingURLModel model) {
 
         Log.v(TAG, "enqueueItem: " + listKey);
-        List<PubnativeTrackingURLModel> pendingList = getList(context, listKey);
-        pendingList.add(model);
-        setList(context, listKey, pendingList);
+        List<PubnativeTrackingURLModel> list = getList(context, listKey);
+        list.add(model);
+        setList(context, listKey, list);
     }
 
     protected static PubnativeTrackingURLModel dequeueItem(Context context, String listKey) {
 
         Log.v(TAG, "dequeueItem: " + listKey);
         PubnativeTrackingURLModel result = null;
-        List<PubnativeTrackingURLModel> pendingList = getList(context, listKey);
-        if (pendingList.size() > 0) {
-            result = pendingList.get(0);
-            pendingList.remove(0);
-            setList(context, listKey, pendingList);
+        List<PubnativeTrackingURLModel> list = getList(context, listKey);
+        if (list.size() > 0) {
+            result = list.get(0);
+            list.remove(0);
+            setList(context, listKey, list);
         }
         return result;
     }
