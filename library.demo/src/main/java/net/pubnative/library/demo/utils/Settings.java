@@ -5,7 +5,7 @@ package net.pubnative.library.demo.utils;
  */
 public class Settings
 {
-    private static final String DEFAULT_APP_TOKEN = "6651a94cad554c30c47427cbaf0b613a967abcca317df325f363ef154a027092";
+    private static final String DEFAULT_APP_TOKEN = "1bc3b0a3ee6cfa1f35ac2f3e9630cc7320e999118cb49a9591dfc957b58d98a0";
 
     private static String mAppToken = null;
 
