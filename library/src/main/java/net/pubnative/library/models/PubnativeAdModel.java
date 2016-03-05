@@ -225,6 +225,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                 public void onClick(View view) {
 
                     Log.v(TAG, "onClick");
+                    invokeOnClick(view);
                     URLDriller driller = new URLDriller();
                     driller.setListener(PubnativeAdModel.this);
                     driller.drill(mClickableView.getContext(), getClickUrl());
