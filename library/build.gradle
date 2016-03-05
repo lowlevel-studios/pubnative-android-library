@@ -13,7 +13,7 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 10
-        versionCode 15
+        versionCode 17
         versionName sharedVersion
     }
     buildTypes {
