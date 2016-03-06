@@ -21,15 +21,19 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.models;
+package net.pubnative.library.request.model;
 
-public class PubnativeBeacon {
+import java.util.List;
 
-    public String type;
-    public String url;
+public class PubnativeRequestAPIResponseModel {
 
-    public interface BeaconType {
+    public String                 status;
+    public String                 error_message;
+    public List<PubnativeAdModel> ads;
 
-        String IMPRESSION = "impression";
+    public interface Status {
+
+        String ERROR = "error";
+        String OK    = "ok";
     }
 }

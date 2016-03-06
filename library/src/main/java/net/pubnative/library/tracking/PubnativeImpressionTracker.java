@@ -43,7 +43,7 @@ public class PubnativeImpressionTracker {
     private              boolean          mIsTrackingInProgress           = false;
     private              boolean          mTrackingShouldStop             = false;
     private              Handler          mHandler                        = null;
-    private              String           mImpressionUrl                  = null;
+
     //==============================================================================================
     // LISTENER
     //==============================================================================================
@@ -54,11 +54,11 @@ public class PubnativeImpressionTracker {
     public interface Listener {
 
         /**
-         * Calledn when the impression is detected
+         * Called when the impression is detected
          *
-         * @param view view where the impression was deteted
+         * @param view view where the impression was detected
          */
-        void onTrackerImpression(View view);
+        void onImpressionDetected(View view);
     }
 
     //==============================================================================================
@@ -88,7 +88,6 @@ public class PubnativeImpressionTracker {
                     if (elapsedTime >= VISIBILITY_TIME_THRESHOLD) {
                         Log.v(TAG, "checkImpression - impression confirmed");
                         invokeOnTrackerImpression();
-                        PubnativeTrackingManager.track(mView.getContext(), mImpressionUrl);
                         mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
                         mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
                         stopImpressionTracking();
@@ -123,7 +122,6 @@ public class PubnativeImpressionTracker {
             mHandler = new Handler();
             mListener = listener;
             mView = view;
-            mImpressionUrl = impressionUrl;
             mViewTreeObserver = mView.getViewTreeObserver();
         }
     }
@@ -208,7 +206,7 @@ public class PubnativeImpressionTracker {
             public void run() {
 
                 if (mListener != null) {
-                    mListener.onTrackerImpression(mView);
+                    mListener.onImpressionDetected(mView);
                 }
             }
         });

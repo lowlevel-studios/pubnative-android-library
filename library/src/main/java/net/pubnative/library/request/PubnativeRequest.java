@@ -32,11 +32,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
-import net.pubnative.library.models.APIRequestResponseModel;
-import net.pubnative.library.models.PubnativeAdModel;
-import net.pubnative.library.network.PubnativeAPIRequest;
+import net.pubnative.library.network.PubnativeHttpRequest;
+import net.pubnative.library.request.model.PubnativeAdModel;
+import net.pubnative.library.request.model.PubnativeRequestAPIResponseModel;
 import net.pubnative.library.utils.AndroidAdvertisingIDTask;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
@@ -47,15 +46,17 @@ import java.util.Locale;
 import java.util.Map;
 
 public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
-                                         PubnativeAPIRequest.Listener {
+                                         PubnativeHttpRequest.Listener {
 
-    private static         String              TAG                = PubnativeRequest.class.getSimpleName();
-    private static final   String              NATIVE_TYPE_URL    = "native";
-    protected static final String              BASE_URL           = "http://api.pubnative.net/api/partner/v2/promotions";
-    protected              Context             mContext           = null;
-    protected              Endpoint            mEndpoint          = null;
-    protected              Map<String, String> mRequestParameters = new HashMap<String, String>();
-    protected              Listener            mListener          = null;
+    private static         String               TAG                = PubnativeRequest.class.getSimpleName();
+    private static final   String               NATIVE_TYPE_URL    = "native";
+    protected static final String               BASE_URL           = "http://api.pubnative.net/api/partner/v2/promotions";
+    protected              Context              mContext           = null;
+    protected              Endpoint             mEndpoint          = null;
+    protected              Map<String, String>  mRequestParameters = new HashMap<String, String>();
+    protected              Listener             mListener          = null;
+    protected              PubnativeHttpRequest mRequest           = null;
+    protected              boolean              mIsRunning         = false;
 
     /**
      * These are the various types of adds pubnative support
@@ -154,9 +155,16 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
     public void start(Context context, Endpoint endpoint, Listener listener) {
 
         Log.v(TAG, "start");
-        if (listener != null) {
+        if (listener == null) {
+            Log.e(TAG, "start - Request started without listener, dropping call");
+        } else {
             mListener = listener;
-            if (endpoint != null && context != null) {
+            if (context == null) {
+                invokeOnFail(new IllegalArgumentException("PubnativeRequest - Error: context is null"));
+            } else if(mIsRunning) {
+                Log.w(TAG, "PubnativeRequest - this request is already running, dropping the call");
+            } else {
+                mIsRunning = true;
                 mContext = context;
                 mEndpoint = endpoint;
                 setDefaultParameters();
@@ -165,11 +173,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
                 } else {
                     sendNetworkRequest();
                 }
-            } else {
-                invokeOnPubnativeRequestFailure(new IllegalArgumentException("start - Arguments cannot be null"));
             }
-        } else {
-            Log.e(TAG, "start - Request started without listener, dropping call");
         }
     }
 
@@ -251,26 +255,29 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
         Log.v(TAG, "sendNetworkRequest");
         String url = getRequestURL();
         if (url == null) {
-            invokeOnPubnativeRequestFailure(new Exception("sendNetworkRequest - Error getting request URL"));
+            invokeOnFail(new Exception("PubnativeRequest - Error: invalid request URL"));
         } else {
-            PubnativeAPIRequest.send(url, this);
+            mRequest = new PubnativeHttpRequest();
+            mRequest.start(mContext, url, this);
         }
     }
 
     //==============================================================================================
     // Listener Helpers
     //==============================================================================================
-    protected void invokeOnPubnativeRequestSuccess(List<PubnativeAdModel> ads) {
+    protected void invokeOnSuccess(List<PubnativeAdModel> ads) {
 
-        Log.v(TAG, "invokeOnPubnativeRequestSuccess");
+        Log.v(TAG, "invokeOnSuccess");
+        mIsRunning = false;
         if (mListener != null) {
             mListener.onPubnativeRequestSuccess(this, ads);
         }
     }
 
-    protected void invokeOnPubnativeRequestFailure(Exception exception) {
+    protected void invokeOnFail(Exception exception) {
 
-        Log.v(TAG, "invokeOnPubnativeRequestFailure: " + exception);
+        Log.v(TAG, "invokeOnFail: " + exception);
+        mIsRunning = false;
         if (mListener != null) {
             mListener.onPubnativeRequestFailed(this, exception);
         }
@@ -295,40 +302,36 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
         sendNetworkRequest();
     }
 
-    // PubnativeAPIRequest.Listener
+    // PubnativeHttpRequest.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onPubnativeAPIRequestResponse(String response) {
+    public void onPubnativeHttpRequestStart(PubnativeHttpRequest request) {
 
-        Log.v(TAG, "onPubnativeAPIRequestResponse");
-        if (TextUtils.isEmpty(response)) {
-            invokeOnPubnativeRequestFailure(new Exception("Server response empty"));
-        } else {
-            try {
-                APIRequestResponseModel model = new Gson().fromJson(response, APIRequestResponseModel.class);
-                if (model != null) {
-                    if (APIRequestResponseModel.Status.OK.equals(model.status)) {
-                        // SUCCESS
-                        invokeOnPubnativeRequestSuccess(model.ads);
-                    } else {
-                        // ERROR: request error
-                        invokeOnPubnativeRequestFailure(new Exception(model.error_message));
-                    }
-                } else {
-                    // ERROR: parsing error
-                    invokeOnPubnativeRequestFailure(new Exception("Response error"));
-                }
-            } catch (JsonSyntaxException exception) {
-                // ERROR: json error
-                invokeOnPubnativeRequestFailure(exception);
+        Log.v(TAG, "onPubnativeHttpRequestStart");
+    }
+
+    @Override
+    public void onPubnativeHttpRequestFinish(PubnativeHttpRequest request, String result) {
+
+        Log.v(TAG, "onPubnativeHttpRequestFinish");
+        try {
+            PubnativeRequestAPIResponseModel apiResponseModel = new Gson().fromJson(result, PubnativeRequestAPIResponseModel.class);
+            if (apiResponseModel == null) {
+                invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
+            } else if (PubnativeRequestAPIResponseModel.Status.OK.equals(apiResponseModel.status)) {
+                invokeOnSuccess(apiResponseModel.ads);
+            } else {
+                invokeOnFail(new Exception("PubnativeRequest - Error: Server error: " + apiResponseModel.error_message));
             }
+        } catch (Exception exception) {
+            invokeOnFail(exception);
         }
     }
 
     @Override
-    public void onPubnativeAPIRequestError(Exception error) {
+    public void onPubnativeHttpRequestFail(PubnativeHttpRequest request, Exception exception) {
 
-        Log.v(TAG, "onPubnativeAPIRequestError: " + error);
-        invokeOnPubnativeRequestFailure(error);
+        Log.v(TAG, "onPubnativeHttpRequestFail: " + exception);
+        invokeOnFail(exception);
     }
 }
