@@ -45,7 +45,6 @@ public class PubnativeTrackingManager {
     private static final String               SHARED_FAILED_LIST  = "failed";
     private static final long                 ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
     private static       boolean              sIsTracking         = false;
-    private static       PubnativeHttpRequest sRequest            = new PubnativeHttpRequest();
     //==============================================================================================
     // PUBLIC
     //==============================================================================================
