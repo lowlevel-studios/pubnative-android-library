@@ -45,7 +45,7 @@ public class PubnativeTrackingManagerTest {
         PubnativeTrackingManager.track(applicationContext, "");
         List<PubnativeTrackingURLModel> urlModelList = PubnativeTrackingManager.getList(applicationContext, PubnativeTrackingManager.SHARED_PENDING_LIST);
 
-        Assert.assertTrue(urlModelList.size() == 0);
+        assertThat(urlModelList).isEmpty();
     }
 
     @Test
