@@ -13,11 +13,7 @@ pubnative-android-library is a collection of Open Source tools to implement API 
 * [Requirements](#requirements)
 * [Install](#install)
 * [Usage](#usage)
-  * [Setup](#usage_setup)
-  * [Native ads](#usage_native)
-  * [Predefined ads](#usage_predefined)
 * [Misc](#misc)
-  * [Dependencies](#misc_dependencies)
   * [License](#misc_license)
   * [Contributing](#misc_contributing)
 
