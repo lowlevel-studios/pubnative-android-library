@@ -35,7 +35,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.demo.utils.Settings;
-import net.pubnative.library.models.PubnativeAdModel;
+import net.pubnative.library.request.model.PubnativeAdModel;
 import net.pubnative.library.request.PubnativeRequest;
 
 import java.util.List;

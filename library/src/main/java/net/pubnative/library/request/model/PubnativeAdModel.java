@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.models;
+package net.pubnative.library.request.model;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,6 +29,7 @@ import android.view.View;
 
 import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
+import net.pubnative.library.tracking.PubnativeTrackingManager;
 
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
 
     private static String                TAG                 = PubnativeAdModel.class.getSimpleName();
+    //==============================================================================================
+    // Fields
+    //==============================================================================================
     protected      String                title               = null;
     protected      String                description         = null;
     protected      String                cta_text            = null;
@@ -47,7 +51,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     protected      String                type                = null;
     protected      String                portrait_banner_url = null;
     protected      List<PubnativeBeacon> beacons             = null;
-
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -280,9 +283,10 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     // PubnativeImpressionTracker.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onTrackerImpression(View view) {
+    public void onImpressionDetected(View view) {
 
-        Log.v(TAG, "onTrackerImpression");
+        Log.v(TAG, "onImpressionDetected");
+        PubnativeTrackingManager.track(view.getContext(), getBeacon(PubnativeBeacon.BeaconType.IMPRESSION));
         invokeOnImpression(view);
     }
 

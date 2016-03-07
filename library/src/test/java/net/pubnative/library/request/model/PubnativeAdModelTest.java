@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.models;
+package net.pubnative.library.request.model;
 
 import android.content.Context;
 import android.view.View;

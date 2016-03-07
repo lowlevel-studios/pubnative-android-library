@@ -31,7 +31,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import net.pubnative.library.network.PubnativeAPIRequest;
+import net.pubnative.library.network.PubnativeHttpRequest;
 import net.pubnative.library.tracking.model.PubnativeTrackingURLModel;
 
 import java.util.ArrayList;
@@ -39,12 +39,12 @@ import java.util.List;
 
 public class PubnativeTrackingManager {
 
-    private static final String  TAG                 = PubnativeTrackingManager.class.getSimpleName();
-    private static final String  SHARED_PREFERENCES  = "net.pubnative.library.tracking.PubnativeTrackingManager";
-    private static final String  SHARED_PENDING_LIST = "pending";
-    private static final String  SHARED_FAILED_LIST  = "failed";
-    private static final long    ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
-    private static       boolean sIsTracking         = false;
+    private static final String               TAG                 = PubnativeTrackingManager.class.getSimpleName();
+    private static final String               SHARED_PREFERENCES  = "net.pubnative.library.tracking.PubnativeTrackingManager";
+    private static final String               SHARED_PENDING_LIST = "pending";
+    private static final String               SHARED_FAILED_LIST  = "failed";
+    private static final long                 ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
+    private static       boolean              sIsTracking         = false;
     //==============================================================================================
     // PUBLIC
     //==============================================================================================
@@ -96,20 +96,26 @@ public class PubnativeTrackingManager {
                     sIsTracking = false;
                     trackNextItem(context);
                 } else {
-                    PubnativeAPIRequest.send(model.url, new PubnativeAPIRequest.Listener() {
+                    new PubnativeHttpRequest().start(context, model.url, new PubnativeHttpRequest.Listener() {
 
                         @Override
-                        public void onPubnativeAPIRequestResponse(String response) {
+                        public void onPubnativeHttpRequestStart(PubnativeHttpRequest request) {
 
-                            Log.v(TAG, "onPubnativeAPIRequestResponse" + response);
+                            Log.v(TAG, "onPubnativeHttpRequestStart");
+                        }
+
+                        @Override
+                        public void onPubnativeHttpRequestFinish(PubnativeHttpRequest request, String result) {
+
+                            Log.v(TAG, "onPubnativeHttpRequestFinish" + result);
                             sIsTracking = false;
                             trackNextItem(context);
                         }
 
                         @Override
-                        public void onPubnativeAPIRequestError(Exception error) {
+                        public void onPubnativeHttpRequestFail(PubnativeHttpRequest request, Exception exception) {
 
-                            Log.e(TAG, "onPubnativeAPIRequestError " + error);
+                            Log.e(TAG, "onPubnativeHttpRequestFail: " + exception);
                             // Since this failed, we re-enqueue it
                             enqueueItem(context, SHARED_FAILED_LIST, model);
                             sIsTracking = false;
