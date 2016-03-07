@@ -114,7 +114,7 @@ public class PubnativeImpressionTracker {
      * @param view          ad view
      * @param listener      listener for callbacks
      */
-    public PubnativeImpressionTracker(View view, String impressionUrl, Listener listener) {
+    public PubnativeImpressionTracker(View view, Listener listener) {
 
         if (view == null) {
             Log.e(TAG, "Error: No view to track, dropping call");
