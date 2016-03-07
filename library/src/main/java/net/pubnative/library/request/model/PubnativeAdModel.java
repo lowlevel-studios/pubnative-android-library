@@ -23,6 +23,8 @@
 
 package net.pubnative.library.request.model;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -32,7 +34,6 @@ import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
 import java.util.List;
-
 
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
@@ -85,10 +86,10 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     }
 
     protected transient Listener mListener;
+
     //==============================================================================================
     // Fields
     //==============================================================================================
-
     public String getTitle() {
 
         Log.v(TAG, "getTitle");
@@ -231,7 +232,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                     invokeOnClick(view);
                     URLDriller driller = new URLDriller();
                     driller.setListener(PubnativeAdModel.this);
-                    driller.drill(mClickableView.getContext(), getClickUrl());
+                    driller.drill(getClickUrl());
                 }
             });
         }
@@ -246,6 +247,21 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         mPubnativeAdTracker.stopTracking();
         if (mClickableView != null) {
             mClickableView.setOnClickListener(null);
+        }
+    }
+
+    protected void openURL(String urlString) {
+
+        Log.v(TAG, "openURL: " + urlString);
+        if (TextUtils.isEmpty(urlString)) {
+            Log.e(TAG, "Error: ending URL cannot be opened - " + urlString);
+        } else if (mClickableView == null) {
+            Log.e(TAG, "Error: clickable view not set");
+        } else {
+            Uri uri = Uri.parse(urlString);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            invokeOnOpenOffer();
+            mClickableView.getContext().startActivity(intent);
         }
     }
 
@@ -308,12 +324,13 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     public void onURLDrillerFinish(String url) {
 
         Log.v(TAG, "onURLDrillerFinish: " + url);
-        invokeOnOpenOffer();
+        openURL(url);
     }
 
     @Override
     public void onURLDrillerFail(String url, Exception exception) {
 
         Log.v(TAG, "onURLDrillerFail: " + exception);
+        openURL(url);
     }
 }
