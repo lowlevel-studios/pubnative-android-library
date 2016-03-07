@@ -155,7 +155,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
     /**
      * This function will return the Beacon URL on the bases of beacon type.
-     * It will traverse all beacons and search for <code><beaconType<code/> beaconType.
+     * It will traverse all beacons and search for <code>beaconType</code>.
      *
      * @param beaconType type of beacon
      *

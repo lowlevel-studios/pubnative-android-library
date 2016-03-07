@@ -149,6 +149,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
     /**
      * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
+     * @param context valid Context object
      * @param endpoint endpoint of ad (ex: NATIVE)
      * @param listener valid nativeRequestListener to track ad request callbacks.
      */
@@ -248,7 +249,7 @@ public class PubnativeRequest implements AndroidAdvertisingIDTask.Listener,
 
     /**
      * This function will create and send the network request.
-     * It consider that <code>type<code/> is already provided so that it can prepare the request URL.
+     * It consider that <code>type</code> is already provided so that it can prepare the request URL.
      */
     protected void sendNetworkRequest() {
 
