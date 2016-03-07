@@ -118,9 +118,11 @@ public class PubnativeHttpRequest {
 
         Log.v(TAG, "start: " + urlString);
         mListener = listener;
+        mHandler = new Handler();
         if (mListener == null) {
             Log.w(TAG, "Warning: null listener specified");
         }
+
         if (TextUtils.isEmpty(urlString)) {
             invokeFail(new IllegalArgumentException("PubnativeHttpRequest - Error: null or empty url, dropping call"));
         } else {
@@ -128,7 +130,7 @@ public class PubnativeHttpRequest {
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
-                mHandler = new Handler();
+
                 new Thread(new Runnable() {
 
                     @Override
