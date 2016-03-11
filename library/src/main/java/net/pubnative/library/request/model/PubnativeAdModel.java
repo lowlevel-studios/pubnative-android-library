@@ -23,7 +23,6 @@
 
 package net.pubnative.library.request.model;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -262,9 +261,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             try {
                 Uri uri = Uri.parse(urlString);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                invokeOnOpenOffer();
                 mClickableView.getContext().startActivity(intent);
-            } catch (ActivityNotFoundException ex) {
+                invokeOnOpenOffer();
+            } catch (Exception ex) {
                 Log.e(TAG, "openURL: Error - " + ex.getMessage());
             }
         }
