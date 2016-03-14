@@ -258,10 +258,14 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         } else if (mClickableView == null) {
             Log.e(TAG, "Error: clickable view not set");
         } else {
-            Uri uri = Uri.parse(urlString);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            invokeOnOpenOffer();
-            mClickableView.getContext().startActivity(intent);
+            try {
+                Uri uri = Uri.parse(urlString);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                mClickableView.getContext().startActivity(intent);
+                invokeOnOpenOffer();
+            } catch (Exception ex) {
+                Log.e(TAG, "openURL: Error - " + ex.getMessage());
+            }
         }
     }
 
