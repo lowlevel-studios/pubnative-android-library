@@ -214,9 +214,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             Log.v(TAG, "startTracking - impression is already confirmed, dropping impression tracking");
         } else {
             if (mPubnativeAdTracker == null) {
-                mPubnativeAdTracker = new PubnativeImpressionTracker(view, this);
+                mPubnativeAdTracker = new PubnativeImpressionTracker();
             }
-            mPubnativeAdTracker.startTracking();
+            mPubnativeAdTracker.startTracking(view, this);
         }
         // Click tracking
         if (TextUtils.isEmpty(getClickUrl())) {
