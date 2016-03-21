@@ -87,8 +87,7 @@ public class PubnativeImpressionTracker {
                     if (elapsedTime >= VISIBILITY_TIME_THRESHOLD) {
                         Log.v(TAG, "checkImpression - impression confirmed");
                         invokeOnTrackerImpression();
-                        mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
-                        mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
+                        removeListeners();
                         stopImpressionTracking();
                         break;
                     } else {
@@ -130,8 +129,7 @@ public class PubnativeImpressionTracker {
     public void stopTracking() {
 
         Log.v(TAG, "stopTracking");
-        mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
-        mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
+        removeListeners();
         mTrackingShouldStop = true;
         stopImpressionTracking();
         mListener = null;
@@ -144,8 +142,12 @@ public class PubnativeImpressionTracker {
 
         Log.v(TAG, "startTracking");
         // Impression tracking
-        mView.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
-        mView.getViewTreeObserver().addOnScrollChangedListener(onScrollChangedListener);
+        if(mView.getViewTreeObserver().isAlive()) {
+            addListeners();
+        } else {
+            // wait for valid viewTreeObserver
+            watchTreeObserver();
+        }
     }
 
     //==============================================================================================
@@ -188,6 +190,37 @@ public class PubnativeImpressionTracker {
         if (mCheckImpressionThread != null) {
             mCheckImpressionThread.interrupt();
             mCheckImpressionThread = null;
+        }
+    }
+
+    private void watchTreeObserver() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(VISIBILITY_CHECK_INTERVAL);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if(mView.getViewTreeObserver().isAlive()) {
+                        addListeners();
+                        break;
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private void addListeners() {
+        mView.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
+        mView.getViewTreeObserver().addOnScrollChangedListener(onScrollChangedListener);
+    }
+
+    private void removeListeners() {
+        if(mView.getViewTreeObserver().isAlive()) {
+            mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
+            mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
         }
     }
 
