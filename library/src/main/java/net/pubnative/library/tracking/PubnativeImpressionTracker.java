@@ -38,7 +38,6 @@ public class PubnativeImpressionTracker {
     private static final long             VISIBILITY_CHECK_INTERVAL       = 200;
     protected            Listener         mListener                       = null;
     private              View             mView                           = null;
-    private              ViewTreeObserver mViewTreeObserver               = null;
     private              Thread           mCheckImpressionThread          = null;
     private              boolean          mIsTrackingInProgress           = false;
     private              boolean          mTrackingShouldStop             = false;
@@ -88,8 +87,8 @@ public class PubnativeImpressionTracker {
                     if (elapsedTime >= VISIBILITY_TIME_THRESHOLD) {
                         Log.v(TAG, "checkImpression - impression confirmed");
                         invokeOnTrackerImpression();
-                        mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
-                        mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+                        mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
+                        mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
                         stopImpressionTracking();
                         break;
                     } else {
@@ -122,7 +121,6 @@ public class PubnativeImpressionTracker {
             mHandler = new Handler();
             mListener = listener;
             mView = view;
-            mViewTreeObserver = mView.getViewTreeObserver();
         }
     }
 
@@ -132,8 +130,8 @@ public class PubnativeImpressionTracker {
     public void stopTracking() {
 
         Log.v(TAG, "stopTracking");
-        mViewTreeObserver.removeGlobalOnLayoutListener(onGlobalLayoutListener);
-        mViewTreeObserver.removeOnScrollChangedListener(onScrollChangedListener);
+        mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
+        mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
         mTrackingShouldStop = true;
         stopImpressionTracking();
         mListener = null;
@@ -146,8 +144,8 @@ public class PubnativeImpressionTracker {
 
         Log.v(TAG, "startTracking");
         // Impression tracking
-        mViewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener);
-        mViewTreeObserver.addOnScrollChangedListener(onScrollChangedListener);
+        mView.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
+        mView.getViewTreeObserver().addOnScrollChangedListener(onScrollChangedListener);
     }
 
     //==============================================================================================
