@@ -39,6 +39,7 @@ public class PubnativeImpressionTracker {
     protected            Listener         mListener                       = null;
     private              View             mView                           = null;
     private              Thread           mCheckImpressionThread          = null;
+    private              Thread           mViewTreeObserverThread         = null;
     private              boolean          mIsTrackingInProgress           = false;
     private              boolean          mTrackingShouldStop             = false;
     private              Handler          mHandler                        = null;
@@ -191,25 +192,32 @@ public class PubnativeImpressionTracker {
             mCheckImpressionThread.interrupt();
             mCheckImpressionThread = null;
         }
+        if(mViewTreeObserverThread != null) {
+            mViewTreeObserverThread.interrupt();
+            mViewTreeObserverThread = null;
+        }
     }
 
     private void watchTreeObserver() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(VISIBILITY_CHECK_INTERVAL);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if(mView.getViewTreeObserver().isAlive()) {
-                        addListeners();
-                        break;
+        if(mViewTreeObserverThread == null) {
+            mViewTreeObserverThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep(VISIBILITY_CHECK_INTERVAL);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(mView.getViewTreeObserver().isAlive()) {
+                            addListeners();
+                            break;
+                        }
                     }
                 }
-            }
-        }).start();
+            });
+        }
+        mViewTreeObserverThread.start();
     }
 
     private void addListeners() {
