@@ -24,6 +24,7 @@
 package net.pubnative.library.tracking;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -32,18 +33,17 @@ import net.pubnative.library.utils.SystemUtils;
 
 public class PubnativeImpressionTracker {
 
-    private static       String           TAG                             = PubnativeImpressionTracker.class.getSimpleName();
-    private static final float            VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
-    private static final long             VISIBILITY_TIME_THRESHOLD       = 1000;
-    private static final long             VISIBILITY_CHECK_INTERVAL       = 200;
-    protected            Listener         mListener                       = null;
-    private              View             mView                           = null;
-    private              Thread           mCheckImpressionThread          = null;
-    private              Thread           mViewTreeObserverThread         = null;
-    private              boolean          mIsTrackingInProgress           = false;
-    private              boolean          mTrackingShouldStop             = false;
-    private              Handler          mHandler                        = null;
-
+    private static       String   TAG                             = PubnativeImpressionTracker.class.getSimpleName();
+    private static final float    VISIBILITY_PERCENTAGE_THRESHOLD = 0.50f;
+    private static final long     VISIBILITY_TIME_THRESHOLD       = 1000;
+    private static final long     VISIBILITY_CHECK_INTERVAL       = 200;
+    protected            Listener mListener                       = null;
+    protected            View     mView                           = null;
+    protected            Thread   mCheckImpressionThread          = null;
+    protected            Thread   mViewTreeObserverThread         = null;
+    protected            boolean  mIsTrackingInProgress           = false;
+    protected            boolean  mTrackingShouldStop             = false;
+    protected            Handler  mHandler                        = null;
     //==============================================================================================
     // LISTENER
     //==============================================================================================
@@ -108,23 +108,6 @@ public class PubnativeImpressionTracker {
     //==============================================================================================
 
     /**
-     * Constructor
-     *
-     * @param view          ad view
-     * @param listener      listener for callbacks
-     */
-    public PubnativeImpressionTracker(View view, Listener listener) {
-
-        if (view == null) {
-            Log.e(TAG, "Error: No view to track, dropping call");
-        } else {
-            mHandler = new Handler();
-            mListener = listener;
-            mView = view;
-        }
-    }
-
-    /**
      * This method stops tracking of the configured view
      */
     public void stopTracking() {
@@ -139,15 +122,19 @@ public class PubnativeImpressionTracker {
     /**
      * This method starts tracking of the configured view
      */
-    public void startTracking() {
+    public void startTracking(View view, Listener listener) {
 
         Log.v(TAG, "startTracking");
-        // Impression tracking
-        if(mView.getViewTreeObserver().isAlive()) {
-            addListeners();
+        if (listener == null) {
+            Log.e(TAG, "Error: No listener for callbacks, dropping call");
+        } else if (view == null) {
+            Log.e(TAG, "Error: No view to track, dropping call");
         } else {
-            // wait for valid viewTreeObserver
-            watchTreeObserver();
+            mListener = listener;
+            mView = view;
+            mHandler = new Handler(Looper.getMainLooper());
+            // Impression tracking
+            waitForTreeObserverAlive();
         }
     }
 
@@ -192,27 +179,27 @@ public class PubnativeImpressionTracker {
             mCheckImpressionThread.interrupt();
             mCheckImpressionThread = null;
         }
-        if(mViewTreeObserverThread != null) {
+        if (mViewTreeObserverThread != null) {
             mViewTreeObserverThread.interrupt();
             mViewTreeObserverThread = null;
         }
     }
 
-    private void watchTreeObserver() {
-        if(mViewTreeObserverThread == null) {
+    private void waitForTreeObserverAlive() {
+
+        if (mViewTreeObserverThread == null) {
             mViewTreeObserverThread = new Thread(new Runnable() {
+
                 @Override
                 public void run() {
-                    while (true) {
-                        try {
+
+                    try {
+                        while (!mView.getViewTreeObserver().isAlive()) {
                             Thread.sleep(VISIBILITY_CHECK_INTERVAL);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
-                        if(mView.getViewTreeObserver().isAlive()) {
-                            addListeners();
-                            break;
-                        }
+                        addListeners();
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
                     }
                 }
             });
@@ -221,17 +208,22 @@ public class PubnativeImpressionTracker {
     }
 
     private void addListeners() {
-        mView.getViewTreeObserver().addOnGlobalLayoutListener(onGlobalLayoutListener);
-        mView.getViewTreeObserver().addOnScrollChangedListener(onScrollChangedListener);
-    }
 
-    private void removeListeners() {
-        if(mView.getViewTreeObserver().isAlive()) {
-            mView.getViewTreeObserver().removeGlobalOnLayoutListener(onGlobalLayoutListener);
-            mView.getViewTreeObserver().removeOnScrollChangedListener(onScrollChangedListener);
+        ViewTreeObserver observer = mView.getViewTreeObserver();
+        if (observer != null && observer.isAlive()) {
+            observer.addOnGlobalLayoutListener(onGlobalLayoutListener);
+            observer.addOnScrollChangedListener(onScrollChangedListener);
         }
     }
 
+    private void removeListeners() {
+
+        ViewTreeObserver observer = mView.getViewTreeObserver();
+        if (observer != null && observer.isAlive()) {
+            observer.removeGlobalOnLayoutListener(onGlobalLayoutListener);
+            observer.removeOnScrollChangedListener(onScrollChangedListener);
+        }
+    }
     //==============================================================================================
     // Listener helpers
     //==============================================================================================
