@@ -44,8 +44,7 @@ Optionally but not necessary to improve user targeting:
 Add the following line to your module dependencies
 
 ```java
-compile 'net.pubnative:library:2.0.0'
-
+compile 'net.pubnative:library:2.0.1'
 ```
 
 ### Manual
