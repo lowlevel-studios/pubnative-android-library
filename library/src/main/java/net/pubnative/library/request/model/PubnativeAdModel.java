@@ -261,7 +261,8 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             try {
                 Uri uri = Uri.parse(urlString);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                mClickableView.getContext().getApplicationContext().startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mClickableView.getContext().startActivity(intent);
                 invokeOnOpenOffer();
             } catch (Exception ex) {
                 Log.e(TAG, "openURL: Error - " + ex.getMessage());
