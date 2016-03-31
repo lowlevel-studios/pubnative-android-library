@@ -14,6 +14,7 @@ pubnative-android-library is a collection of Open Source tools to implement API 
 * [Install](#install)
 * [Usage](#usage)
 * [Misc](#misc)
+  * [Proguard] (#proguard)
   * [License](#misc_license)
   * [Contributing](#misc_contributing)
 
@@ -116,6 +117,15 @@ If at some point you want to stop the view and click tracking, just call the ad 
 
 <a name="misc"></a>
 # Misc
+
+<a name="proguard"></a>
+### Proguard
+
+If you are using Proguard, add these lines to your Proguard file
+```
+-keepattributes Signature
+-keep class net.pubnative.** { *; }
+```
 
 <a name="misc_license"></a>
 ### License
