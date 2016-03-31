@@ -14,7 +14,8 @@ pubnative-android-library is a collection of Open Source tools to implement API 
 * [Install](#install)
 * [Usage](#usage)
 * [Misc](#misc)
-  * [Proguard] (#proguard)
+  * [Proguard](#proguard)
+  * [Dependencies](#dependencies)
   * [License](#misc_license)
   * [Contributing](#misc_contributing)
 
@@ -126,6 +127,15 @@ If you are using Proguard, add these lines to your Proguard file
 -keepattributes Signature
 -keep class net.pubnative.** { *; }
 ```
+
+<a name="dependencies"></a>
+### Dependencies
+
+This repository holds the following dependencies
+
+* [GSON](https://github.com/google/gson): for json parsing
+* [url_driller](https://github.com/pubnative/url-driller): to follow clicks redirections on background
+* [advertising_id_client](https://github.com/pubnative/advertising-id-client): to retrieve [android advertising id](http://developer.android.com/intl/es/google/play-services/id.html) without using google ads library
 
 <a name="misc_license"></a>
 ### License
