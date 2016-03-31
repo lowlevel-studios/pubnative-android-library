@@ -12,12 +12,16 @@ pubnative-android-library is a collection of Open Source tools to implement API 
 
 * [Requirements](#requirements)
 * [Install](#install)
+ * [Gradle](#install_gradle)
+ * [Manual](#install_manual)
 * [Usage](#usage)
+ *  [Request](#usage_request)
+ *  [Track](#usage_track)
 * [Misc](#misc)
-  * [Proguard](#proguard)
-  * [Dependencies](#dependencies)
-  * [License](#misc_license)
-  * [Contributing](#misc_contributing)
+ * [Proguard](#misc_proguard)
+ * [Dependencies](#misc_dependencies)
+ * [License](#misc_license)
+ * [Contributing](#misc_contributing)
 
 <a name="requirements"></a>
 # Requirements
@@ -41,6 +45,7 @@ Optionally but not necessary to improve user targeting:
 <a name="install"></a>
 # Install
 
+<a name="install_gradle"></a>
 ### Gradle
 
 Add the following line to your module dependencies
@@ -49,6 +54,7 @@ Add the following line to your module dependencies
 compile 'net.pubnative:library:2.0.1'
 ```
 
+<a name="install_manual"></a>
 ### Manual
 
 Clone the repository and import the `:library` module into your project
@@ -60,10 +66,10 @@ PubNative library is a lean yet complete library that allows you to request and 
 
 Basic integration steps are:
 
-1. [Request](#usage_native_request): Using `PubnativeRequest`
-3. [Track](#usage_native_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
+1. [Request](#usage_request): Using `PubnativeRequest`
+3. [Track](#usage_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
 
-<a name="usage_native_request"></a>
+<a name="usage_request"></a>
 ### 1) Request
 
 You will need to create a `PubnativeRequest`, add all the required parameters to it and start it with a listener for the results specifying which endpoint you want to request to. Right now only `NATIVE` is available.
@@ -89,7 +95,7 @@ request.start(CONTEXT, PubnativeRequest.Endpoint.NATIVE, new PubnativeRequest.Li
 });
 ```
 
-<a name="usage_native_track"></a>
+<a name="usage_track"></a>
 ### 2) Track
 
 For confirming impressions, and track clicks, call `ad.startTracking` and provide a valid listener if you want to be in track of what's going on with the ad tracking process
@@ -119,7 +125,7 @@ If at some point you want to stop the view and click tracking, just call the ad 
 <a name="misc"></a>
 # Misc
 
-<a name="proguard"></a>
+<a name="misc_proguard"></a>
 ### Proguard
 
 If you are using Proguard, add these lines to your Proguard file
@@ -128,7 +134,7 @@ If you are using Proguard, add these lines to your Proguard file
 -keep class net.pubnative.** { *; }
 ```
 
-<a name="dependencies"></a>
+<a name="misc_dependencies"></a>
 ### Dependencies
 
 This repository holds the following dependencies
