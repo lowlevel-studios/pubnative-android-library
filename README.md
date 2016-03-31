@@ -1,5 +1,7 @@
 ![ScreenShot](PNLogo.png)
 
+[![Circle CI](https://circleci.com/gh/pubnative/pubnative-android-library.svg?style=shield)](https://circleci.com/gh/pubnative/pubnative-android-library) ![Version](https://img.shields.io/badge/version-2.0.1-blue.svg) ![Gradle](https://img.shields.io/badge/gradle-net.pubnative:library:2.0.1-green.svg)
+
 PubNative is an API-based publisher platform dedicated to native advertising which does not require the integration of an Library.
 
 Through PubNative, publishers can request over 20 parameters to enrich their ads and thereby create any number of combinations for unique and truly native ad units.
