@@ -35,9 +35,8 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.demo.utils.Settings;
-import net.pubnative.library.request.model.PubnativeAPIV3AdModel;
-import net.pubnative.library.request.model.PubnativeAdModel;
 import net.pubnative.library.request.PubnativeRequest;
+import net.pubnative.library.request.model.PubnativeAdModel;
 
 import java.util.List;
 
@@ -94,11 +93,11 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
     // PubnativeRequest.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAPIV3AdModel> ads) {
+    public void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {
-            PubnativeAPIV3AdModel ad = ads.get(0);
+            PubnativeAdModel ad = ads.get(0);
             mTitle.setText(ad.getTitle());
             mDescription.setText(ad.getDescription());
             mCTA.setText(ad.getCta());
