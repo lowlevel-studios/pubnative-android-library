@@ -33,7 +33,6 @@ import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
@@ -100,39 +99,38 @@ public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Lis
 
     public abstract String getCreativeId();
 
-    protected List<String> getAllBeacons() {
-
-        List<String> beacons = null;
-        if (mBeacons != null) {
-            beacons = new ArrayList<String>();
-            for (PubnativeAPIV3DataModel beacon : mBeacons) {
-                if(TextUtils.isEmpty(beacon.getData().get("url"))) {
-                    beacons.add(beacon.getData().get("url"));
-                }
-            }
-        }
-        return beacons;
-    }
+    protected abstract List<String> getAllBeacons();
 
     //==============================================================================================
     // Tracking
     //==============================================================================================
-    private   transient PubnativeImpressionTracker      mPubnativeAdTracker     = null;
-    private   transient boolean                         mIsImpressionConfirmed  = false;
-    private   transient View                            mClickableView          = null;
-    protected transient List<PubnativeAPIV3DataModel>   mBeacons                = null;
+    private transient PubnativeImpressionTracker mPubnativeAdTracker     = null;
+    private transient boolean                    mIsImpressionConfirmed  = false;
+    private transient View                       mClickableView          = null;
 
-    protected void startTracking(View view, Listener listener, List<PubnativeAPIV3DataModel> beacons) {
+    /**
+     * Start tracking of ad view
+     *
+     * @param view     ad view
+     * @param listener listener for callbacks
+     */
+    public void startTracking(View view, Listener listener) {
 
         Log.v(TAG, "startTracking: both ad view & clickable view are same");
-        startTracking(view, view, listener, beacons);
+        startTracking(view, view, listener);
     }
 
-    protected void startTracking(View view, View clickableView, Listener listener, List<PubnativeAPIV3DataModel> beacons) {
+    /**
+     * start tracking of your ad view
+     *
+     * @param view          ad view
+     * @param clickableView clickable view
+     * @param listener      listener for callbacks
+     */
+    public void startTracking(View view, View clickableView, Listener listener) {
 
         Log.v(TAG, "startTracking");
         mListener = listener;
-        mBeacons = beacons;
         // Impression tracking
         List<String> allBeacons = getAllBeacons();
         if (allBeacons == null || allBeacons.size() == 0) {

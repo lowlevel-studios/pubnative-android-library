@@ -1,8 +1,9 @@
 package net.pubnative.library.request.model;
 
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PubnativeAPIV3AdModel extends PubnativeAdModel {
@@ -153,29 +154,20 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         return creativeId;
     }
 
-    /**
-     * Start tracking of ad view
-     *
-     * @param view     ad view
-     * @param listener listener for callbacks
-     */
-    public void startTracking(View view, Listener listener) {
+    @Override
+    protected List<String> getAllBeacons() {
 
-        Log.v(TAG, "startTracking");
-        super.startTracking(view, view, listener, beacons);
-    }
-
-    /**
-     * start tracking of your ad view
-     *
-     * @param view          ad view
-     * @param clickableView clickable view
-     * @param listener      listener for callbacks
-     */
-    public void startTracking(View view, View clickableView, Listener listener) {
-
-        Log.v(TAG, "startTracking");
-        super.startTracking(view, clickableView, listener, beacons);
+        Log.v(TAG, "getAllBeacons");
+        List<String> allBeacons = null;
+        if (beacons != null) {
+            allBeacons = new ArrayList<String>();
+            for (PubnativeAPIV3DataModel beacon : beacons) {
+                if(!TextUtils.isEmpty(beacon.getData().get("url"))) {
+                    allBeacons.add(beacon.getData().get("url"));
+                }
+            }
+        }
+        return allBeacons;
     }
 
     //==============================================================================================
