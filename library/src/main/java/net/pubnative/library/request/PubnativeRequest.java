@@ -28,18 +28,18 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
 import net.pubnative.AdvertisingIdClient;
 import net.pubnative.library.network.PubnativeHttpRequest;
-import net.pubnative.library.request.model.PubnativeAdModel;
-import net.pubnative.library.request.model.PubnativeRequestAPIResponseModel;
+import net.pubnative.library.request.model.PubnativeAPIV3AdModel;
+import net.pubnative.library.request.model.PubnativeAPIV3ResponseModel;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,13 +49,15 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
 
     private static         String               TAG                = PubnativeRequest.class.getSimpleName();
     private static final   String               NATIVE_TYPE_URL    = "native";
-    protected static final String               BASE_URL           = "http://api.pubnative.net/api/partner/v2/promotions";
+    protected static final String               BASE_URL           = "http://api.pubnative.net/api/v3";
     protected              Context              mContext           = null;
     protected              Endpoint             mEndpoint          = null;
     protected              Map<String, String>  mRequestParameters = new HashMap<String, String>();
     protected              Listener             mListener          = null;
     protected              PubnativeHttpRequest mRequest           = null;
     protected              boolean              mIsRunning         = false;
+    protected              List<String>         mAssetList         = null;
+    protected              List<String>         mMetaList          = null;
 
     /**
      * These are the various types of adds pubnative support
@@ -72,30 +74,29 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
      */
     public interface Parameters {
 
-        String APP_TOKEN                  = "app_token";
-        String BUNDLE_ID                  = "bundle_id";
-        String ANDROID_ADVERTISER_ID      = "android_advertiser_id";
-        String ANDROID_ADVERTISER_ID_SHA1 = "android_advertiser_id_sha1";
-        String ANDROID_ADVERTISER_ID_MD5  = "android_advertiser_id_md5";
-        String ICON_SIZE                  = "icon_size";
-        String BANNER_SIZE                = "banner_size";
+        String APP_TOKEN                  = "apptoken";
+        String ANDROID_ADVERTISER_ID      = "gid";
+        String ANDROID_ADVERTISER_ID_SHA1 = "gidsha1";
+        String ANDROID_ADVERTISER_ID_MD5  = "gidmd5";
         String OS                         = "os";
-        String DEVICE_MODEL               = "device_model";
-        String OS_VERSION                 = "os_version";
-        String NO_USER_ID                 = "no_user_id";
-        String PARTNER                    = "partner";
+        String OS_VERSION                 = "osver";
+        String DEVICE_MODEL               = "devicemodel";
+        String NO_USER_ID                 = "dnt";
         String LOCALE                     = "locale";
-        String PORTRAIT_BANNER_SIZE       = "portrait_banner_size";
-        String DEVICE_RESOLUTION          = "device_resolution";
-        String DEVICE_TYPE                = "device_type";
-        String AD_COUNT                   = "ad_count";
-        String ZONE_ID                    = "zone_id";
+        String AD_COUNT                   = "adcount";
+        String ZONE_ID                    = "zoneid";
         String LAT                        = "lat";
         String LONG                       = "long";
         String GENDER                     = "gender";
         String AGE                        = "age";
         String KEYWORDS                   = "keywords";
+        String APP_VERSION                = "appver";
+        String TEST                       = "test";
+        String VIDEO                      = "video";
+        String META_FIELDS                = "mf";
+        String ASSET_FIELDS               = "af";
     }
+
     //==============================================================================================
     // LISTENER
     //==============================================================================================
@@ -111,7 +112,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
          * @param request Request object used for making the request
          * @param ads     List of ads received
          */
-        void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads);
+        void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAPIV3AdModel> ads);
 
         /**
          * Invoked when PubnativeRequest request fails
@@ -143,6 +144,50 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
         } else {
             mRequestParameters.put(key, value);
         }
+    }
+
+    /**
+     * Sets desired assets type in request
+     *
+     * @param assetFields list of asset types
+     */
+    public void setAssetFields(List<String> assetFields) {
+        mAssetList = assetFields;
+    }
+
+    /**
+     * Add asset type in request
+     *
+     * @param assetField asset type
+     */
+    public void addAssetField(String assetField) {
+        if(mAssetList == null) {
+            mAssetList = new ArrayList<String>();
+        }
+
+        mAssetList.add(assetField);
+    }
+
+    /**
+     * Sets desired meta types in request
+     *
+     * @param metaFields list of asset types
+     */
+    public void setMetaFields(List<String> metaFields) {
+        mAssetList = metaFields;
+    }
+
+    /**
+     * Add meta type in request
+     *
+     * @param metaType meta type
+     */
+    public void addMetaField(String metaType) {
+        if(mAssetList == null) {
+            mAssetList = new ArrayList<String>();
+        }
+
+        mAssetList.add(metaType);
     }
 
     /**
@@ -183,34 +228,24 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     protected void setDefaultParameters() {
 
         Log.v(TAG, "setDefaultParameters");
-        if (!mRequestParameters.containsKey(Parameters.BUNDLE_ID)) {
-            mRequestParameters.put(Parameters.BUNDLE_ID, SystemUtils.getPackageName(mContext));
-        }
         if (!mRequestParameters.containsKey(Parameters.OS)) {
             mRequestParameters.put(Parameters.OS, "android");
         }
         if (!mRequestParameters.containsKey(Parameters.DEVICE_MODEL)) {
-            mRequestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
+            mRequestParameters.put(Parameters.DEVICE_MODEL, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
         }
         if (!mRequestParameters.containsKey(Parameters.OS_VERSION)) {
             mRequestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
-        }
-        if (!mRequestParameters.containsKey(Parameters.DEVICE_RESOLUTION)) {
-            DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
-            mRequestParameters.put(Parameters.DEVICE_RESOLUTION, dm.widthPixels + "x" + dm.heightPixels);
-        }
-        if (!mRequestParameters.containsKey(Parameters.DEVICE_TYPE)) {
-            mRequestParameters.put(Parameters.DEVICE_TYPE, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
         }
         if (!mRequestParameters.containsKey(Parameters.LOCALE)) {
             mRequestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
-        if (SystemUtils.isLocationPermissionGranted(mContext)) {
+        if (!mRequestParameters.containsKey(Parameters.LAT)
+                && !mRequestParameters.containsKey(Parameters.LONG)
+                && SystemUtils.isLocationPermissionGranted(mContext)) {
             Location location = SystemUtils.getLastLocation(mContext);
-            if (location != null &&
-                !mRequestParameters.containsKey(Parameters.LAT) &&
-                !mRequestParameters.containsKey(Parameters.LONG)) {
+            if(location != null) {
                 mRequestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
                 mRequestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
             }
@@ -234,6 +269,15 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
                             uriBuilder.appendQueryParameter(key, value);
                         }
                     }
+
+                    if(mAssetList != null && mAssetList.size() > 0) {
+                        uriBuilder.appendQueryParameter(Parameters.ASSET_FIELDS, TextUtils.join(",", mAssetList));
+                    }
+
+                    if(mMetaList != null && mMetaList.size() > 0) {
+                        uriBuilder.appendQueryParameter(Parameters.META_FIELDS, TextUtils.join(",", mMetaList));
+                    }
+
                     // Final URL
                     url = uriBuilder.build().toString();
                     break;
@@ -265,7 +309,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     //==============================================================================================
     // Listener Helpers
     //==============================================================================================
-    protected void invokeOnSuccess(List<PubnativeAdModel> ads) {
+    protected void invokeOnSuccess(List<PubnativeAPIV3AdModel> ads) {
 
         Log.v(TAG, "invokeOnSuccess");
         mIsRunning = false;
@@ -299,10 +343,10 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
 
         Log.v(TAG, "onPubnativeHttpRequestFinish");
         try {
-            PubnativeRequestAPIResponseModel apiResponseModel = new Gson().fromJson(result, PubnativeRequestAPIResponseModel.class);
+            PubnativeAPIV3ResponseModel apiResponseModel = new Gson().fromJson(result, PubnativeAPIV3ResponseModel.class);
             if (apiResponseModel == null) {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
-            } else if (PubnativeRequestAPIResponseModel.Status.OK.equals(apiResponseModel.status)) {
+            } else if (PubnativeAPIV3ResponseModel.Status.OK.equals(apiResponseModel.status)) {
                 invokeOnSuccess(apiResponseModel.ads);
             } else {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Server error: " + apiResponseModel.error_message));

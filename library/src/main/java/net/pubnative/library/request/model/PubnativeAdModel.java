@@ -33,25 +33,13 @@ import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
+public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
 
     private static String                TAG                 = PubnativeAdModel.class.getSimpleName();
-    //==============================================================================================
-    // Fields
-    //==============================================================================================
-    protected      String                title               = null;
-    protected      String                description         = null;
-    protected      String                cta_text            = null;
-    protected      String                icon_url            = null;
-    protected      String                banner_url          = null;
-    protected      String                click_url           = null;
-    protected      String                revenue_model       = null;
-    protected      String                type                = null;
-    protected      String                portrait_banner_url = null;
-    protected      List<PubnativeBeacon> beacons             = null;
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -88,128 +76,67 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     protected transient Listener mListener;
 
     //==============================================================================================
-    // Fields
+    // Ad data
     //==============================================================================================
-    public String getTitle() {
+    public abstract String getClickUrl();
 
-        Log.v(TAG, "getTitle");
-        return title;
-    }
+    public abstract String getTitle();
 
-    public String getDescription() {
+    public abstract String getDescription();
 
-        Log.v(TAG, "getDescription");
-        return description;
-    }
+    public abstract String getCta();
 
-    public String getCtaText() {
+    public abstract String getRating();
 
-        Log.v(TAG, "getCtaText");
-        return cta_text;
-    }
+    public abstract PubnativeIcon getIcon();
 
-    public String getIconUrl() {
+    public abstract PubnativeBanner getBanner();
 
-        Log.v(TAG, "getIconUrl");
-        return icon_url;
-    }
+    public abstract String getPoints();
 
-    public String getBannerUrl() {
+    public abstract String getRevenueModel();
 
-        Log.v(TAG, "getBannerUrl");
-        return banner_url;
-    }
+    public abstract String getCampaignId();
 
-    public String getClickUrl() {
+    public abstract String getCreativeId();
 
-        Log.v(TAG, "getClickUrl");
-        return click_url;
-    }
+    protected List<String> getAllBeacons() {
 
-    public String getRevenueModel() {
-
-        Log.v(TAG, "getRevenueModel");
-        return revenue_model;
-    }
-
-    public List<PubnativeBeacon> getBeacons() {
-
-        Log.v(TAG, "getBeacons");
-        return beacons;
-    }
-
-    public String getType() {
-
-        Log.v(TAG, "getType");
-        return type;
-    }
-
-    public String getPortraitBannerUrl() {
-
-        Log.v(TAG, "getPortraitBannerUrl");
-        return portrait_banner_url;
-    }
-    //==============================================================================================
-    // Helpers
-    //==============================================================================================
-
-    /**
-     * This function will return the Beacon URL on the bases of beacon type.
-     * It will traverse all beacons and search for <code>beaconType</code>.
-     *
-     * @param beaconType type of beacon
-     *
-     * @return return Beacon URL or null otherwise.
-     */
-    public String getBeacon(String beaconType) {
-
-        Log.v(TAG, "getBeacon: " + beaconType);
-        String beaconUrl = null;
-        if (!TextUtils.isEmpty(beaconType) && beacons != null) {
-            for (PubnativeBeacon beacon : beacons) {
-                if (beaconType.equalsIgnoreCase(beacon.type)) {
-                    beaconUrl = beacon.url;
-                    break;
+        List<String> beacons = null;
+        if (mBeacons != null) {
+            beacons = new ArrayList<String>();
+            for (PubnativeAPIV3DataModel beacon : mBeacons) {
+                if(TextUtils.isEmpty(beacon.getData().get("url"))) {
+                    beacons.add(beacon.getData().get("url"));
                 }
             }
         }
-        return beaconUrl;
+        return beacons;
     }
 
     //==============================================================================================
     // Tracking
     //==============================================================================================
-    private transient PubnativeImpressionTracker mPubnativeAdTracker    = null;
-    private transient boolean                    mIsImpressionConfirmed = false;
-    private transient View                       mClickableView         = null;
+    private   transient PubnativeImpressionTracker      mPubnativeAdTracker     = null;
+    private   transient boolean                         mIsImpressionConfirmed  = false;
+    private   transient View                            mClickableView          = null;
+    protected transient List<PubnativeAPIV3DataModel>   mBeacons                = null;
 
-    /**
-     * Start tracking of ad view
-     *
-     * @param view     ad view
-     * @param listener listener for callbacks
-     */
-    public void startTracking(View view, Listener listener) {
+    protected void startTracking(View view, Listener listener, List<PubnativeAPIV3DataModel> beacons) {
 
-        Log.v(TAG, "startTracking(View, Listener)");
-        startTracking(view, view, listener);
+        Log.v(TAG, "startTracking: both ad view & clickable view are same");
+        startTracking(view, view, listener, beacons);
     }
 
-    /**
-     * start tracking of your ad view
-     *
-     * @param view          ad view
-     * @param clickableView clickable view
-     * @param listener      listener for callbacks
-     */
-    public void startTracking(View view, View clickableView, Listener listener) {
+    protected void startTracking(View view, View clickableView, Listener listener, List<PubnativeAPIV3DataModel> beacons) {
 
         Log.v(TAG, "startTracking");
         mListener = listener;
+        mBeacons = beacons;
         // Impression tracking
-        String impressionURL = getBeacon(PubnativeBeacon.BeaconType.IMPRESSION);
-        if (TextUtils.isEmpty((impressionURL))) {
-            Log.e(TAG, "startTracking - Error: impression url is empty, impression cannot be tracked");
+        List<String> allBeacons = getAllBeacons();
+        if (allBeacons == null || allBeacons.size() == 0) {
+            Log.e(TAG, "startTracking - Error: no valid beacon");
         } else if (mIsImpressionConfirmed) {
             Log.v(TAG, "startTracking - impression is already confirmed, dropping impression tracking");
         } else {
@@ -307,7 +234,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     public void onImpressionDetected(View view) {
 
         Log.v(TAG, "onImpressionDetected");
-        PubnativeTrackingManager.track(view.getContext(), getBeacon(PubnativeBeacon.BeaconType.IMPRESSION));
+        for(String beacon: getAllBeacons()) {
+            PubnativeTrackingManager.track(view.getContext(), beacon);
+        }
         invokeOnImpression(view);
     }
 
