@@ -173,7 +173,6 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
     //==============================================================================================
     // Private
     //==============================================================================================
-
     private PubnativeAPIV3DataModel findAsset(String assetType) {
 
         PubnativeAPIV3DataModel result = null;

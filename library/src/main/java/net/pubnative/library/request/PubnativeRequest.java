@@ -34,8 +34,8 @@ import com.google.gson.Gson;
 
 import net.pubnative.AdvertisingIdClient;
 import net.pubnative.library.network.PubnativeHttpRequest;
-import net.pubnative.library.request.model.PubnativeAPIV3AdModel;
 import net.pubnative.library.request.model.PubnativeAPIV3ResponseModel;
+import net.pubnative.library.request.model.PubnativeAdModel;
 import net.pubnative.library.utils.Crypto;
 import net.pubnative.library.utils.SystemUtils;
 
@@ -112,7 +112,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
          * @param request Request object used for making the request
          * @param ads     List of ads received
          */
-        void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAPIV3AdModel> ads);
+        void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads);
 
         /**
          * Invoked when PubnativeRequest request fails
@@ -309,7 +309,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     //==============================================================================================
     // Listener Helpers
     //==============================================================================================
-    protected void invokeOnSuccess(List<PubnativeAPIV3AdModel> ads) {
+    protected void invokeOnSuccess(List<? extends PubnativeAdModel> ads) {
 
         Log.v(TAG, "invokeOnSuccess");
         mIsRunning = false;
