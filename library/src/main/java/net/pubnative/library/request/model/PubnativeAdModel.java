@@ -87,17 +87,11 @@ public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Lis
 
     public abstract String getRating();
 
-    public abstract PubnativeIcon getIcon();
+    public abstract PubnativeImage getIcon();
 
-    public abstract PubnativeBanner getBanner();
+    public abstract PubnativeImage getBanner();
 
-    public abstract String getPoints();
-
-    public abstract String getRevenueModel();
-
-    public abstract String getCampaignId();
-
-    public abstract String getCreativeId();
+    public abstract PubnativeAPIV3DataModel getMetaField(String metaType);
 
     protected abstract List<String> getAllBeacons();
 

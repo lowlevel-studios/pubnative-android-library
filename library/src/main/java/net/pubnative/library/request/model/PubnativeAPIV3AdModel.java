@@ -75,83 +75,52 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
     }
 
     @Override
-    public PubnativeIcon getIcon() {
+    public PubnativeImage getIcon() {
 
         Log.v(TAG, "getIcon");
-        PubnativeIcon icon = null;
+        PubnativeImage icon = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.ICON);
         if(asset != null) {
 
-            icon = new PubnativeIcon();
-            icon.setWidth(Integer.valueOf(asset.getData().get("w")));
-            icon.setHeight(Integer.valueOf(asset.getData().get("h")));
-            icon.setUrl(asset.getData().get("url"));
+            icon = new PubnativeImage();
+            icon.width = Integer.valueOf(asset.getData().get("w"));
+            icon.height = Integer.valueOf(asset.getData().get("h"));
+            icon.url = asset.getData().get("url");
         }
         return icon;
     }
 
     @Override
-    public PubnativeBanner getBanner() {
+    public PubnativeImage getBanner() {
 
         Log.v(TAG, "getBanner");
-        PubnativeBanner banner = null;
+        PubnativeImage banner = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.BANNER);
         if(asset != null) {
 
-            banner = new PubnativeBanner();
-            banner.setWidth(Integer.valueOf(asset.getData().get("w")));
-            banner.setHeight(Integer.valueOf(asset.getData().get("h")));
-            banner.setUrl(asset.getData().get("url"));
+            banner = new PubnativeImage();
+            banner.width = Integer.valueOf(asset.getData().get("w"));
+            banner.height = Integer.valueOf(asset.getData().get("h"));
+            banner.url = asset.getData().get("url");
         }
         return banner;
     }
 
     @Override
-    public String getPoints() {
+    public PubnativeAPIV3DataModel getMetaField(String metaType) {
 
-        Log.v(TAG, "getPoints");
-        String points = null;
-        PubnativeAPIV3DataModel meta = findMeta(PubnativeMetaType.POINTS);
+        Log.v(TAG, "getMetaField");
+        PubnativeAPIV3DataModel result = null;
+
         if(meta != null) {
-            points = meta.getData().get("number");
+            for(PubnativeAPIV3DataModel model: meta) {
+                if(model.getType().equals(metaType)) {
+                    result = model;
+                }
+            }
         }
-        return points;
-    }
 
-    @Override
-    public String getRevenueModel() {
-
-        Log.v(TAG, "getRevenueModel");
-        String revenueModel = null;
-        PubnativeAPIV3DataModel meta = findMeta(PubnativeMetaType.REVENU_MODEL);
-        if(meta != null) {
-            revenueModel = meta.getData().get("text");
-        }
-        return revenueModel;
-    }
-
-    @Override
-    public String getCampaignId() {
-
-        Log.v(TAG, "getCampaignId");
-        String campaignId = null;
-        PubnativeAPIV3DataModel meta = findMeta(PubnativeMetaType.CAMPAIGN_ID);
-        if(meta != null) {
-            campaignId = meta.getData().get("number");
-        }
-        return campaignId;
-    }
-
-    @Override
-    public String getCreativeId() {
-
-        Log.v(TAG, "getCreativeId");
-        String creativeId = null;
-        PubnativeAPIV3DataModel meta = findMeta(PubnativeMetaType.CREATIVE_ID);
-        if(meta != null) {
-            creativeId = meta.getData().get("number");
-        }
-        return creativeId;
+        return result;
     }
 
     @Override
@@ -176,22 +145,15 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
     private PubnativeAPIV3DataModel findAsset(String assetType) {
 
         PubnativeAPIV3DataModel result = null;
-        for(PubnativeAPIV3DataModel model: assets) {
-            if(model.getType().equals(assetType)) {
-                result = model;
+
+        if(assets != null) {
+            for(PubnativeAPIV3DataModel model: assets) {
+                if(model.getType().equals(assetType)) {
+                    result = model;
+                }
             }
         }
-        return result;
-    }
 
-    private PubnativeAPIV3DataModel findMeta(String assetType) {
-
-        PubnativeAPIV3DataModel result = null;
-        for(PubnativeAPIV3DataModel model: meta) {
-            if(model.getType().equals(assetType)) {
-                result = model;
-            }
-        }
         return result;
     }
 }

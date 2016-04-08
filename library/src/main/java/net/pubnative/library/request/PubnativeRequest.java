@@ -232,7 +232,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
             mRequestParameters.put(Parameters.OS, "android");
         }
         if (!mRequestParameters.containsKey(Parameters.DEVICE_MODEL)) {
-            mRequestParameters.put(Parameters.DEVICE_MODEL, SystemUtils.isTablet(mContext) ? "tablet" : "phone");
+            mRequestParameters.put(Parameters.DEVICE_MODEL, Build.MODEL);
         }
         if (!mRequestParameters.containsKey(Parameters.OS_VERSION)) {
             mRequestParameters.put(Parameters.OS_VERSION, Build.VERSION.RELEASE);
@@ -242,8 +242,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
         }
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
         if (!mRequestParameters.containsKey(Parameters.LAT)
-                && !mRequestParameters.containsKey(Parameters.LONG)
-                && SystemUtils.isLocationPermissionGranted(mContext)) {
+                && !mRequestParameters.containsKey(Parameters.LONG)) {
             Location location = SystemUtils.getLastLocation(mContext);
             if(location != null) {
                 mRequestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
