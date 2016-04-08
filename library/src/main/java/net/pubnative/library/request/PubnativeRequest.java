@@ -174,7 +174,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
      * @param metaFields list of asset types
      */
     public void setMetaFields(List<String> metaFields) {
-        mAssetList = metaFields;
+        mMetaList = metaFields;
     }
 
     /**
@@ -183,11 +183,11 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
      * @param metaType meta type
      */
     public void addMetaField(String metaType) {
-        if(mAssetList == null) {
-            mAssetList = new ArrayList<String>();
+        if(mMetaList == null) {
+            mMetaList = new ArrayList<String>();
         }
 
-        mAssetList.add(metaType);
+        mMetaList.add(metaType);
     }
 
     /**
