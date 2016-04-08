@@ -35,10 +35,6 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -61,51 +57,10 @@ public class PubnativeAdModelTest {
     }
 
     @Test
-    public void testGetBeaconWithNullValueReturnsNull() {
-
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        String url = model.getBeacon(null);
-        assertThat(url).isNull();
-    }
-
-    @Test
-    public void testGetBeaconWithEmptyValueReturnsNull() {
-
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        String url = model.getBeacon("");
-        assertThat(url).isNull();
-    }
-
-    @Test
-    public void testGetBeaconWithNotContainedValueReturnsNull() {
-
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        model.beacons = mock(List.class);
-        String url = model.getBeacon("");
-        assertThat(url).isNull();
-    }
-
-    @Test
-    public void testGetBeaconWitContainedValueReturnsBeacon() {
-
-        String testType = "type";
-        String testValue = "value";
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeBeacon beacon = spy(PubnativeBeacon.class);
-        beacon.type = testType;
-        beacon.url = testValue;
-        List<PubnativeBeacon> beacons = new ArrayList<PubnativeBeacon>();
-        beacons.add(beacon);
-        model.beacons = beacons;
-        String url = model.getBeacon(testType);
-        assertThat(url).isEqualTo(testValue);
-    }
-
-    @Test
     public void testImpressionCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         model.mListener = listener;
         model.invokeOnImpression(adView);
@@ -115,8 +70,8 @@ public class PubnativeAdModelTest {
     @Test
     public void testClickCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         model.mListener = listener;
         model.invokeOnClick(adView);
@@ -126,8 +81,8 @@ public class PubnativeAdModelTest {
     @Test
     public void testOpenOfferCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         model.mListener = listener;
         model.invokeOnOpenOffer();
         verify(listener, times(1)).onPubnativeAdModelOpenOffer(eq(model));
@@ -136,8 +91,7 @@ public class PubnativeAdModelTest {
     @Test
     public void testCallbacksWithNullListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
         model.mListener = null;
         model.invokeOnOpenOffer();
         model.invokeOnClick(null);
@@ -147,11 +101,11 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithClickableView() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         View clickableView = spy(new View(applicationContext));
-        model.click_url = "http://www.google.com";
+        model.link = "http://www.google.com";
         model.startTracking(adView, clickableView, listener);
         verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
@@ -159,8 +113,8 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithClickableViewForValidClickListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         View clickableView = spy(new View(applicationContext));
         model.startTracking(adView, clickableView, listener);
@@ -170,10 +124,10 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithoutClickableView() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        PubnativeAPIV3AdModel model = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAPIV3AdModel.Listener listener = mock(PubnativeAPIV3AdModel.Listener.class);
         View adView = spy(new View(applicationContext));
-        model.click_url = "http://www.google.com";
+        model.link = "http://www.google.com";
         model.startTracking(adView, listener);
         verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }

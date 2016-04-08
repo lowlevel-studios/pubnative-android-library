@@ -177,12 +177,9 @@ public class PubnativeRequestTest {
         PubnativeRequest request = spy(PubnativeRequest.class);
         request.mContext = this.applicationContext;
         request.setDefaultParameters();
-        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.BUNDLE_ID)).isTrue();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS)).isTrue();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.OS_VERSION)).isTrue();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_MODEL)).isTrue();
-        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_RESOLUTION)).isTrue();
-        assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.DEVICE_TYPE)).isTrue();
         assertThat(request.mRequestParameters.containsKey(PubnativeRequest.Parameters.LOCALE)).isTrue();
     }
 
