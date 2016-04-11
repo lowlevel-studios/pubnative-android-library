@@ -89,12 +89,12 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
     public String getRating() {
 
         Log.v(TAG, "getRating");
-        String cta = null;
+        String rating = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.RATING);
         if(asset != null) {
-            cta = asset.getData().get("number");
+            rating = asset.getData().get("number");
         }
-        return cta;
+        return rating;
     }
 
     @Override
