@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -15,6 +16,8 @@ import net.pubnative.library.predefined.interstitial.R;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
 public class PubnativeInterstitial extends Activity implements PubnativeAdModel.Listener {
+
+    private static final String TAG = PubnativeInterstitial.class.getSimpleName();
 
     public static final String EXTRA_AD                     = "ad";
     public static final String EXTRA_IDENTIFIER             = "identifier";
@@ -35,6 +38,8 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.pubnative_interstitial);
@@ -50,12 +55,9 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     protected void onResume() {
+
+        Log.v(TAG, "onResume");
         super.onResume();
 
         mPubnativeAdModel.startTracking(findViewById(R.id.pn_interstitial_container), downloadView, this);
@@ -63,24 +65,17 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
     protected void onStop() {
+
+        Log.v(TAG, "onStop");
         super.onStop();
 
         sendLocalMessage(ACTION_ACTIVITY_STOPPED);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
     private void renderAd() {
 
+        Log.v(TAG, "renderAd");
         mPubnativeAdModel = (PubnativeAdModel) getIntent().getSerializableExtra("ad");
 
         if(mPubnativeAdModel == null) {
@@ -112,6 +107,8 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     }
 
     private void sendLocalMessage(String action) {
+
+        Log.v(TAG, "sendLocalMessage");
         Intent intent = new Intent(BROADCAST_INTENT_EVENT);
         intent.putExtra("action", action);
         intent.putExtra(EXTRA_IDENTIFIER, mIdentifier);
@@ -121,15 +118,18 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     @Override
     public void onPubnativeAdModelImpression(PubnativeAdModel pubnativeAdModel, View view) {
 
+        Log.v(TAG, "onPubnativeAdModelImpression");
     }
 
     @Override
     public void onPubnativeAdModelClick(PubnativeAdModel pubnativeAdModel, View view) {
 
+        Log.v(TAG, "onPubnativeAdModelClick");
     }
 
     @Override
     public void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel) {
 
+        Log.v(TAG, "onPubnativeAdModelOpenOffer");
     }
 }

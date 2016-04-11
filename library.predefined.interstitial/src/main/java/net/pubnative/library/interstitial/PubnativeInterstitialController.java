@@ -19,7 +19,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class PubnativeInterstitialController implements PubnativeRequest.Listener {
 
-    private static String TAG = PubnativeInterstitialController.class.getSimpleName();
+    private static final String TAG = PubnativeInterstitialController.class.getSimpleName();
 
     private Context mContext;
     private Listener mListener;
