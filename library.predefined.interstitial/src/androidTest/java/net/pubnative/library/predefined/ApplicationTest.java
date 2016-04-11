@@ -1,4 +1,4 @@
-package net.pubnative.library.predefined;
+package net.pubnative.library.interstitial;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

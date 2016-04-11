@@ -1,4 +1,4 @@
-package net.pubnative.library.predefined;
+package net.pubnative.library.interstitial;
 
 import org.junit.Test;
 

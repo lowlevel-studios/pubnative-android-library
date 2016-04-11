@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.pubnative.library.predefined">
+    package="net.pubnative.library.predefined.interstitial">
 
     <application
         android:allowBackup="true"
