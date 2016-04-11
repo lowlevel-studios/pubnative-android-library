@@ -17,8 +17,10 @@ import net.pubnative.library.request.model.PubnativeAdModel;
 public class PubnativeInterstitial extends Activity implements PubnativeAdModel.Listener {
 
     public static final String EXTRA_AD                     = "ad";
+    public static final String EXTRA_IDENTIFIER             = "identifier";
     public static final String BROADCAST_INTENT_EVENT       = "interstitial_event";
     public static final String ACTION_ACTIVITY_RESUMED      = "action_activity_resumed";
+    public static final String ACTION_ACTIVITY_STOPPED      = "action_activity_stopped";
     public static final String ACTION_FAILED_INVALID_DATA   = "action_failed_invalid_data";
 
     private TextView            titleView;
@@ -29,6 +31,7 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     private TextView            downloadView;
 
     private PubnativeAdModel    mPubnativeAdModel;
+    private String              mIdentifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,8 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     @Override
     protected void onStop() {
         super.onStop();
+
+        sendLocalMessage(ACTION_ACTIVITY_STOPPED);
     }
 
     @Override
@@ -102,11 +107,14 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
         if(mPubnativeAdModel.getRating() != null) {
             ratingView.setRating(Float.parseFloat(mPubnativeAdModel.getRating()));
         }
+
+        mIdentifier = getIntent().getStringExtra(EXTRA_IDENTIFIER);
     }
 
     private void sendLocalMessage(String action) {
         Intent intent = new Intent(BROADCAST_INTENT_EVENT);
         intent.putExtra("action", action);
+        intent.putExtra(EXTRA_IDENTIFIER, mIdentifier);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
