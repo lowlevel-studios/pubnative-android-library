@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PubnativeAPIV3AdModel extends PubnativeAdModel {
@@ -56,7 +57,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         String title = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.TITLE);
         if(asset != null) {
-            title = asset.getData().get("text");
+            title = asset.data.get("text");
         }
         return title;
     }
@@ -68,7 +69,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         String description = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.DESCRIPTION);
         if(asset != null) {
-            description = asset.getData().get("text");
+            description = asset.data.get("text");
         }
         return description;
     }
@@ -80,7 +81,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         String cta = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.CTA);
         if(asset != null) {
-            cta = asset.getData().get("text");
+            cta = asset.data.get("text");
         }
         return cta;
     }
@@ -92,7 +93,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         String rating = null;
         PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.RATING);
         if(asset != null) {
-            rating = asset.getData().get("number");
+            rating = asset.data.get("number");
         }
         return rating;
     }
@@ -106,9 +107,9 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         if(asset != null) {
 
             icon = new PubnativeImage();
-            icon.width = Integer.valueOf(asset.getData().get("w"));
-            icon.height = Integer.valueOf(asset.getData().get("h"));
-            icon.url = asset.getData().get("url");
+            icon.width = Integer.valueOf(asset.data.get("w"));
+            icon.height = Integer.valueOf(asset.data.get("h"));
+            icon.url = asset.data.get("url");
         }
         return icon;
     }
@@ -122,23 +123,23 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         if(asset != null) {
 
             banner = new PubnativeImage();
-            banner.width = Integer.valueOf(asset.getData().get("w"));
-            banner.height = Integer.valueOf(asset.getData().get("h"));
-            banner.url = asset.getData().get("url");
+            banner.width = Integer.valueOf(asset.data.get("w"));
+            banner.height = Integer.valueOf(asset.data.get("h"));
+            banner.url = asset.data.get("url");
         }
         return banner;
     }
 
     @Override
-    public PubnativeAPIV3DataModel getMetaField(String metaType) {
+    public HashMap<String, String> getMetaField(String metaType) {
 
         Log.v(TAG, "getMetaField");
-        PubnativeAPIV3DataModel result = null;
+        HashMap<String, String> result = null;
 
         if(meta != null) {
             for(PubnativeAPIV3DataModel model: meta) {
-                if(model.getType().equals(metaType)) {
-                    result = model;
+                if(model.type.equals(metaType)) {
+                    result = model.data;
                 }
             }
         }
@@ -154,8 +155,8 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
         if (beacons != null) {
             allBeacons = new ArrayList<String>();
             for (PubnativeAPIV3DataModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.getData().get("url"))) {
-                    allBeacons.add(beacon.getData().get("url"));
+                if(!TextUtils.isEmpty(beacon.data.get("url"))) {
+                    allBeacons.add(beacon.data.get("url"));
                 }
             }
         }
@@ -171,7 +172,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         if(assets != null) {
             for(PubnativeAPIV3DataModel model: assets) {
-                if(model.getType().equals(assetType)) {
+                if(model.type.equals(assetType)) {
                     result = model;
                 }
             }

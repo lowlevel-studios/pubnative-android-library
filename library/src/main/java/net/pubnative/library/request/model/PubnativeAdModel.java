@@ -33,6 +33,7 @@ import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
@@ -91,7 +92,7 @@ public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Lis
 
     public abstract PubnativeImage getBanner();
 
-    public abstract PubnativeAPIV3DataModel getMetaField(String metaType);
+    public abstract HashMap<String, String> getMetaField(String metaType);
 
     protected abstract List<String> getAllBeacons();
 
