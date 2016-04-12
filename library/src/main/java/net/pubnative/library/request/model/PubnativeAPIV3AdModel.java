@@ -55,7 +55,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getTitle");
         String title = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.TITLE);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.TITLE);
         if(asset != null) {
             title = asset.data.get("text");
         }
@@ -67,7 +67,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getDescription");
         String description = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.DESCRIPTION);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.DESCRIPTION);
         if(asset != null) {
             description = asset.data.get("text");
         }
@@ -79,7 +79,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getCta");
         String cta = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.CTA);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.CTA);
         if(asset != null) {
             cta = asset.data.get("text");
         }
@@ -91,7 +91,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getRating");
         String rating = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.RATING);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.RATING);
         if(asset != null) {
             rating = asset.data.get("number");
         }
@@ -103,7 +103,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getIcon");
         PubnativeImage icon = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.ICON);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.ICON);
         if(asset != null) {
 
             icon = new PubnativeImage();
@@ -119,7 +119,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdModel {
 
         Log.v(TAG, "getBanner");
         PubnativeImage banner = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAssetType.BANNER);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3DataModel.AssetType.BANNER);
         if(asset != null) {
 
             banner = new PubnativeImage();

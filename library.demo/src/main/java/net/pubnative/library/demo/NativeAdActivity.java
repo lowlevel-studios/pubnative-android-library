@@ -101,8 +101,8 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
             mTitle.setText(ad.getTitle());
             mDescription.setText(ad.getDescription());
             mCTA.setText(ad.getCta());
-            Picasso.with(this).load(ad.getIcon().getUrl()).into(mIcon);
-            Picasso.with(this).load(ad.getBanner().getUrl()).into(mBanner);
+            Picasso.with(this).load(ad.getIcon().url).into(mIcon);
+            Picasso.with(this).load(ad.getBanner().url).into(mBanner);
             ad.startTracking(mAdContainer, this);
         } else {
             Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);

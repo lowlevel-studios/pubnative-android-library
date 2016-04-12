@@ -29,4 +29,28 @@ public class PubnativeAPIV3DataModel {
 
     protected String                    type;
     protected HashMap<String, String>   data;
+
+    /**
+     * These are the various types of assets
+     */
+    public interface AssetType {
+
+        String TITLE        = "title";
+        String DESCRIPTION  = "description";
+        String CTA          = "cta";
+        String RATING       = "rating";
+        String ICON         = "icon";
+        String BANNER       = "banner";
+    }
+
+    /**
+     * These are meta fields
+     */
+    public interface MetaType {
+
+        String POINTS       = "points";
+        String REVENU_MODEL = "revenuemodel";
+        String CAMPAIGN_ID  = "campaignid";
+        String CREATIVE_ID  = "creativeid";
+    }
 }
