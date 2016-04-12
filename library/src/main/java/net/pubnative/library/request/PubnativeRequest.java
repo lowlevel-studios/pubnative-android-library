@@ -147,15 +147,6 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     }
 
     /**
-     * Sets desired assets type in request
-     *
-     * @param assetFields list of asset types
-     */
-    public void setAssetFields(List<String> assetFields) {
-        mAssetList = assetFields;
-    }
-
-    /**
      * Add asset type in request
      *
      * @param assetField asset type
@@ -166,15 +157,6 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
         }
 
         mAssetList.add(assetField);
-    }
-
-    /**
-     * Sets desired meta types in request
-     *
-     * @param metaFields list of asset types
-     */
-    public void setMetaFields(List<String> metaFields) {
-        mMetaList = metaFields;
     }
 
     /**
