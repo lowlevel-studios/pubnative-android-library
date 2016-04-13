@@ -1,9 +1,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Theme.PubNativeInterstitials" parent="@android:style/Theme.Translucent">
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
     <style name="_AL_ShadedTextStyle">
         <item name="android:shadowColor">@color/pn_shadow_normal</item>
         <item name="android:shadowDx">-0.5</item>

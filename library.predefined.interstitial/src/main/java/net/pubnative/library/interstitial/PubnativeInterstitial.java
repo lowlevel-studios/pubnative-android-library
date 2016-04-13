@@ -7,7 +7,7 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import net.pubnative.library.interstitial.activity.PubnativeInterstitial;
+import net.pubnative.library.interstitial.activity.PubnativeInterstitialActivity;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
@@ -17,9 +17,9 @@ import java.util.UUID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-public class PubnativeInterstitialController implements PubnativeRequest.Listener {
+public class PubnativeInterstitial implements PubnativeRequest.Listener {
 
-    private static final String TAG = PubnativeInterstitialController.class.getSimpleName();
+    private static final String TAG = PubnativeInterstitial.class.getSimpleName();
 
     private Context mContext;
     private Listener mListener;
@@ -52,11 +52,11 @@ public class PubnativeInterstitialController implements PubnativeRequest.Listene
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
-        Intent adIntent = new Intent(mContext, PubnativeInterstitial.class);
+        Intent adIntent = new Intent(mContext, PubnativeInterstitialActivity.class);
         adIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         PubnativeAdModel pubnativeAdModel = ads.get(0);
-        adIntent.putExtra(PubnativeInterstitial.EXTRA_AD, pubnativeAdModel);
-        adIntent.putExtra(PubnativeInterstitial.EXTRA_IDENTIFIER, mIdentifier);
+        adIntent.putExtra(PubnativeInterstitialActivity.EXTRA_AD, pubnativeAdModel);
+        adIntent.putExtra(PubnativeInterstitialActivity.EXTRA_IDENTIFIER, mIdentifier);
         mContext.startActivity(adIntent);
     }
 
@@ -72,21 +72,20 @@ public class PubnativeInterstitialController implements PubnativeRequest.Listene
         public void onReceive(Context context, Intent intent) {
 
             Log.v(TAG, "mMessageReceiver - onReceive");
-            String identifier = intent.getStringExtra(PubnativeInterstitial.EXTRA_IDENTIFIER);
+            String identifier = intent.getStringExtra(PubnativeInterstitialActivity.EXTRA_IDENTIFIER);
 
             if(!identifier.equals(mIdentifier)) {
                 return; // I am not the correct one :)
             }
             String action = intent.getStringExtra("action");
-            Log.v(TAG, "mMessageReceiver - onReceive action = " + action);
             switch (action) {
-                case PubnativeInterstitial.ACTION_ACTIVITY_RESUMED:
+                case PubnativeInterstitialActivity.ACTION_ACTIVITY_RESUMED:
                     invokeOnPubnativeInterstitialOpened();
                     break;
-                case PubnativeInterstitial.ACTION_FAILED_INVALID_DATA:
+                case PubnativeInterstitialActivity.ACTION_FAILED_INVALID_DATA:
                     invokeOnPubnativeInterstitialFailed(new Exception("Invalid data"));
                     break;
-                case PubnativeInterstitial.ACTION_ACTIVITY_STOPPED:
+                case PubnativeInterstitialActivity.ACTION_ACTIVITY_STOPPED:
                     invokeOnPubnativeInterstitialClosed();
                     break;
             }
@@ -94,7 +93,7 @@ public class PubnativeInterstitialController implements PubnativeRequest.Listene
     };
 
     private void registerBroadcastReceiver() {
-        LocalBroadcastManager.getInstance(mContext.getApplicationContext()).registerReceiver(mMessageReceiver, new IntentFilter(PubnativeInterstitial.BROADCAST_INTENT_EVENT));
+        LocalBroadcastManager.getInstance(mContext.getApplicationContext()).registerReceiver(mMessageReceiver, new IntentFilter(PubnativeInterstitialActivity.BROADCAST_INTENT_EVENT));
     }
 
     private void unRegisterBroadcastReceiver() {

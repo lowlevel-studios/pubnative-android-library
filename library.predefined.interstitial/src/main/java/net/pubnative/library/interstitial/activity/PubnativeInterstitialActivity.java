@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -15,9 +16,9 @@ import com.squareup.picasso.Picasso;
 import net.pubnative.library.predefined.interstitial.R;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
-public class PubnativeInterstitial extends Activity implements PubnativeAdModel.Listener {
+public class PubnativeInterstitialActivity extends Activity implements PubnativeAdModel.Listener {
 
-    private static final String TAG = PubnativeInterstitial.class.getSimpleName();
+    private static final String TAG                         = PubnativeInterstitialActivity.class.getSimpleName();
 
     public static final String EXTRA_AD                     = "ad";
     public static final String EXTRA_IDENTIFIER             = "identifier";
@@ -41,6 +42,8 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
 
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.pubnative_interstitial);
 
@@ -131,5 +134,6 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     public void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel) {
 
         Log.v(TAG, "onPubnativeAdModelOpenOffer");
+        finish();
     }
 }
