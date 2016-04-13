@@ -33,13 +33,19 @@ import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
-                                         URLDriller.Listener {
+public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
+                                         URLDriller.Listener, PubnativeAPIV3AdModel.AdData, PubnativeAPIV3AdModel.AdBeacon {
 
-    private static String                TAG                 = PubnativeAdModel.class.getSimpleName();
+    private static String                   TAG     = PubnativeAdModel.class.getSimpleName();
+
+    protected String                        link;
+    protected List<PubnativeAPIV3AdModel>   assets;
+    protected List<PubnativeAPIV3AdModel>   beacons;
+    protected List<PubnativeAPIV3AdModel>   meta;
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -78,23 +84,134 @@ public abstract class PubnativeAdModel implements PubnativeImpressionTracker.Lis
     //==============================================================================================
     // Ad data
     //==============================================================================================
-    public abstract String getClickUrl();
+    public String getClickUrl() {
 
-    public abstract String getTitle();
+        Log.v(TAG, "getClickUrl");
+        return link;
+    }
 
-    public abstract String getDescription();
+    public String getTitle() {
 
-    public abstract String getCta();
+        Log.v(TAG, "getTitle");
+        String title = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.TITLE);
+        if(asset != null) {
+            title = asset.data.get("text");
+        }
+        return title;
+    }
 
-    public abstract String getRating();
+    public String getDescription() {
 
-    public abstract PubnativeImage getIcon();
+        Log.v(TAG, "getDescription");
+        String description = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.DESCRIPTION);
+        if(asset != null) {
+            description = asset.data.get("text");
+        }
+        return description;
+    }
 
-    public abstract PubnativeImage getBanner();
+    public String getCta() {
 
-    public abstract HashMap<String, String> getMetaField(String metaType);
+        Log.v(TAG, "getCta");
+        String cta = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.CTA);
+        if(asset != null) {
+            cta = asset.data.get("text");
+        }
+        return cta;
+    }
 
-    protected abstract List<String> getAllBeacons();
+    public String getRating() {
+
+        Log.v(TAG, "getRating");
+        String rating = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.RATING);
+        if(asset != null) {
+            rating = asset.data.get("number");
+        }
+        return rating;
+    }
+
+    public PubnativeImage getIcon() {
+
+        Log.v(TAG, "getIcon");
+        PubnativeImage icon = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.ICON);
+        if(asset != null) {
+
+            icon = new PubnativeImage();
+            icon.width = Integer.valueOf(asset.data.get("w"));
+            icon.height = Integer.valueOf(asset.data.get("h"));
+            icon.url = asset.data.get("url");
+        }
+        return icon;
+    }
+
+    public PubnativeImage getBanner() {
+
+        Log.v(TAG, "getBanner");
+        PubnativeImage banner = null;
+        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.BANNER);
+        if(asset != null) {
+
+            banner = new PubnativeImage();
+            banner.width = Integer.valueOf(asset.data.get("w"));
+            banner.height = Integer.valueOf(asset.data.get("h"));
+            banner.url = asset.data.get("url");
+        }
+        return banner;
+    }
+
+    public HashMap<String, String> getMetaField(String metaType) {
+
+        Log.v(TAG, "getMetaField");
+        HashMap<String, String> result = null;
+
+        if(meta != null) {
+            for(PubnativeAPIV3AdModel model: meta) {
+                if(model.type.equals(metaType)) {
+                    result = model.data;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public List<String> getAllBeacons() {
+
+        Log.v(TAG, "getAllBeacons");
+        List<String> allBeacons = null;
+        if (beacons != null) {
+            allBeacons = new ArrayList<String>();
+            for (PubnativeAPIV3AdModel beacon : beacons) {
+                if(!TextUtils.isEmpty(beacon.data.get("url"))) {
+                    allBeacons.add(beacon.data.get("url"));
+                }
+            }
+        }
+        return allBeacons;
+    }
+
+    //==============================================================================================
+    // Private
+    //==============================================================================================
+    private PubnativeAPIV3AdModel findAsset(String assetType) {
+
+        PubnativeAPIV3AdModel result = null;
+
+        if(assets != null) {
+            for(PubnativeAPIV3AdModel model: assets) {
+                if(model.type.equals(assetType)) {
+                    result = model;
+                }
+            }
+        }
+
+        return result;
+    }
 
     //==============================================================================================
     // Tracking

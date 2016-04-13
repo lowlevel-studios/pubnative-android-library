@@ -93,7 +93,7 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
     // PubnativeRequest.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads) {
+    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {

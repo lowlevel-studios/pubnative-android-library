@@ -112,7 +112,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
          * @param request Request object used for making the request
          * @param ads     List of ads received
          */
-        void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads);
+        void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads);
 
         /**
          * Invoked when PubnativeRequest request fails
@@ -290,7 +290,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     //==============================================================================================
     // Listener Helpers
     //==============================================================================================
-    protected void invokeOnSuccess(List<? extends PubnativeAdModel> ads) {
+    protected void invokeOnSuccess(List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "invokeOnSuccess");
         mIsRunning = false;
