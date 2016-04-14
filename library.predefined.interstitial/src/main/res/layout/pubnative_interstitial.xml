@@ -71,6 +71,8 @@
                 android:layout_alignBottom="@id/pn_interstitial_icon"
                 android:layout_marginBottom="5dp"
                 android:layout_toRightOf="@id/pn_interstitial_icon"
+                android:progressTint="@color/pn_rating_stars_fill"
+                android:progressBackgroundTint="@color/pn_rating_stars_empty"
                 android:isIndicator="true" />
     
             <TextView

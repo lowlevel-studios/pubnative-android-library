@@ -6,4 +6,6 @@
     <color name="pn_white">@android:color/white</color>
     <color name="pn_shadow_normal">#555555</color>
     <color name="pn_shadow_dark">#151515</color>
+    <color name="pn_rating_stars_fill">#009688</color>
+    <color name="pn_rating_stars_empty">#D2D2D2</color>
 </resources>
