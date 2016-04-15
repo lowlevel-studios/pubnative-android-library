@@ -27,6 +27,7 @@ public class PubnativeAPIV3AdModel extends PubnativeAdDataModel {
 
     public interface AdBeacon {
         List<String> getAllBeacons();
+        List<String> getJsBeacons();
     }
 
     /**

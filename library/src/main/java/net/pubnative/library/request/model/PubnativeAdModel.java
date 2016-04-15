@@ -28,10 +28,12 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
+import net.pubnative.library.widget.PubnativeWebView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,6 +197,20 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         return allBeacons;
     }
 
+    public List<String> getJsBeacons() {
+        Log.v(TAG, "getJsBeacons");
+        List<String> jsBeacons = null;
+        if (beacons != null) {
+            jsBeacons = new ArrayList<String>();
+            for (PubnativeAPIV3AdModel beacon : beacons) {
+                if(!TextUtils.isEmpty(beacon.data.get("js"))) {
+                    jsBeacons.add(beacon.data.get("js"));
+                }
+            }
+        }
+        return jsBeacons;
+    }
+
     //==============================================================================================
     // Private
     //==============================================================================================
@@ -245,7 +261,8 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         mListener = listener;
         // Impression tracking
         List<String> allBeacons = getAllBeacons();
-        if (allBeacons == null || allBeacons.size() == 0) {
+        List<String> jsBeacons = getJsBeacons();
+        if ((allBeacons == null || allBeacons.size() == 0) && (jsBeacons == null || jsBeacons.size() == 0)) {
             Log.e(TAG, "startTracking - Error: no valid beacon");
         } else if (mIsImpressionConfirmed) {
             Log.v(TAG, "startTracking - impression is already confirmed, dropping impression tracking");
@@ -346,6 +363,14 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         Log.v(TAG, "onImpressionDetected");
         for(String beacon: getAllBeacons()) {
             PubnativeTrackingManager.track(view.getContext(), beacon);
+        }
+        List<String> jsBeacons = getJsBeacons();
+        if(jsBeacons != null && jsBeacons.size() > 0) {
+            for(String jsBeacon: jsBeacons) {
+                PubnativeWebView webView = new PubnativeWebView(view.getContext());
+                ((ViewGroup)view.getParent()).addView(webView);
+                webView.loadBeacon(jsBeacon);
+            }
         }
         invokeOnImpression(view);
     }
