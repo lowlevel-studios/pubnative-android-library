@@ -28,5 +28,5 @@ public class PubnativeImage {
     public int width;
     public int height;
     public String url;
-    public String trackingUrl;
+    public String tracking;
 }

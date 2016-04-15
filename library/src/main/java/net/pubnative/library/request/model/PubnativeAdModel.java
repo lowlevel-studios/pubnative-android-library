@@ -194,6 +194,16 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                 }
             }
         }
+        if(assets != null) {
+            if(allBeacons == null) {
+                allBeacons = new ArrayList<String>();
+            }
+            for(PubnativeAPIV3AdModel model: assets) {
+                if(model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
+                    allBeacons.add(model.data.get("tracking"));
+                }
+            }
+        }
         return allBeacons;
     }
 
