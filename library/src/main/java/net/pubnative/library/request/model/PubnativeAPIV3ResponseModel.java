@@ -29,8 +29,8 @@ public class PubnativeAPIV3ResponseModel {
 
     public String                       status;
     public String                       error_message;
-    public List<PubnativeAdModel>       ads;
-    public List<PubnativeExtModel>      ext;
+    public List<PubnativeAPIV3AdModel>  ads;
+    public List<PubnativeAPIV3ExtModel> ext;
 
     public interface Status {
 

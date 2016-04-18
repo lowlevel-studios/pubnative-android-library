@@ -35,19 +35,13 @@ import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 import net.pubnative.library.widget.PubnativeWebView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
-                                         URLDriller.Listener, PubnativeAPIV3AdModel.AdData, PubnativeAPIV3AdModel.AdBeacon {
+                                         URLDriller.Listener {
 
-    private static String                   TAG     = PubnativeAdModel.class.getSimpleName();
-
-    protected String                        link;
-    protected List<PubnativeAPIV3AdModel>   assets;
-    protected List<PubnativeAPIV3AdModel>   beacons;
-    protected List<PubnativeAPIV3AdModel>   meta;
+    private static String       TAG          = PubnativeAdModel.class.getSimpleName();
+    public PubnativeAdDataModel adDataModel;
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -84,162 +78,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     protected transient Listener mListener;
 
     //==============================================================================================
-    // Ad data
-    //==============================================================================================
-    public String getClickUrl() {
-
-        Log.v(TAG, "getClickUrl");
-        return link;
-    }
-
-    public String getTitle() {
-
-        Log.v(TAG, "getTitle");
-        String title = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.TITLE);
-        if(asset != null) {
-            title = asset.data.get("text");
-        }
-        return title;
-    }
-
-    public String getDescription() {
-
-        Log.v(TAG, "getDescription");
-        String description = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.DESCRIPTION);
-        if(asset != null) {
-            description = asset.data.get("text");
-        }
-        return description;
-    }
-
-    public String getCta() {
-
-        Log.v(TAG, "getCta");
-        String cta = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.CTA);
-        if(asset != null) {
-            cta = asset.data.get("text");
-        }
-        return cta;
-    }
-
-    public String getRating() {
-
-        Log.v(TAG, "getRating");
-        String rating = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.RATING);
-        if(asset != null) {
-            rating = asset.data.get("number");
-        }
-        return rating;
-    }
-
-    public PubnativeImage getIcon() {
-
-        Log.v(TAG, "getIcon");
-        PubnativeImage icon = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.ICON);
-        if(asset != null) {
-
-            icon = new PubnativeImage();
-            icon.width = Integer.valueOf(asset.data.get("w"));
-            icon.height = Integer.valueOf(asset.data.get("h"));
-            icon.url = asset.data.get("url");
-        }
-        return icon;
-    }
-
-    public PubnativeImage getBanner() {
-
-        Log.v(TAG, "getBanner");
-        PubnativeImage banner = null;
-        PubnativeAPIV3AdModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.BANNER);
-        if(asset != null) {
-
-            banner = new PubnativeImage();
-            banner.width = Integer.valueOf(asset.data.get("w"));
-            banner.height = Integer.valueOf(asset.data.get("h"));
-            banner.url = asset.data.get("url");
-        }
-        return banner;
-    }
-
-    public HashMap<String, String> getMetaField(String metaType) {
-
-        Log.v(TAG, "getMetaField");
-        HashMap<String, String> result = null;
-
-        if(meta != null) {
-            for(PubnativeAPIV3AdModel model: meta) {
-                if(model.type.equals(metaType)) {
-                    result = model.data;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public List<String> getAllBeacons() {
-
-        Log.v(TAG, "getAllBeacons");
-        List<String> allBeacons = null;
-        if (beacons != null) {
-            allBeacons = new ArrayList<String>();
-            for (PubnativeAPIV3AdModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.data.get("url"))) {
-                    allBeacons.add(beacon.data.get("url"));
-                }
-            }
-        }
-        if(assets != null) {
-            if(allBeacons == null) {
-                allBeacons = new ArrayList<String>();
-            }
-            for(PubnativeAPIV3AdModel model: assets) {
-                if(model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
-                    allBeacons.add(model.data.get("tracking"));
-                }
-            }
-        }
-        return allBeacons;
-    }
-
-    public List<String> getJsBeacons() {
-        Log.v(TAG, "getJsBeacons");
-        List<String> jsBeacons = null;
-        if (beacons != null) {
-            jsBeacons = new ArrayList<String>();
-            for (PubnativeAPIV3AdModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.data.get("js"))) {
-                    jsBeacons.add(beacon.data.get("js"));
-                }
-            }
-        }
-        return jsBeacons;
-    }
-
-    //==============================================================================================
-    // Private
-    //==============================================================================================
-    private PubnativeAPIV3AdModel findAsset(String assetType) {
-
-        PubnativeAPIV3AdModel result = null;
-
-        if(assets != null) {
-            for(PubnativeAPIV3AdModel model: assets) {
-                if(model.type.equals(assetType)) {
-                    result = model;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    //==============================================================================================
     // Tracking
     //==============================================================================================
     private transient PubnativeImpressionTracker mPubnativeAdTracker     = null;
@@ -270,8 +108,8 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         Log.v(TAG, "startTracking");
         mListener = listener;
         // Impression tracking
-        List<String> allBeacons = getAllBeacons();
-        List<String> jsBeacons = getJsBeacons();
+        List<String> allBeacons = adDataModel.getAllBeacons();
+        List<String> jsBeacons = adDataModel.getJsBeacons();
         if ((allBeacons == null || allBeacons.size() == 0) && (jsBeacons == null || jsBeacons.size() == 0)) {
             Log.e(TAG, "startTracking - Error: no valid beacon");
         } else if (mIsImpressionConfirmed) {
@@ -283,7 +121,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             mPubnativeAdTracker.startTracking(view, this);
         }
         // Click tracking
-        if (TextUtils.isEmpty(getClickUrl())) {
+        if (TextUtils.isEmpty(adDataModel.getClickUrl())) {
             Log.e(TAG, "startTracking - Error: click url is empty, clicks won't be tracked");
         } else {
             mClickableView = clickableView;
@@ -296,7 +134,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                     invokeOnClick(view);
                     URLDriller driller = new URLDriller();
                     driller.setListener(PubnativeAdModel.this);
-                    driller.drill(getClickUrl());
+                    driller.drill(adDataModel.getClickUrl());
                 }
             });
         }
@@ -371,10 +209,10 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     public void onImpressionDetected(View view) {
 
         Log.v(TAG, "onImpressionDetected");
-        for(String beacon: getAllBeacons()) {
+        for(String beacon: adDataModel.getAllBeacons()) {
             PubnativeTrackingManager.track(view.getContext(), beacon);
         }
-        List<String> jsBeacons = getJsBeacons();
+        List<String> jsBeacons = adDataModel.getJsBeacons();
         if(jsBeacons != null && jsBeacons.size() > 0) {
             for(String jsBeacon: jsBeacons) {
                 PubnativeWebView webView = new PubnativeWebView(view.getContext());

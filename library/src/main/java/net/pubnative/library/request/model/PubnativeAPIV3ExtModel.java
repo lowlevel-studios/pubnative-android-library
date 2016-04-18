@@ -23,5 +23,9 @@
 
 package net.pubnative.library.request.model;
 
-public class PubnativeAPIV3ExtModel extends PubnativeExtDataModel {
+import java.util.HashMap;
+
+public class PubnativeAPIV3ExtModel {
+
+    protected HashMap<String, String> meta;
 }

@@ -36,6 +36,7 @@ import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.demo.utils.Settings;
 import net.pubnative.library.request.PubnativeRequest;
+import net.pubnative.library.request.model.PubnativeAdDataModel;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
 import java.util.List;
@@ -97,13 +98,14 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {
-            PubnativeAdModel ad = ads.get(0);
-            mTitle.setText(ad.getTitle());
-            mDescription.setText(ad.getDescription());
-            mCTA.setText(ad.getCta());
-            Picasso.with(this).load(ad.getIcon().url).into(mIcon);
-            Picasso.with(this).load(ad.getBanner().url).into(mBanner);
-            ad.startTracking(mAdContainer, this);
+            PubnativeAdModel adModel = ads.get(0);
+            PubnativeAdDataModel adData = adModel.adDataModel;
+            mTitle.setText(adData.getTitle());
+            mDescription.setText(adData.getDescription());
+            mCTA.setText(adData.getCta());
+            Picasso.with(this).load(adData.getIcon().url).into(mIcon);
+            Picasso.with(this).load(adData.getBanner().url).into(mBanner);
+            adModel.startTracking(mAdContainer, this);
         } else {
             Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
         }

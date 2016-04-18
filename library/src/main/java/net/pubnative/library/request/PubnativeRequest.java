@@ -34,6 +34,7 @@ import com.google.gson.Gson;
 
 import net.pubnative.AdvertisingIdClient;
 import net.pubnative.library.network.PubnativeHttpRequest;
+import net.pubnative.library.request.model.PubnativeAPIV3AdModel;
 import net.pubnative.library.request.model.PubnativeAPIV3ResponseModel;
 import net.pubnative.library.request.model.PubnativeAdModel;
 import net.pubnative.library.utils.Crypto;
@@ -328,7 +329,13 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
             if (apiResponseModel == null) {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
             } else if (PubnativeAPIV3ResponseModel.Status.OK.equals(apiResponseModel.status)) {
-                invokeOnSuccess(apiResponseModel.ads);
+                List<PubnativeAdModel> ads = new ArrayList<PubnativeAdModel>();
+                for(PubnativeAPIV3AdModel adModel : apiResponseModel.ads) {
+                    PubnativeAdModel pubnativeAdModel = new PubnativeAdModel();
+                    pubnativeAdModel.adDataModel = adModel;
+                    ads.add(pubnativeAdModel);
+                }
+                invokeOnSuccess(ads);
             } else {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Server error: " + apiResponseModel.error_message));
             }
