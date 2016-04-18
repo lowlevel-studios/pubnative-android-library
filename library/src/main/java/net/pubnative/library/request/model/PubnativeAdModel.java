@@ -108,8 +108,12 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         Log.v(TAG, "startTracking");
         mListener = listener;
         // Impression tracking
-        List<String> allBeacons = adDataModel.getAllBeacons();
-        List<String> jsBeacons = adDataModel.getJsBeacons();
+        List<String> allBeacons = null;
+        List<String> jsBeacons = null;
+        if(adDataModel != null) {
+            allBeacons = adDataModel.getAllBeacons();
+            jsBeacons = adDataModel.getJsBeacons();
+        }
         if ((allBeacons == null || allBeacons.size() == 0) && (jsBeacons == null || jsBeacons.size() == 0)) {
             Log.e(TAG, "startTracking - Error: no valid beacon");
         } else if (mIsImpressionConfirmed) {
@@ -121,7 +125,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             mPubnativeAdTracker.startTracking(view, this);
         }
         // Click tracking
-        if (TextUtils.isEmpty(adDataModel.getClickUrl())) {
+        if (adDataModel == null || TextUtils.isEmpty(adDataModel.getClickUrl())) {
             Log.e(TAG, "startTracking - Error: click url is empty, clicks won't be tracked");
         } else {
             mClickableView = clickableView;
