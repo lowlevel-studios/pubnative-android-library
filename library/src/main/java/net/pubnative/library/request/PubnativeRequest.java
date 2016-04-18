@@ -211,6 +211,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     protected void setDefaultParameters() {
 
         Log.v(TAG, "setDefaultParameters");
+        mRequestParameters.put("jsbeacon", "1");
         if (!mRequestParameters.containsKey(Parameters.OS)) {
             mRequestParameters.put(Parameters.OS, "android");
         }
@@ -329,11 +330,13 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
             if (apiResponseModel == null) {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
             } else if (PubnativeAPIV3ResponseModel.Status.OK.equals(apiResponseModel.status)) {
-                List<PubnativeAdModel> ads = new ArrayList<PubnativeAdModel>();
-                for(PubnativeAPIV3AdModel adModel : apiResponseModel.ads) {
-                    PubnativeAdModel pubnativeAdModel = new PubnativeAdModel();
-                    pubnativeAdModel.adDataModel = adModel;
-                    ads.add(pubnativeAdModel);
+                List<PubnativeAdModel> ads = null;
+                if(apiResponseModel.ads != null && apiResponseModel.ads.size() > 0) {
+                    ads = new ArrayList<PubnativeAdModel>();
+                    for(PubnativeAPIV3AdModel adModel : apiResponseModel.ads) {
+                        PubnativeAdModel pubnativeAdModel = new PubnativeAdModel(adModel);
+                        ads.add(pubnativeAdModel);
+                    }
                 }
                 invokeOnSuccess(ads);
             } else {

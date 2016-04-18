@@ -99,7 +99,7 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {
             PubnativeAdModel adModel = ads.get(0);
-            PubnativeAdDataModel adData = adModel.adDataModel;
+            PubnativeAdDataModel adData = adModel.getAdDataModel();
             mTitle.setText(adData.getTitle());
             mDescription.setText(adData.getDescription());
             mCTA.setText(adData.getCta());

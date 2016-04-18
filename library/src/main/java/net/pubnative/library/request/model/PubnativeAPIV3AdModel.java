@@ -29,6 +29,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
@@ -39,12 +40,14 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
     protected List<PubnativeAPIV3DataModel> beacons;
     protected List<PubnativeAPIV3DataModel> meta;
 
+    @Override
     public String getClickUrl() {
 
         Log.v(TAG, "getClickUrl");
         return link;
     }
 
+    @Override
     public String getTitle() {
 
         Log.v(TAG, "getTitle");
@@ -56,6 +59,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return title;
     }
 
+    @Override
     public String getDescription() {
 
         Log.v(TAG, "getDescription");
@@ -67,6 +71,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return description;
     }
 
+    @Override
     public String getCta() {
 
         Log.v(TAG, "getCta");
@@ -78,6 +83,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return cta;
     }
 
+    @Override
     public String getRating() {
 
         Log.v(TAG, "getRating");
@@ -89,6 +95,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return rating;
     }
 
+    @Override
     public PubnativeImage getIcon() {
 
         Log.v(TAG, "getIcon");
@@ -104,6 +111,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return icon;
     }
 
+    @Override
     public PubnativeImage getBanner() {
 
         Log.v(TAG, "getBanner");
@@ -119,7 +127,8 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return banner;
     }
 
-    public HashMap<String, String> getMetaField(String metaType) {
+    @Override
+    public Map getMetaField(String metaType) {
 
         Log.v(TAG, "getMetaField");
         HashMap<String, String> result = null;
@@ -134,43 +143,36 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
         return result;
     }
 
-    public List<String> getAllBeacons() {
+    @Override
+    public List getBeacons(String type) {
 
-        Log.v(TAG, "getAllBeacons");
+        Log.v(TAG, "getBeacons");
         List<String> allBeacons = null;
         if (beacons != null) {
+
             allBeacons = new ArrayList<String>();
             for (PubnativeAPIV3DataModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.data.get("url"))) {
-                    allBeacons.add(beacon.data.get("url"));
-                }
-            }
-        }
-        if(assets != null) {
-            if(allBeacons == null) {
-                allBeacons = new ArrayList<String>();
-            }
-            for(PubnativeAPIV3DataModel model: assets) {
-                if(model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
-                    allBeacons.add(model.data.get("tracking"));
+                if(!TextUtils.isEmpty(beacon.data.get(type))) {
+                    allBeacons.add(beacon.data.get(type));
                 }
             }
         }
         return allBeacons;
     }
 
-    public List<String> getJsBeacons() {
-        Log.v(TAG, "getJsBeacons");
-        List<String> jsBeacons = null;
-        if (beacons != null) {
-            jsBeacons = new ArrayList<String>();
-            for (PubnativeAPIV3DataModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.data.get("js"))) {
-                    jsBeacons.add(beacon.data.get("js"));
+    @Override
+    public List getAssetTrackingUrls() {
+        List<String> trackingUrls = null;
+        if(assets != null) {
+
+            trackingUrls = new ArrayList<String>();
+            for(PubnativeAPIV3DataModel model: assets) {
+                if(model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
+                    trackingUrls.add(model.data.get("tracking"));
                 }
             }
         }
-        return jsBeacons;
+        return trackingUrls;
     }
 
     //==============================================================================================

@@ -23,8 +23,8 @@
 
 package net.pubnative.library.request.model;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface PubnativeAdDataModel {
 
@@ -42,11 +42,11 @@ public interface PubnativeAdDataModel {
 
     PubnativeImage getBanner();
 
-    HashMap<String, String> getMetaField(String metaType);
+    Map getMetaField(String metaType);
 
-    List<String> getAllBeacons();
+    List getBeacons(String type);
 
-    List<String> getJsBeacons();
+    List getAssetTrackingUrls();
 
     interface AssetType {
 
@@ -64,5 +64,10 @@ public interface PubnativeAdDataModel {
         String REVENU_MODEL = "revenuemodel";
         String CAMPAIGN_ID  = "campaignid";
         String CREATIVE_ID  = "creativeid";
+    }
+
+    interface BeaconType {
+        String URL = "url";
+        String JS = "js";
     }
 }

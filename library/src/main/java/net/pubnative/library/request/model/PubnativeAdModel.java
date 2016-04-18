@@ -40,8 +40,18 @@ import java.util.List;
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
 
-    private static String       TAG          = PubnativeAdModel.class.getSimpleName();
-    public PubnativeAdDataModel adDataModel;
+    private static String           TAG          = PubnativeAdModel.class.getSimpleName();
+
+    private PubnativeAdDataModel    mPubnativeAdDataModel;
+
+    public PubnativeAdModel(PubnativeAdDataModel adDataModel) {
+        mPubnativeAdDataModel = adDataModel;
+    }
+
+    public PubnativeAdDataModel getAdDataModel() {
+        return mPubnativeAdDataModel;
+    }
+
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -108,13 +118,24 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         Log.v(TAG, "startTracking");
         mListener = listener;
         // Impression tracking
-        List<String> allBeacons = null;
-        List<String> jsBeacons = null;
-        if(adDataModel != null) {
-            allBeacons = adDataModel.getAllBeacons();
-            jsBeacons = adDataModel.getJsBeacons();
+        boolean beaconsFound = false;
+        if (mPubnativeAdDataModel != null) {
+            List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.URL);
+            if(urlBeacons != null && urlBeacons.size() > 0) {
+                beaconsFound = true;
+            } else {
+                List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS);
+                if(jsBeacons != null && jsBeacons.size() > 0) {
+                    beaconsFound = true;
+                } else {
+                    List<String> trackingUrls = mPubnativeAdDataModel.getAssetTrackingUrls();
+                    if(trackingUrls != null && trackingUrls.size() > 0) {
+                        beaconsFound = true;
+                    }
+                }
+            }
         }
-        if ((allBeacons == null || allBeacons.size() == 0) && (jsBeacons == null || jsBeacons.size() == 0)) {
+        if (!beaconsFound) {
             Log.e(TAG, "startTracking - Error: no valid beacon");
         } else if (mIsImpressionConfirmed) {
             Log.v(TAG, "startTracking - impression is already confirmed, dropping impression tracking");
@@ -125,7 +146,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             mPubnativeAdTracker.startTracking(view, this);
         }
         // Click tracking
-        if (adDataModel == null || TextUtils.isEmpty(adDataModel.getClickUrl())) {
+        if (mPubnativeAdDataModel == null || TextUtils.isEmpty(mPubnativeAdDataModel.getClickUrl())) {
             Log.e(TAG, "startTracking - Error: click url is empty, clicks won't be tracked");
         } else {
             mClickableView = clickableView;
@@ -138,7 +159,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                     invokeOnClick(view);
                     URLDriller driller = new URLDriller();
                     driller.setListener(PubnativeAdModel.this);
-                    driller.drill(adDataModel.getClickUrl());
+                    driller.drill(mPubnativeAdDataModel.getClickUrl());
                 }
             });
         }
@@ -213,10 +234,24 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     public void onImpressionDetected(View view) {
 
         Log.v(TAG, "onImpressionDetected");
-        for(String beacon: adDataModel.getAllBeacons()) {
-            PubnativeTrackingManager.track(view.getContext(), beacon);
+        // Track normal beacons
+        List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.URL);
+        if(urlBeacons != null && urlBeacons.size() > 0) {
+            for(String beacon: urlBeacons) {
+                PubnativeTrackingManager.track(view.getContext(), beacon);
+            }
         }
-        List<String> jsBeacons = adDataModel.getJsBeacons();
+
+        // Track all asset's tracking url
+        List<String> assetTrackingUrls = mPubnativeAdDataModel.getAssetTrackingUrls();
+        if(assetTrackingUrls != null && assetTrackingUrls.size() > 0) {
+            for(String trackingUrl: assetTrackingUrls) {
+                PubnativeTrackingManager.track(view.getContext(), trackingUrl);
+            }
+        }
+
+        // Track JS beacons
+        List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS);
         if(jsBeacons != null && jsBeacons.size() > 0) {
             for(String jsBeacon: jsBeacons) {
                 PubnativeWebView webView = new PubnativeWebView(view.getContext());

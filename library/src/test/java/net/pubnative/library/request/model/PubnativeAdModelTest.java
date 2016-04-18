@@ -59,7 +59,7 @@ public class PubnativeAdModelTest {
     @Test
     public void testImpressionCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAdModel model = spy(new PubnativeAdModel(null));
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         model.mListener = listener;
@@ -70,7 +70,7 @@ public class PubnativeAdModelTest {
     @Test
     public void testClickCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAdModel model = spy(new PubnativeAdModel(null));
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         model.mListener = listener;
@@ -81,7 +81,7 @@ public class PubnativeAdModelTest {
     @Test
     public void testOpenOfferCallbackWithValidListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAdModel model = spy(new PubnativeAdModel(null));
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         model.mListener = listener;
         model.invokeOnOpenOffer();
@@ -91,7 +91,7 @@ public class PubnativeAdModelTest {
     @Test
     public void testCallbacksWithNullListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAdModel model = spy(new PubnativeAdModel(null));
         model.mListener = null;
         model.invokeOnOpenOffer();
         model.invokeOnClick(null);
@@ -101,13 +101,12 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithClickableView() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAPIV3AdModel adDataModel = spy(PubnativeAPIV3AdModel.class);
+        adDataModel.link = "http://www.google.com";
+        PubnativeAdModel model = spy(new PubnativeAdModel(adDataModel));
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         View clickableView = spy(new View(applicationContext));
-        PubnativeAPIV3AdModel adDataModel = spy(PubnativeAPIV3AdModel.class);
-        adDataModel.link = "http://www.google.com";
-        model.adDataModel = adDataModel;
         model.startTracking(adView, clickableView, listener);
         verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
@@ -115,7 +114,8 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithClickableViewForValidClickListener() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
+        PubnativeAPIV3AdModel adDataModel = spy(PubnativeAPIV3AdModel.class);
+        PubnativeAdModel model = spy(new PubnativeAdModel(adDataModel));
         PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
         View adView = spy(new View(applicationContext));
         View clickableView = spy(new View(applicationContext));
@@ -126,12 +126,11 @@ public class PubnativeAdModelTest {
     @Test
     public void testStartTrackingWithoutClickableView() {
 
-        PubnativeAdModel model = spy(PubnativeAdModel.class);
-        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
-        View adView = spy(new View(applicationContext));
         PubnativeAPIV3AdModel adDataModel = spy(PubnativeAPIV3AdModel.class);
         adDataModel.link = "http://www.google.com";
-        model.adDataModel = adDataModel;
+        PubnativeAdModel model = spy(new PubnativeAdModel(adDataModel));
+        PubnativeAdModel.Listener listener = mock(PubnativeAdModel.Listener.class);
+        View adView = spy(new View(applicationContext));
         model.startTracking(adView, listener);
         verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
