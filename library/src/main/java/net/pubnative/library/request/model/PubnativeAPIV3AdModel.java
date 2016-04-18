@@ -152,8 +152,11 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
             allBeacons = new ArrayList<String>();
             for (PubnativeAPIV3DataModel beacon : beacons) {
-                if(!TextUtils.isEmpty(beacon.data.get(type))) {
-                    allBeacons.add(beacon.data.get(type));
+                if(beacon.type.equals(type)) {
+                    String key = type.equals(BeaconType.JS_IMPRESSION) ? "js" : "url";
+                    if(!TextUtils.isEmpty(beacon.data.get(key))) {
+                        allBeacons.add(beacon.data.get(key));
+                    }
                 }
             }
         }

@@ -40,9 +40,9 @@ import java.util.List;
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
 
-    private static String           TAG          = PubnativeAdModel.class.getSimpleName();
+    private static String        TAG          = PubnativeAdModel.class.getSimpleName();
 
-    private PubnativeAdDataModel    mPubnativeAdDataModel;
+    private PubnativeAdDataModel mPubnativeAdDataModel;
 
     public PubnativeAdModel(PubnativeAdDataModel adDataModel) {
         mPubnativeAdDataModel = adDataModel;
@@ -120,11 +120,11 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         // Impression tracking
         boolean beaconsFound = false;
         if (mPubnativeAdDataModel != null) {
-            List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.URL);
+            List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.IMPRESSION);
             if(urlBeacons != null && urlBeacons.size() > 0) {
                 beaconsFound = true;
             } else {
-                List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS);
+                List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS_IMPRESSION);
                 if(jsBeacons != null && jsBeacons.size() > 0) {
                     beaconsFound = true;
                 } else {
@@ -235,7 +235,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
         Log.v(TAG, "onImpressionDetected");
         // Track normal beacons
-        List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.URL);
+        List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.IMPRESSION);
         if(urlBeacons != null && urlBeacons.size() > 0) {
             for(String beacon: urlBeacons) {
                 PubnativeTrackingManager.track(view.getContext(), beacon);
@@ -251,7 +251,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         }
 
         // Track JS beacons
-        List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS);
+        List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS_IMPRESSION);
         if(jsBeacons != null && jsBeacons.size() > 0) {
             for(String jsBeacon: jsBeacons) {
                 PubnativeWebView webView = new PubnativeWebView(view.getContext());

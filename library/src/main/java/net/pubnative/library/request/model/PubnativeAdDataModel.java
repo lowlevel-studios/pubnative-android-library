@@ -67,7 +67,7 @@ public interface PubnativeAdDataModel {
     }
 
     interface BeaconType {
-        String URL = "url";
-        String JS = "js";
+        String IMPRESSION = "impression";
+        String JS_IMPRESSION = "jsimpression";
     }
 }
