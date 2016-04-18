@@ -211,7 +211,6 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener, Advertis
     protected void setDefaultParameters() {
 
         Log.v(TAG, "setDefaultParameters");
-        mRequestParameters.put("jsbeacon", "1");
         if (!mRequestParameters.containsKey(Parameters.OS)) {
             mRequestParameters.put(Parameters.OS, "android");
         }
