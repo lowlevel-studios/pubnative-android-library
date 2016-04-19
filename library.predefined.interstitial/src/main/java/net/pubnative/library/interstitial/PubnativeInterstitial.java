@@ -49,7 +49,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener {
     }
 
     @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<? extends PubnativeAdModel> ads) {
+    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         Intent adIntent = new Intent(mContext, PubnativeInterstitialActivity.class);

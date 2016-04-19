@@ -55,6 +55,8 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
         downloadView = (TextView) this.findViewById(R.id.pn_interstitial_cta);
 
         renderAd();
+
+        ratingView.setVisibility(View.GONE);
     }
 
     @Override
@@ -93,18 +95,18 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
         if(mPubnativeAdModel.getDescription() != null) {
             descriptionView.setText(mPubnativeAdModel.getDescription());
         }
-        if(mPubnativeAdModel.getCta() != null) {
-            downloadView.setText(mPubnativeAdModel.getCta());
+        if(mPubnativeAdModel.getCtaText() != null) {
+            downloadView.setText(mPubnativeAdModel.getCtaText());
         }
-        if(mPubnativeAdModel.getBanner() != null) {
-            Picasso.with(this).load(mPubnativeAdModel.getBanner().getUrl()).into(bannerView);
+        if(mPubnativeAdModel.getBannerUrl() != null) {
+            Picasso.with(this).load(mPubnativeAdModel.getBannerUrl()).into(bannerView);
         }
-        if(mPubnativeAdModel.getIcon() != null) {
-            Picasso.with(this).load(mPubnativeAdModel.getIcon().getUrl()).into(iconView);
+        if(mPubnativeAdModel.getIconUrl() != null) {
+            Picasso.with(this).load(mPubnativeAdModel.getIconUrl()).into(iconView);
         }
-        if(mPubnativeAdModel.getRating() != null) {
+        /*if(mPubnativeAdModel.getRating() != null) {
             ratingView.setRating(Float.parseFloat(mPubnativeAdModel.getRating()));
-        }
+        }*/
 
         mIdentifier = getIntent().getStringExtra(EXTRA_IDENTIFIER);
     }
