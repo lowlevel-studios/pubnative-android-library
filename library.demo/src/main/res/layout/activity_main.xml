@@ -15,25 +15,6 @@
         android:textSize="20dp"
         android:textStyle="bold"
         android:padding="20dp"/>
-
-    <!--<RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/activity_main_separator"
-        >
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Native"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentRight="false"
-            android:onClick="onNativeClick"
-            android:id="@+id/button"
-            />
-    </RelativeLayout>-->
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
