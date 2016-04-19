@@ -23,7 +23,9 @@
 
 package net.pubnative.library.request.model;
 
-public class PubnativeBeacon {
+import java.io.Serializable;
+
+public class PubnativeBeacon implements Serializable {
 
     public String type;
     public String url;

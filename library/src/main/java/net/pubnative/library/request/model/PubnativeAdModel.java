@@ -33,10 +33,11 @@ import net.pubnative.URLDriller;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
-                                         URLDriller.Listener {
+                                         URLDriller.Listener, Serializable {
 
     private static String                TAG                 = PubnativeAdModel.class.getSimpleName();
     //==============================================================================================
