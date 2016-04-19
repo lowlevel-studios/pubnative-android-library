@@ -39,6 +39,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
     protected List<PubnativeAPIV3DataModel> assets;
     protected List<PubnativeAPIV3DataModel> beacons;
     protected List<PubnativeAPIV3DataModel> meta;
+    private   List<String>                  assetTrackingUrls = null;
 
     @Override
     public String getClickUrl() {
@@ -52,7 +53,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getTitle");
         String title = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.TITLE);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.TITLE, true);
         if(asset != null) {
             title = asset.data.get("text");
         }
@@ -64,7 +65,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getDescription");
         String description = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.DESCRIPTION);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.DESCRIPTION, true);
         if(asset != null) {
             description = asset.data.get("text");
         }
@@ -76,7 +77,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getCta");
         String cta = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.CTA);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.CTA, true);
         if(asset != null) {
             cta = asset.data.get("text");
         }
@@ -88,7 +89,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getRating");
         String rating = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.RATING);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.RATING, true);
         if(asset != null) {
             rating = asset.data.get("number");
         }
@@ -100,7 +101,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getIcon");
         PubnativeImage icon = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.ICON);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.ICON, true);
         if(asset != null) {
 
             icon = new PubnativeImage();
@@ -116,7 +117,7 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
         Log.v(TAG, "getBanner");
         PubnativeImage banner = null;
-        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.BANNER);
+        PubnativeAPIV3DataModel asset = findAsset(PubnativeAPIV3AdModel.AssetType.BANNER, true);
         if(asset != null) {
 
             banner = new PubnativeImage();
@@ -147,15 +148,25 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
     public List getBeacons(String type) {
 
         Log.v(TAG, "getBeacons");
-        List<String> allBeacons = null;
+        List<PubnativeBeacon> allBeacons = null;
         if (beacons != null) {
 
-            allBeacons = new ArrayList<String>();
+            allBeacons = new ArrayList<PubnativeBeacon>();
             for (PubnativeAPIV3DataModel beacon : beacons) {
                 if(beacon.type.equals(type)) {
-                    String key = type.equals(BeaconType.JS_IMPRESSION) ? "js" : "url";
-                    if(!TextUtils.isEmpty(beacon.data.get(key))) {
-                        allBeacons.add(beacon.data.get(key));
+                    boolean shouldAdd = false;
+                    PubnativeBeacon pubnativeBeacon = new PubnativeBeacon();
+                    pubnativeBeacon.type = beacon.type;
+                    if(!TextUtils.isEmpty(beacon.data.get("url"))) {
+                        pubnativeBeacon.url = beacon.data.get("url");
+                        shouldAdd = true;
+                    }
+                    if(!TextUtils.isEmpty(beacon.data.get("js"))) {
+                        pubnativeBeacon.js = beacon.data.get("js");
+                        shouldAdd = true;
+                    }
+                    if(shouldAdd) {
+                        allBeacons.add(pubnativeBeacon);
                     }
                 }
             }
@@ -165,23 +176,13 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
 
     @Override
     public List getAssetTrackingUrls() {
-        List<String> trackingUrls = null;
-        if(assets != null) {
-
-            trackingUrls = new ArrayList<String>();
-            for(PubnativeAPIV3DataModel model: assets) {
-                if(model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
-                    trackingUrls.add(model.data.get("tracking"));
-                }
-            }
-        }
-        return trackingUrls;
+        return assetTrackingUrls;
     }
 
     //==============================================================================================
     // Private
     //==============================================================================================
-    private PubnativeAPIV3DataModel findAsset(String assetType) {
+    private PubnativeAPIV3DataModel findAsset(String assetType, boolean getTrackingUrl) {
 
         PubnativeAPIV3DataModel result = null;
 
@@ -189,6 +190,9 @@ public class PubnativeAPIV3AdModel implements PubnativeAdDataModel {
             for(PubnativeAPIV3DataModel model: assets) {
                 if(model.type.equals(assetType)) {
                     result = model;
+                    if(getTrackingUrl && model.data.containsKey("tracking") && !TextUtils.isEmpty(model.data.get("tracking"))) {
+                        assetTrackingUrls.add(model.data.get("tracking"));
+                    }
                 }
             }
         }

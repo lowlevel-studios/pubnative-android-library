@@ -23,46 +23,14 @@
 
 package net.pubnative.library.request.model;
 
-import java.util.List;
-import java.util.Map;
+class PubnativeBeacon {
 
-public interface PubnativeAdDataModel {
+    String type;
+    String url;
+    String js;
 
-    String getClickUrl();
+    interface BeaconType {
 
-    String getTitle();
-
-    String getDescription();
-
-    String getCta();
-
-    String getRating();
-
-    PubnativeImage getIcon();
-
-    PubnativeImage getBanner();
-
-    Map getMetaField(String metaType);
-
-    List getBeacons(String type);
-
-    List getAssetTrackingUrls();
-
-    interface AssetType {
-
-        String TITLE        = "title";
-        String DESCRIPTION  = "description";
-        String CTA          = "cta";
-        String RATING       = "rating";
-        String ICON         = "icon";
-        String BANNER       = "banner";
-    }
-
-    interface MetaType {
-
-        String POINTS       = "points";
-        String REVENU_MODEL = "revenuemodel";
-        String CAMPAIGN_ID  = "campaignid";
-        String CREATIVE_ID  = "creativeid";
+        String IMPRESSION = "impression";
     }
 }

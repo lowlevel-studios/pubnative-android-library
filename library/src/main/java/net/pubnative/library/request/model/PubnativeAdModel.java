@@ -36,6 +36,7 @@ import net.pubnative.library.tracking.PubnativeTrackingManager;
 import net.pubnative.library.widget.PubnativeWebView;
 
 import java.util.List;
+import java.util.Map;
 
 public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener {
@@ -46,10 +47,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
     public PubnativeAdModel(PubnativeAdDataModel adDataModel) {
         mPubnativeAdDataModel = adDataModel;
-    }
-
-    public PubnativeAdDataModel getAdDataModel() {
-        return mPubnativeAdDataModel;
     }
 
     //==============================================================================================
@@ -88,6 +85,137 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     protected transient Listener mListener;
 
     //==============================================================================================
+    // Fields
+    //==============================================================================================
+    public String getTitle() {
+
+        Log.v(TAG, "getTitle");
+        return mPubnativeAdDataModel.getTitle();
+    }
+
+    public String getDescription() {
+
+        Log.v(TAG, "getDescription");
+        return mPubnativeAdDataModel.getDescription();
+    }
+
+    public String getCtaText() {
+
+        Log.v(TAG, "getCtaText");
+        return mPubnativeAdDataModel.getCta();
+    }
+
+    /**
+     * Get icon url
+     *
+     * @return iconUrl
+     *
+     * @deprecated use {@link #getIcon()}
+     */
+    public String getIconUrl() {
+
+        Log.v(TAG, "getIconUrl");
+        return mPubnativeAdDataModel.getIcon().url;
+    }
+
+    /**
+     * Get object of PubnativeImage as icon
+     *
+     * @return {@link PubnativeImage}
+     */
+    public PubnativeImage getIcon() {
+
+        Log.v(TAG, "getIcon");
+        return mPubnativeAdDataModel.getIcon();
+    }
+
+    /**
+     * Get banner url
+     *
+     * @return bannerUrl
+     *
+     * @deprecated use {@link #getBanner()}
+     */
+    @Deprecated
+    public String getBannerUrl() {
+
+        Log.v(TAG, "getBannerUrl");
+        return mPubnativeAdDataModel.getBanner().url;
+    }
+
+    /**
+     * Get object of PubnativeImage as banner
+     *
+     * @return {@link PubnativeImage}
+     */
+    public PubnativeImage getBanner() {
+
+        Log.v(TAG, "getBanner");
+        return mPubnativeAdDataModel.getBanner();
+    }
+
+    public String getClickUrl() {
+
+        Log.v(TAG, "getClickUrl");
+        return mPubnativeAdDataModel.getClickUrl();
+    }
+
+    /**
+     * Get revenue model
+     *
+     * @deprecated use {@link #getMetaField(String)}
+     */
+    @Deprecated
+    public String getRevenueModel() {
+
+        Log.v(TAG, "getRevenueModel");
+        return null;
+    }
+
+    @Deprecated
+    public List<PubnativeBeacon> getBeacons() {
+
+        Log.v(TAG, "getBeacons");
+        return null;
+    }
+
+    @Deprecated
+    public String getType() {
+
+        Log.v(TAG, "getType");
+        return null;
+    }
+
+    @Deprecated
+    public String getPortraitBannerUrl() {
+
+        Log.v(TAG, "getPortraitBannerUrl");
+        return null;
+    }
+
+    /**
+     * Get meta field
+     * @param metaType type of meta field
+     * @return map
+     */
+    public Map getMetaField(String metaType) {
+
+        Log.v(TAG, "getMetaFields");
+        return mPubnativeAdDataModel.getMetaField(metaType);
+    }
+
+    public Float getRating() {
+
+        Log.v(TAG, "getRating");
+        Float result = null;
+        String rating = mPubnativeAdDataModel.getRating();
+        if(rating != null) {
+            result = Float.valueOf(rating);
+        }
+        return result;
+    }
+
+    //==============================================================================================
     // Tracking
     //==============================================================================================
     private transient PubnativeImpressionTracker mPubnativeAdTracker     = null;
@@ -120,18 +248,13 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         // Impression tracking
         boolean beaconsFound = false;
         if (mPubnativeAdDataModel != null) {
-            List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.IMPRESSION);
-            if(urlBeacons != null && urlBeacons.size() > 0) {
+            List<PubnativeBeacon> beacons = mPubnativeAdDataModel.getBeacons(PubnativeBeacon.BeaconType.IMPRESSION);
+            if(beacons != null && beacons.size() > 0) {
                 beaconsFound = true;
             } else {
-                List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS_IMPRESSION);
-                if(jsBeacons != null && jsBeacons.size() > 0) {
+                List<String> trackingUrls = mPubnativeAdDataModel.getAssetTrackingUrls();
+                if(trackingUrls != null && trackingUrls.size() > 0) {
                     beaconsFound = true;
-                } else {
-                    List<String> trackingUrls = mPubnativeAdDataModel.getAssetTrackingUrls();
-                    if(trackingUrls != null && trackingUrls.size() > 0) {
-                        beaconsFound = true;
-                    }
                 }
             }
         }
@@ -234,29 +357,28 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     public void onImpressionDetected(View view) {
 
         Log.v(TAG, "onImpressionDetected");
-        // Track normal beacons
-        List<String> urlBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.IMPRESSION);
-        if(urlBeacons != null && urlBeacons.size() > 0) {
-            for(String beacon: urlBeacons) {
-                PubnativeTrackingManager.track(view.getContext(), beacon);
+        // Track beacons
+        List<PubnativeBeacon> beacons = mPubnativeAdDataModel.getBeacons(PubnativeBeacon.BeaconType.IMPRESSION);
+        if(beacons != null && beacons.size() > 0) {
+            for(PubnativeBeacon beacon: beacons) {
+
+                if(!TextUtils.isEmpty(beacon.url)) {
+                    PubnativeTrackingManager.track(view.getContext(), beacon.url);
+                }
+
+                if(!TextUtils.isEmpty(beacon.js)) {
+                    PubnativeWebView webView = new PubnativeWebView(view.getContext());
+                    ((ViewGroup)view.getParent()).addView(webView);
+                    webView.loadBeacon(beacon.js);
+                }
             }
         }
 
-        // Track all asset's tracking url
+        // Track accessed asset's tracking url
         List<String> assetTrackingUrls = mPubnativeAdDataModel.getAssetTrackingUrls();
         if(assetTrackingUrls != null && assetTrackingUrls.size() > 0) {
             for(String trackingUrl: assetTrackingUrls) {
                 PubnativeTrackingManager.track(view.getContext(), trackingUrl);
-            }
-        }
-
-        // Track JS beacons
-        List<String> jsBeacons = mPubnativeAdDataModel.getBeacons(PubnativeAdDataModel.BeaconType.JS_IMPRESSION);
-        if(jsBeacons != null && jsBeacons.size() > 0) {
-            for(String jsBeacon: jsBeacons) {
-                PubnativeWebView webView = new PubnativeWebView(view.getContext());
-                ((ViewGroup)view.getParent()).addView(webView);
-                webView.loadBeacon(jsBeacon);
             }
         }
         invokeOnImpression(view);
