@@ -30,7 +30,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.WebView;
 
 import net.pubnative.library.utils.SystemUtils;
 
