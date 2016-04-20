@@ -155,7 +155,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         Log.v(TAG, "setParameter: " + key + " : " + value);
         if (TextUtils.isEmpty(key)) {
             Log.e(TAG, "Invalid key passed for parameter");
-        } else if  (value == null) {
+        } else if (value == null) {
             mRequestParameters.remove(key);
         } else {
             mRequestParameters.put(key, TextUtils.join(",", value));
@@ -163,11 +163,13 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     }
 
     /**
-     * Starts pub native request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
+     * Starts pubnative request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
      *
      * @param context  valid Context object
      * @param endpoint endpoint of ad (ex: NATIVE)
      * @param listener valid nativeRequestListener to track ad request callbacks.
+     *
+     * @deprecated Start doesn't require an endpoint anymore, this parameter will be ignored
      */
     @Deprecated
     public void start(Context context, Endpoint endpoint, Listener listener) {
@@ -176,6 +178,12 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         start(context, listener);
     }
 
+    /**
+     * Starts pubnative request, This function make the ad request to the pubnative server. It makes asynchronous network request in the background.
+     *
+     * @param context  valid Context object
+     * @param listener valid nativeRequestListener to track ad request callbacks.
+     */
     public void start(Context context, Listener listener) {
 
         Log.v(TAG, "start");
