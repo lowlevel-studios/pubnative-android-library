@@ -41,7 +41,8 @@ import java.net.URL;
 
 public class PubnativeHttpRequest {
 
-    private static final String TAG = PubnativeHttpRequest.class.getSimpleName();
+    private static final String TAG         = PubnativeHttpRequest.class.getSimpleName();
+    private static       String userAgent   = null;
 
     //==============================================================================================
     // Listener
@@ -81,7 +82,6 @@ public class PubnativeHttpRequest {
     // Inner
     protected Listener mListener          = null;
     protected Handler  mHandler           = null;
-    private   String   userAgent          = null;
 
     //==============================================================================================
     // Public
@@ -115,7 +115,7 @@ public class PubnativeHttpRequest {
      * @param urlString URL where the request will be done
      * @param listener valid Listener for callbacks
      */
-    public void start(Context context, final String urlString, Listener listener) {
+    public void start(final Context context, final String urlString, Listener listener) {
 
         Log.v(TAG, "start: " + urlString);
         mListener = listener;
@@ -133,18 +133,16 @@ public class PubnativeHttpRequest {
             if (isConnected) {
 
                 if(userAgent == null) {
-                    userAgent = new WebView(context).getSettings().getUserAgentString();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            userAgent = new WebView(context).getSettings().getUserAgentString();
+                            initiateRequest(urlString);
+                        }
+                    });
+                } else {
+                    initiateRequest(urlString);
                 }
-
-                new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        invokeStart();
-                        doRequest(urlString);
-                    }
-                }).start();
             } else {
                 invokeFail(new Exception("PubnativeHttpRequest - Error: internet connection not detected, dropping call"));
             }
@@ -154,6 +152,20 @@ public class PubnativeHttpRequest {
     //==============================================================================================
     // Private
     //==============================================================================================
+    private void initiateRequest(final String urlString) {
+
+        Log.v(TAG, "initiateRequest");
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                invokeStart();
+                doRequest(urlString);
+            }
+        }).start();
+    }
+
     protected void doRequest(String urlString) {
 
         Log.v(TAG, "doRequest: " + urlString);
