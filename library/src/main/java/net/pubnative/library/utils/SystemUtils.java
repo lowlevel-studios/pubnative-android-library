@@ -34,13 +34,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 
 public class SystemUtils {
 
     private static final String TAG = SystemUtils.class.getSimpleName();
-
-    private static String userAgent;
 
     /**
      * @param context Context object
@@ -172,13 +169,5 @@ public class SystemUtils {
         // CASE 4: When the view is outside of screen bounds such that no part of it is visible then the default value(false) of result will return.
         // We don't need to put explicit condition for this case.
         return result;
-    }
-
-    public static String getUserAgentString(Context context) {
-        if(userAgent == null) {
-            userAgent = new WebView(context).getSettings().getUserAgentString();
-        }
-
-        return userAgent;
     }
 }

@@ -31,8 +31,6 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import net.pubnative.library.utils.SystemUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +80,7 @@ public class PubnativeHttpRequest {
     // Inner
     protected Listener mListener          = null;
     protected Handler  mHandler           = null;
+    private   String   userAgent          = null;
 
     //==============================================================================================
     // Public
@@ -132,7 +131,9 @@ public class PubnativeHttpRequest {
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
 
-                final String userAgent = SystemUtils.getUserAgentString(context);
+                if(userAgent == null) {
+                    userAgent = new WebView(context).getSettings().getUserAgentString();
+                }
 
                 new Thread(new Runnable() {
 
@@ -140,7 +141,7 @@ public class PubnativeHttpRequest {
                     public void run() {
 
                         invokeStart();
-                        doRequest(urlString, userAgent);
+                        doRequest(urlString);
                     }
                 }).start();
             } else {
@@ -152,16 +153,14 @@ public class PubnativeHttpRequest {
     //==============================================================================================
     // Private
     //==============================================================================================
-    protected void doRequest(String urlString, String userAgent) {
+    protected void doRequest(String urlString) {
 
         Log.v(TAG, "doRequest: " + urlString);
         try {
             // 1. Create connection
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if(userAgent != null) {
-                connection.setRequestProperty("User-Agent", userAgent);
-            }
+            connection.setRequestProperty("User-Agent", userAgent);
             // 2. Set connection properties
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(mConnectionTimeout);
