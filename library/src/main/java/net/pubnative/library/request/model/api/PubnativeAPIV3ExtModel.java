@@ -21,12 +21,11 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import java.util.HashMap;
+import java.util.Map;
 
-public class PubnativeAPIV3DataModel {
+public class PubnativeAPIV3ExtModel {
 
-    protected String                  type;
-    protected HashMap<String, String> data;
+    protected Map meta;
 }

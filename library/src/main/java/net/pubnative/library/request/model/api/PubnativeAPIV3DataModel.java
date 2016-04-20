@@ -21,48 +21,49 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import java.util.List;
 import java.util.Map;
 
-public interface PubnativeAdDataModel {
+public class PubnativeAPIV3DataModel {
 
-    String getClickUrl();
+    public String type;
+    public Map    data;
 
-    String getTitle();
+    public String getText() {
 
-    String getDescription();
-
-    String getCta();
-
-    String getRating();
-
-    PubnativeImage getIcon();
-
-    PubnativeImage getBanner();
-
-    Map getMetaField(String metaType);
-
-    List getBeacons(String type);
-
-    List getAssetTrackingUrls();
-
-    interface AssetType {
-
-        String TITLE        = "title";
-        String DESCRIPTION  = "description";
-        String CTA          = "cta";
-        String RATING       = "rating";
-        String ICON         = "icon";
-        String BANNER       = "banner";
+        return getStringField("text");
     }
 
-    interface MetaType {
+    public String getTracking() {
 
-        String POINTS       = "points";
-        String REVENU_MODEL = "revenuemodel";
-        String CAMPAIGN_ID  = "campaignid";
-        String CREATIVE_ID  = "creativeid";
+        return getStringField("tracking");
+    }
+
+    public Integer getNumber() {
+
+        return getIntegerField("number");
+    }
+
+    public String getURL() {
+
+        return getStringField("url");
+    }
+
+    public String getStringField(String field) {
+        return (String) getDataField(field);
+    }
+
+    public Integer getIntegerField(String field) {
+        return (Integer) getDataField(field);
+    }
+
+    protected Object getDataField(String dataField) {
+
+        Object result = null;
+        if(data != null && data.containsKey(dataField)) {
+            result = data.get(dataField);
+        }
+        return result;
     }
 }

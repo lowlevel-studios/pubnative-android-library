@@ -21,11 +21,20 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import java.util.HashMap;
+import java.util.List;
 
-public class PubnativeAPIV3ExtModel {
+public class PubnativeAPIV3ResponseModel {
 
-    protected HashMap<String, String> meta;
+    public String                       status;
+    public String                       error_message;
+    public List<PubnativeAPIV3AdModel>  ads;
+    public List<PubnativeAPIV3ExtModel> ext;
+
+    public interface Status {
+
+        String ERROR = "error";
+        String OK    = "ok";
+    }
 }
