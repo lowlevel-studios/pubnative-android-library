@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.WebView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
