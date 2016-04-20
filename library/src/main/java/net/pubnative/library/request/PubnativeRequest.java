@@ -137,9 +137,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         Log.v(TAG, "setParameter: " + key + " : " + value);
         if (TextUtils.isEmpty(key)) {
             Log.e(TAG, "Invalid key passed for parameter");
-            return;
-        }
-        if (TextUtils.isEmpty(value)) {
+        } else if (TextUtils.isEmpty(value)) {
             mRequestParameters.remove(key);
         } else {
             mRequestParameters.put(key, value);
@@ -157,9 +155,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         Log.v(TAG, "setParameter: " + key + " : " + value);
         if (TextUtils.isEmpty(key)) {
             Log.e(TAG, "Invalid key passed for parameter");
-            return;
-        }
-        if (value == null) {
+        } else if  (value == null) {
             mRequestParameters.remove(key);
         } else {
             mRequestParameters.put(key, TextUtils.join(",", value));
