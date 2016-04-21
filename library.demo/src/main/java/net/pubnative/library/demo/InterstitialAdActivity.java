@@ -5,11 +5,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.demo.utils.Settings;
 import net.pubnative.library.interstitial.PubnativeInterstitial;
+import net.pubnative.library.request.PubnativeRequest;
+import net.pubnative.library.request.model.PubnativeAdModel;
 
-public class InterstitialAdActivity extends Activity implements PubnativeInterstitial.Listener {
+import java.util.List;
+
+public class InterstitialAdActivity extends Activity implements PubnativeRequest.Listener,
+                                                                PubnativeInterstitial.Listener {
 
     private static final String TAG = NativeAdActivity.class.getName();
 
@@ -28,15 +36,37 @@ public class InterstitialAdActivity extends Activity implements PubnativeInterst
 
         Log.v(TAG, "onRequestClick");
         mLoaderContainer.setVisibility(View.VISIBLE);
-        PubnativeInterstitial pubnativeInterstitial = new PubnativeInterstitial();
-        pubnativeInterstitial.show(this, Settings.getAppToken(), this);
+        PubnativeRequest request = new PubnativeRequest();
+        request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, Settings.getAppToken());
+        request.start(this, this);
+    }
+
+    //==============================================================================================
+    // Callbacks
+    //==============================================================================================
+
+    // PubnativeRequest.Listener
+    //----------------------------------------------------------------------------------------------
+    @Override
+    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
+        Log.v(TAG, "onPubnativeRequestSuccess");
+        if (ads != null && ads.size() > 0) {
+            new PubnativeInterstitial().show(this, ads.get(0), this);
+        } else {
+            Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
+        }
+        mLoaderContainer.setVisibility(View.GONE);
     }
 
     @Override
-    public void onPubnativeInterstitialStarted() {
-        Log.v(TAG, "onPubnativeInterstitialStarted");
+    public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
+        Log.v(TAG, "onPubnativeRequestFailed: " + ex);
+        Toast.makeText(this, "ERROR: " + ex, Toast.LENGTH_SHORT);
+        mLoaderContainer.setVisibility(View.GONE);
     }
 
+    // PubnativeInterstitial.Listener
+    //----------------------------------------------------------------------------------------------
     @Override
     public void onPubnativeInterstitialOpened() {
         mLoaderContainer.setVisibility(View.GONE);

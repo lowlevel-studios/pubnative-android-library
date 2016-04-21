@@ -17,7 +17,7 @@ import java.util.UUID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-public class PubnativeInterstitial implements PubnativeRequest.Listener {
+public class PubnativeInterstitial {
 
     private static final String TAG = PubnativeInterstitial.class.getSimpleName();
 
@@ -27,44 +27,30 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener {
     private String mIdentifier = UUID.randomUUID().toString();
 
     public interface Listener {
-        void onPubnativeInterstitialStarted();
         void onPubnativeInterstitialOpened();
         void onPubnativeInterstitialClosed();
         void onPubnativeInterstitialFailed(Exception exception);
     }
 
-    public void show(Context context, String appToken, Listener listener) {
+    /**
+     * Open ads in fullscreen activity
+     * @param context Context
+     * @param adModel Object of PubnativeAdModel
+     * @param listener A valid or null listener
+     */
+    public void show(Context context, PubnativeAdModel adModel, Listener listener) {
 
         Log.v(TAG, "show");
         mContext = context;
         mListener = listener;
 
-        invokeOnPubnativeInterstitialStarted();
-
         registerBroadcastReceiver();
 
-        PubnativeRequest request = new PubnativeRequest();
-        request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, appToken);
-        request.start(context, PubnativeRequest.Endpoint.NATIVE, this);
-    }
-
-    @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
-
-        Log.v(TAG, "onPubnativeRequestSuccess");
         Intent adIntent = new Intent(mContext, PubnativeInterstitialActivity.class);
         adIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        PubnativeAdModel pubnativeAdModel = ads.get(0);
-        adIntent.putExtra(PubnativeInterstitialActivity.EXTRA_AD, pubnativeAdModel);
+        adIntent.putExtra(PubnativeInterstitialActivity.EXTRA_AD, adModel);
         adIntent.putExtra(PubnativeInterstitialActivity.EXTRA_IDENTIFIER, mIdentifier);
         mContext.startActivity(adIntent);
-    }
-
-    @Override
-    public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
-
-        Log.v(TAG, "onPubnativeRequestFailed");
-        invokeOnPubnativeInterstitialFailed(ex);
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -115,14 +101,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener {
             mListener.onPubnativeInterstitialClosed();
         }
         unRegisterBroadcastReceiver();
-    }
-
-    private void invokeOnPubnativeInterstitialStarted() {
-
-        Log.v(TAG, "invokeOnPubnativeInterstitialStarted");
-        if(mListener != null) {
-            mListener.onPubnativeInterstitialStarted();
-        }
     }
 
     private void invokeOnPubnativeInterstitialFailed(Exception exception) {

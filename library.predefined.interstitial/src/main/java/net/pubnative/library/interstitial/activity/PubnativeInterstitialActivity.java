@@ -104,9 +104,10 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
         if(mPubnativeAdModel.getIconUrl() != null) {
             Picasso.with(this).load(mPubnativeAdModel.getIconUrl()).into(iconView);
         }
-        /*if(mPubnativeAdModel.getRating() != null) {
-            ratingView.setRating(Float.parseFloat(mPubnativeAdModel.getRating()));
-        }*/
+        if(mPubnativeAdModel.getRating() != 0) {
+            ratingView.setRating(mPubnativeAdModel.getRating());
+            ratingView.setVisibility(View.VISIBLE);
+        }
 
         mIdentifier = getIntent().getStringExtra(EXTRA_IDENTIFIER);
     }
