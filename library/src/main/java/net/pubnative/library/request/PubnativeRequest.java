@@ -209,10 +209,22 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     }
 
     /**
+     * Sets test mode to the status passed in the parameter
+     *
+     * @param enabled true if you want to enable test mode false if you want to get production ads
+     */
+    public void setTestMode(boolean enabled) {
+
+        Log.v(TAG, "setTestMode");
+        setParameter(Parameters.TEST, enabled ? "1" : "0");
+    }
+
+    /**
      * Sets the timeout for the request to the specified timeout
+     *
      * @param timeout int value of timeout in milliseconds
      */
-    public void setTimeout(int timeout){
+    public void setTimeout(int timeout) {
 
         Log.v(TAG, "setTimeout");
         PubnativeHttpRequest.setConnectionTimeout(timeout);
