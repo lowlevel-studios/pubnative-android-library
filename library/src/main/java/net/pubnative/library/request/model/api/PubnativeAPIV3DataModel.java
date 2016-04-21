@@ -23,9 +23,10 @@
 
 package net.pubnative.library.request.model.api;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class PubnativeAPIV3DataModel {
+public class PubnativeAPIV3DataModel implements Serializable {
 
     public String type;
     public Map    data;
