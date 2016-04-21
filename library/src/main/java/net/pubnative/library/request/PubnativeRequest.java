@@ -227,8 +227,8 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
             mRequestParameters.put(Parameters.LOCALE, Locale.getDefault().getLanguage());
         }
         // If none of lat and long is sent by the client then only we add default values. We can't alter client's parameters.
-        if (!mRequestParameters.containsKey(Parameters.LAT)
-            && !mRequestParameters.containsKey(Parameters.LONG)) {
+        if (!mRequestParameters.containsKey(Parameters.LAT) &&
+            !mRequestParameters.containsKey(Parameters.LONG)) {
             Location location = SystemUtils.getLastLocation(mContext);
             if (location != null) {
                 mRequestParameters.put(Parameters.LAT, String.valueOf(location.getLatitude()));
