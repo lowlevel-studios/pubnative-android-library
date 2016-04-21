@@ -464,10 +464,10 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                     Log.v(TAG, "onClick detected");
                     invokeOnClick(view);
                     confirmClickBeacons(view);
-                    if (mUseClickLoader) {
-                        showLoadingView();
-                    }
                     if (mUseBackgroundClick) {
+                        if (mUseClickLoader) {
+                            showLoadingView();
+                        }
                         URLDriller driller = new URLDriller();
                         driller.setListener(PubnativeAdModel.this);
                         driller.drill(getClickUrl());
