@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import net.pubnative.library.demo.utils.Settings;
-import net.pubnative.library.interstitial.PubnativeInterstitial;
+import net.pubnative.library.ad.PubnativeInterstitial;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
@@ -17,8 +17,7 @@ import java.util.List;
 public class InterstitialAdActivity extends Activity implements PubnativeRequest.Listener {
 
     private static final String TAG = InterstitialAdActivity.class.getName();
-
-    private RelativeLayout   mLoaderContainer;
+    private RelativeLayout mLoaderContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +36,6 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
         request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, Settings.getAppToken());
         request.start(this, this);
     }
-
     //==============================================================================================
     // Callbacks
     //==============================================================================================
@@ -46,9 +44,10 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
     //----------------------------------------------------------------------------------------------
     @Override
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
+
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {
-            new PubnativeInterstitial().show(this, ads.get(0));
+            PubnativeInterstitial.show(this, ads.get(0));
         } else {
             Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
         }
@@ -57,6 +56,7 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
 
     @Override
     public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
+
         Log.v(TAG, "onPubnativeRequestFailed: " + ex);
         Toast.makeText(this, "ERROR: " + ex, Toast.LENGTH_SHORT);
         mLoaderContainer.setVisibility(View.GONE);

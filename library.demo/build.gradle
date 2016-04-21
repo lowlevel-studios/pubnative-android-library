@@ -24,5 +24,5 @@ dependencies {
 
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':library')
-    compile project(':library.predefined.interstitial')
+    compile project(':library.ad.interstitial')
 }

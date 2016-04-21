@@ -1,1 +1,1 @@
-include ':library', ':library.demo', ':library.predefined.interstitial'
+include ':library', ':library.demo', ':library.ad.interstitial'

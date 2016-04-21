@@ -1,4 +1,4 @@
-package net.pubnative.library.interstitial;
+package net.pubnative.library.ad;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import net.pubnative.library.predefined.interstitial.R;
 import net.pubnative.library.request.model.PubnativeAdModel;
 
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -22,16 +21,15 @@ import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 
 public class PubnativeInterstitial extends Activity implements PubnativeAdModel.Listener {
 
-    private static final String           TAG                = PubnativeInterstitial.class.getSimpleName();
-    public  static final String           EXTRA_AD           = "ad";
-
-    private              TextView         titleView;
-    private              TextView         descriptionView;
-    private              ImageView        iconView;
-    private              ImageView        bannerView;
-    private              RatingBar        ratingView;
-    private              TextView         downloadView;
-    private              PubnativeAdModel mPubnativeAdModel;
+    private static final String           TAG               = PubnativeInterstitial.class.getSimpleName();
+    public static final  String           EXTRA_AD          = "ad";
+    private              TextView         titleView         = null;
+    private              TextView         descriptionView   = null;
+    private              ImageView        iconView          = null;
+    private              ImageView        bannerView        = null;
+    private              RatingBar        ratingView        = null;
+    private              TextView         downloadView      = null;
+    private              PubnativeAdModel mPubnativeAdModel = null;
 
     /**
      * Open a fullscreen activity with the data of passed ad
@@ -42,8 +40,7 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
     public static void show(Context context, PubnativeAdModel adModel) {
 
         Log.v(TAG, "show");
-
-        if(adModel == null) {
+        if (adModel == null) {
             Log.e(TAG, "Invalid data, can't open activity");
         } else {
             Intent adIntent = new Intent(context, PubnativeInterstitial.class);
@@ -58,18 +55,14 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
 
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         setContentView(R.layout.pubnative_interstitial);
-
         titleView = (TextView) this.findViewById(R.id.pn_interstitial_title);
         descriptionView = (TextView) this.findViewById(R.id.pn_interstitial_description);
         iconView = (ImageView) this.findViewById(R.id.pn_interstitial_icon);
         bannerView = (ImageView) this.findViewById(R.id.pn_interstitial_banner);
         ratingView = (RatingBar) this.findViewById(R.id.pn_interstitial_rating);
         downloadView = (TextView) this.findViewById(R.id.pn_interstitial_cta);
-
         renderAd();
     }
 
@@ -78,7 +71,6 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
 
         Log.v(TAG, "onResume");
         super.onResume();
-
         mPubnativeAdModel.startTracking(findViewById(R.id.pn_interstitial_container), downloadView, this);
     }
 
@@ -86,23 +78,12 @@ public class PubnativeInterstitial extends Activity implements PubnativeAdModel.
 
         Log.v(TAG, "renderAd");
         mPubnativeAdModel = (PubnativeAdModel) getIntent().getSerializableExtra(EXTRA_AD);
-
-        if(mPubnativeAdModel.getTitle() != null) {
-            titleView.setText(mPubnativeAdModel.getTitle());
-        }
-        if(mPubnativeAdModel.getDescription() != null) {
-            descriptionView.setText(mPubnativeAdModel.getDescription());
-        }
-        if(mPubnativeAdModel.getCtaText() != null) {
-            downloadView.setText(mPubnativeAdModel.getCtaText());
-        }
-        if(mPubnativeAdModel.getBannerUrl() != null) {
-            Picasso.with(this).load(mPubnativeAdModel.getBannerUrl()).into(bannerView);
-        }
-        if(mPubnativeAdModel.getIconUrl() != null) {
-            Picasso.with(this).load(mPubnativeAdModel.getIconUrl()).into(iconView);
-        }
-        if(mPubnativeAdModel.getRating() != 0) {
+        titleView.setText(mPubnativeAdModel.getTitle());
+        descriptionView.setText(mPubnativeAdModel.getDescription());
+        downloadView.setText(mPubnativeAdModel.getCtaText());
+        Picasso.with(this).load(mPubnativeAdModel.getBannerUrl()).into(bannerView);
+        Picasso.with(this).load(mPubnativeAdModel.getIconUrl()).into(iconView);
+        if (mPubnativeAdModel.getRating() != 0) {
             ratingView.setRating(mPubnativeAdModel.getRating());
         } else {
             Log.i(TAG, "Rating is not available");
