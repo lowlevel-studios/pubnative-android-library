@@ -42,7 +42,7 @@ import java.net.URL;
 
 public class PubnativeHttpRequest {
 
-    private static final String TAG         = PubnativeHttpRequest.class.getSimpleName();
+    private static final String TAG = PubnativeHttpRequest.class.getSimpleName();
 
     //==============================================================================================
     // Listener
@@ -77,35 +77,23 @@ public class PubnativeHttpRequest {
     // Properties
     //==============================================================================================
     // Request properties
-    protected int      mConnectionTimeout = 3000; // 3 seconds
-    protected int      mReadTimeout       = 1000; // 1 second
+    protected static int      sConnectionTimeout = 4000; // 4 seconds
     // Inner
-    protected Listener mListener          = null;
-    protected Handler  mHandler           = null;
-
+    protected        Listener mListener          = null;
+    protected        Handler  mHandler           = null;
     //==============================================================================================
     // Public
     //==============================================================================================
+
     /**
      * Sets a timeout for stabilshing connection with the server, if not specified default is 3000 ms
      *
      * @param connectionTimeout time in milliseconds
      */
-    public void setConnectionTimeout(int connectionTimeout) {
+    public static void setConnectionTimeout(int connectionTimeout) {
 
         Log.v(TAG, "setConnectionTimeout");
-        mConnectionTimeout = connectionTimeout;
-    }
-
-    /**
-     * Sets a timeout for reading the server response from the request, if not specified, default is 1000 ms
-     *
-     * @param readTimeout time in milliseconds
-     */
-    public void setReadTimeout(int readTimeout) {
-
-        Log.v(TAG, "setReadTimeout");
-        mReadTimeout = readTimeout;
+        sConnectionTimeout = connectionTimeout;
     }
 
     /**
@@ -113,7 +101,7 @@ public class PubnativeHttpRequest {
      *
      * @param context   valid Context object
      * @param urlString URL where the request will be done
-     * @param listener valid Listener for callbacks
+     * @param listener  valid Listener for callbacks
      */
     public void start(final Context context, final String urlString, Listener listener) {
 
@@ -123,7 +111,6 @@ public class PubnativeHttpRequest {
         if (mListener == null) {
             Log.w(TAG, "Warning: null listener specified");
         }
-
         if (TextUtils.isEmpty(urlString)) {
             invokeFail(new IllegalArgumentException("PubnativeHttpRequest - Error: null or empty url, dropping call"));
         } else {
@@ -131,7 +118,6 @@ public class PubnativeHttpRequest {
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
-
                 new Thread(new Runnable() {
 
                     @Override
@@ -140,7 +126,7 @@ public class PubnativeHttpRequest {
                         Looper.prepare();
                         invokeStart();
                         String userAgent = SystemUtils.getWebViewUserAgent(context);
-                        if(TextUtils.isEmpty(userAgent)) {
+                        if (TextUtils.isEmpty(userAgent)) {
                             invokeFail(new Exception("PubnativeHttpRequest - Error: User agent cannot be retrieved"));
                         } else {
                             doRequest(urlString, userAgent);
@@ -152,7 +138,6 @@ public class PubnativeHttpRequest {
             }
         }
     }
-
     //==============================================================================================
     // Private
     //==============================================================================================
@@ -167,8 +152,7 @@ public class PubnativeHttpRequest {
             connection.setRequestProperty("User-Agent", userAgent);
             // 2. Set connection properties
             connection.setRequestMethod("GET");
-            connection.setConnectTimeout(mConnectionTimeout);
-            connection.setReadTimeout(mReadTimeout);
+            connection.setConnectTimeout(sConnectionTimeout);
             connection.setDoInput(true);
             // 3. Do request
             connection.connect();
