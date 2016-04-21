@@ -79,7 +79,7 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
     private void renderAd() {
 
         Log.v(TAG, "renderAd");
-        mPubnativeAdModel = (PubnativeAdModel) getIntent().getSerializableExtra("ad");
+        mPubnativeAdModel = (PubnativeAdModel) getIntent().getSerializableExtra(EXTRA_AD);
 
         if(mPubnativeAdModel == null) {
             sendLocalMessage(ACTION_FAILED_INVALID_DATA);
