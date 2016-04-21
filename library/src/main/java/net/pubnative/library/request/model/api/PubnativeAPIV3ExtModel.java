@@ -21,24 +21,11 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import net.pubnative.library.request.model.api.PubnativeAPIV3AdModel;
+import java.util.Map;
 
-/**
- * Data holder for a Pubnative tracking beacon
- * @deprecated This data holder is outdated and can contain null url's, so shouldn't be used
- */
-@Deprecated
-class PubnativeBeacon {
+public class PubnativeAPIV3ExtModel {
 
-    String type;
-    String url;
-    String js;
-
-    interface BeaconType {
-
-        String IMPRESSION = PubnativeAPIV3AdModel.Beacon.IMPRESSION;
-        String CLICK      = PubnativeAPIV3AdModel.Beacon.CLICK;
-    }
+    protected Map meta;
 }

@@ -107,12 +107,14 @@ public class SystemUtils {
     public static Location getLastLocation(Context context) {
 
         Log.v(TAG, "getLastLocation");
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Location loc = null;
-        for (String prov : lm.getProviders(true)) {
-            loc = lm.getLastKnownLocation(prov);
-            if (loc != null) {
-                break;
+        if(SystemUtils.isLocationPermissionGranted(context)) {
+            LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            for (String prov : lm.getProviders(true)) {
+                loc = lm.getLastKnownLocation(prov);
+                if (loc != null) {
+                    break;
+                }
             }
         }
         return loc;

@@ -21,19 +21,49 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import java.util.List;
+import java.util.Map;
 
-public class PubnativeRequestAPIResponseModel {
+public class PubnativeAPIV3DataModel {
 
-    public String                 status;
-    public String                 error_message;
-    public List<PubnativeAdModel> ads;
+    public String type;
+    public Map    data;
 
-    public interface Status {
+    public String getText() {
 
-        String ERROR = "error";
-        String OK    = "ok";
+        return getStringField("text");
+    }
+
+    public String getTracking() {
+
+        return getStringField("tracking");
+    }
+
+    public Integer getNumber() {
+
+        return getIntegerField("number");
+    }
+
+    public String getURL() {
+
+        return getStringField("url");
+    }
+
+    public String getStringField(String field) {
+        return (String) getDataField(field);
+    }
+
+    public Integer getIntegerField(String field) {
+        return (Integer) getDataField(field);
+    }
+
+    protected Object getDataField(String dataField) {
+
+        Object result = null;
+        if(data != null && data.containsKey(dataField)) {
+            result = data.get(dataField);
+        }
+        return result;
     }
 }
