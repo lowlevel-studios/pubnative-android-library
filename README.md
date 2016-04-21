@@ -52,7 +52,7 @@ Optionally but not necessary to improve user targeting:
 
 Add the following line to your module dependencies
 
-```java
+```
 compile 'net.pubnative:library:2.0.3'
 ```
 
@@ -126,6 +126,23 @@ If at some point you want to stop the view and click tracking, just call the ad 
 
 <a name="misc"></a>
 # Misc
+
+<a name="misc_custom_loading"></a>
+### Custom loading
+
+The `PubnativeAdModel` class comes with a default loading view that overlaps the entire current actvity view in order to have the easiest integration, however, you might want to create your own loading view while the click redirection is calculated.
+
+To do this, simply disabe the click loader an develop our own using the following line **before the onPubnativeAdModelClick method ends**
+ 
+```java
+ad.setUseClickLoader(false);
+```
+
+There are also some people that don't like the idea of having a background click redirection, for this case, you can deactivate using the following method
+
+```java
+ad.setUseBackgroundClick(false)
+```
 
 <a name="misc_proguard"></a>
 ### Proguard
