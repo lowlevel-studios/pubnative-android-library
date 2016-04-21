@@ -40,6 +40,7 @@ import net.pubnative.library.request.model.api.PubnativeAPIV3AdModel;
 import net.pubnative.library.request.model.api.PubnativeAPIV3DataModel;
 import net.pubnative.library.tracking.PubnativeImpressionTracker;
 import net.pubnative.library.tracking.PubnativeTrackingManager;
+import net.pubnative.library.utils.SystemUtils;
 import net.pubnative.library.widget.PubnativeWebView;
 
 import java.io.Serializable;
@@ -471,6 +472,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                             showLoadingView();
                         }
                         URLDriller driller = new URLDriller();
+                        driller.setUserAgent(SystemUtils.getWebViewUserAgent(view.getContext()));
                         driller.setListener(PubnativeAdModel.this);
                         driller.drill(getClickUrl());
                     } else {
