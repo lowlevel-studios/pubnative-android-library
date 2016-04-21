@@ -15,25 +15,23 @@
         android:textSize="20dp"
         android:textStyle="bold"
         android:padding="20dp"/>
-
-    <RelativeLayout
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/activity_main_separator"
-        >
+        android:layout_height="wrap_content"
+        android:text="Native"
+        android:layout_centerHorizontal="true"
+        android:onClick="onNativeClick"
+        android:id="@+id/button"
+        android:layout_below="@+id/activity_main_separator" />
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Native"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentRight="false"
-            android:onClick="onNativeClick"
-            android:id="@+id/button"
-            />
-    </RelativeLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Interstitial"
+        android:layout_centerHorizontal="true"
+        android:onClick="onInterstitialClick"
+        android:id="@+id/buttonInterstitial"
+        android:layout_below="@id/button"/>
 
     <TextView
         android:layout_width="match_parent"
