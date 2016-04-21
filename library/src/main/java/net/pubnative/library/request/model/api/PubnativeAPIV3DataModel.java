@@ -23,9 +23,10 @@
 
 package net.pubnative.library.request.model.api;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class PubnativeAPIV3DataModel {
+public class PubnativeAPIV3DataModel implements Serializable {
 
     public String type;
     public Map    data;
@@ -42,7 +43,7 @@ public class PubnativeAPIV3DataModel {
 
     public Integer getNumber() {
 
-        return getIntegerField("number");
+        return getNumberField("number").intValue();
     }
 
     public String getURL() {
@@ -54,8 +55,8 @@ public class PubnativeAPIV3DataModel {
         return (String) getDataField(field);
     }
 
-    public Integer getIntegerField(String field) {
-        return (Integer) getDataField(field);
+    public Double getNumberField(String field) {
+        return (Double) getDataField(field);
     }
 
     protected Object getDataField(String dataField) {

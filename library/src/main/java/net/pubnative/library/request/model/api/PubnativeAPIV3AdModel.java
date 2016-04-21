@@ -23,10 +23,11 @@
 
 package net.pubnative.library.request.model.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PubnativeAPIV3AdModel {
+public class PubnativeAPIV3AdModel implements Serializable {
     //==============================================================================================
     // Interfaces
     //==============================================================================================
