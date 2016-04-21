@@ -24,11 +24,15 @@
 package net.pubnative.library.request.model;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import net.pubnative.URLDriller;
 import net.pubnative.library.request.PubnativeAsset;
@@ -78,9 +82,11 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel);
     }
 
-    protected transient Listener              mListener;
-    protected           PubnativeAPIV3AdModel mData;
-    protected           List<String>          mUsedAssets;
+    protected transient Listener              mListener           = null;
+    protected           boolean               mUseClickLoader     = true;
+    protected           boolean               mUseBackgroundClick = true;
+    protected           PubnativeAPIV3AdModel mData               = null;
+    protected           List<String>          mUsedAssets         = null;
 
     public static PubnativeAdModel create(PubnativeAPIV3AdModel data) {
 
@@ -88,7 +94,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         model.mData = data;
         return model;
     }
-
     //==============================================================================================
     // Generic Fields
     //==============================================================================================
@@ -132,7 +137,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             Log.w(TAG, "getAsset - Error: ad data not present");
         } else {
             result = mData.getAsset(asset);
-            if(result != null) {
+            if (result != null) {
                 recordAsset(result.getTracking());
             }
         }
@@ -358,6 +363,23 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     //==============================================================================================
 
     /**
+     * This will enable / disable the spin that takes the screen on click. Default behaviour is enabled
+     *
+     * @param enabled true will show a spinner on top of the screen, false will disable the click spin view
+     */
+    public void setUseClickLoader(boolean enabled) {
+
+        Log.v(TAG, "setUseClickLoader");
+        mUseClickLoader = enabled;
+    }
+
+    public void setUseBackgroundClick(boolean enabled) {
+
+        Log.v(TAG, "setUseBackgroundClick");
+        mUseBackgroundClick = enabled;
+    }
+
+    /**
      * This function will return the first present beacon URL of the specified type
      *
      * @param beaconType type of beacon
@@ -390,6 +412,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     private transient PubnativeImpressionTracker mPubnativeAdTracker    = null;
     private transient boolean                    mIsImpressionConfirmed = false;
     private transient View                       mClickableView         = null;
+    private transient View                       mAdView                = null;
 
     /**
      * Start tracking of ad view to auto confirm impressions and handle clicks
@@ -414,31 +437,43 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
         Log.v(TAG, "startTracking");
         mListener = listener;
-        // 1. start tracking impressions
-        if (mIsImpressionConfirmed) {
+        mAdView = view;
+        mClickableView = clickableView;
+        // 1. Impression tracking
+        if (mAdView == null) {
+            Log.w(TAG, "startTracking - ad view is null, cannot start tracking");
+        } else if (mIsImpressionConfirmed) {
             Log.v(TAG, "startTracking - impression is already confirmed, dropping impression tracking");
         } else {
             if (mPubnativeAdTracker == null) {
                 mPubnativeAdTracker = new PubnativeImpressionTracker();
             }
-            mPubnativeAdTracker.startTracking(view, this);
+            mPubnativeAdTracker.startTracking(mAdView, this);
         }
         // 2. Start tracking clicks
         if (TextUtils.isEmpty(getClickUrl())) {
-            Log.e(TAG, "startTracking - Error: click url is empty, clicks won't be tracked");
+            Log.w(TAG, "startTracking - Error: click url is empty, clicks won't be tracked");
+        } else if (mClickableView == null) {
+            Log.w(TAG, "startTracking - Error: click view is null, clicks won't be tracked");
         } else {
-            mClickableView = clickableView;
             mClickableView.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View view) {
 
-                    Log.v(TAG, "onClick");
+                    Log.v(TAG, "onClick detected");
                     invokeOnClick(view);
                     confirmClickBeacons(view);
-                    URLDriller driller = new URLDriller();
-                    driller.setListener(PubnativeAdModel.this);
-                    driller.drill(getClickUrl());
+                    if (mUseClickLoader) {
+                        showLoadingView();
+                    }
+                    if (mUseBackgroundClick) {
+                        URLDriller driller = new URLDriller();
+                        driller.setListener(PubnativeAdModel.this);
+                        driller.drill(getClickUrl());
+                    } else {
+                        openURL(getClickUrl());
+                    }
                 }
             });
         }
@@ -460,9 +495,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
         Log.v(TAG, "openURL: " + urlString);
         if (TextUtils.isEmpty(urlString)) {
-            Log.e(TAG, "Error: ending URL cannot be opened - " + urlString);
+            Log.w(TAG, "Error: ending URL cannot be opened - " + urlString);
         } else if (mClickableView == null) {
-            Log.e(TAG, "Error: clickable view not set");
+            Log.w(TAG, "Error: clickable view not set");
         } else {
             try {
                 Uri uri = Uri.parse(urlString);
@@ -471,7 +506,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                 mClickableView.getContext().startActivity(intent);
                 invokeOnOpenOffer();
             } catch (Exception ex) {
-                Log.e(TAG, "openURL: Error - " + ex.getMessage());
+                Log.w(TAG, "openURL: Error - " + ex.getMessage());
             }
         }
     }
@@ -491,14 +526,18 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
     protected void confirmClickBeacons(View view) {
 
+        Log.v(TAG, "confirmClickBeacons");
         confirmBeacons(PubnativeAPIV3AdModel.Beacon.CLICK, view);
     }
 
     protected void confirmBeacons(String beaconType, View view) {
 
-        if (mData != null) {
+        Log.v(TAG, "confirmBeacons: " + beaconType);
+        if (mData == null) {
+            Log.w(TAG, "confirmBeacons - Error: ad data not present");
+        } else {
             List<PubnativeAPIV3DataModel> beacons = mData.getBeacons(beaconType);
-            if(beacons != null) {
+            if (beacons != null) {
                 for (PubnativeAPIV3DataModel beaconData : beacons) {
                     String beaconURL = beaconData.getURL();
                     if (TextUtils.isEmpty(beaconURL)) {
@@ -518,6 +557,59 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                 }
             }
         }
+    }
+
+    //==============================================================================================
+    // LoadingView
+    //==============================================================================================
+    private transient RelativeLayout loadingView = null;
+
+    protected void showLoadingView() {
+
+        Log.v(TAG, "showLoadingView");
+        if (getRootView() == null) {
+            Log.w(TAG, "showLoadingView - Error: impossible to retrieve root view");
+        } else {
+            hideLoadingView();
+            getRootView().addView(getLoadingView(),
+                                  new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                             ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+    }
+
+    protected void hideLoadingView() {
+
+        Log.v(TAG, "hideLoadingView");
+        if (getRootView() == null) {
+            Log.w(TAG, "hideLoadingView - Error: impossible to retrieve root view");
+        } else {
+            getRootView().removeView(getLoadingView());
+        }
+    }
+
+    protected ViewGroup getRootView() {
+
+        Log.v(TAG, "getRootView");
+        ViewGroup result = null;
+        if (mAdView == null) {
+            Log.w(TAG, "getRootView - Error: not assigned ad view, cannot retrieve root view");
+        } else {
+            result = (ViewGroup) mAdView.getRootView();
+        }
+        return result;
+    }
+
+    protected RelativeLayout getLoadingView() {
+
+        Log.v(TAG, "getLoadingView");
+        if (loadingView == null) {
+            loadingView = new RelativeLayout(mAdView.getContext());
+            loadingView.setGravity(Gravity.CENTER);
+            loadingView.setBackgroundColor(Color.argb(77, 0, 0, 0));
+            loadingView.setClickable(true);
+            loadingView.addView(new ProgressBar(mAdView.getContext()));
+        }
+        return loadingView;
     }
 
     //==============================================================================================
@@ -580,6 +672,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
         Log.v(TAG, "onURLDrillerFinish: " + url);
         openURL(url);
+        hideLoadingView();
     }
 
     @Override
@@ -587,5 +680,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
 
         Log.v(TAG, "onURLDrillerFail: " + exception);
         openURL(url);
+        hideLoadingView();
     }
 }
