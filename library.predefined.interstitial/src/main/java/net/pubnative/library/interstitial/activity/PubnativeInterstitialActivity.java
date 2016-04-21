@@ -55,8 +55,6 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
         downloadView = (TextView) this.findViewById(R.id.pn_interstitial_cta);
 
         renderAd();
-
-        ratingView.setVisibility(View.GONE);
     }
 
     @Override
@@ -106,7 +104,8 @@ public class PubnativeInterstitialActivity extends Activity implements Pubnative
         }
         if(mPubnativeAdModel.getRating() != 0) {
             ratingView.setRating(mPubnativeAdModel.getRating());
-            ratingView.setVisibility(View.VISIBLE);
+        } else {
+            ratingView.setVisibility(View.GONE);
         }
 
         mIdentifier = getIntent().getStringExtra(EXTRA_IDENTIFIER);

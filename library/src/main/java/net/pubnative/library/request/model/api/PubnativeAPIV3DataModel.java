@@ -43,7 +43,7 @@ public class PubnativeAPIV3DataModel implements Serializable {
 
     public Integer getNumber() {
 
-        return getIntegerField("number");
+        return getNumberField("number").intValue();
     }
 
     public String getURL() {
@@ -55,8 +55,8 @@ public class PubnativeAPIV3DataModel implements Serializable {
         return (String) getDataField(field);
     }
 
-    public Integer getIntegerField(String field) {
-        return (Integer) getDataField(field);
+    public Double getNumberField(String field) {
+        return (Double) getDataField(field);
     }
 
     protected Object getDataField(String dataField) {
