@@ -7,8 +7,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
 import net.pubnative.library.demo.utils.Settings;
 import net.pubnative.library.interstitial.PubnativeInterstitial;
 import net.pubnative.library.request.PubnativeRequest;
@@ -16,10 +14,9 @@ import net.pubnative.library.request.model.PubnativeAdModel;
 
 import java.util.List;
 
-public class InterstitialAdActivity extends Activity implements PubnativeRequest.Listener,
-                                                                PubnativeInterstitial.Listener {
+public class InterstitialAdActivity extends Activity implements PubnativeRequest.Listener {
 
-    private static final String TAG = NativeAdActivity.class.getName();
+    private static final String TAG = InterstitialAdActivity.class.getName();
 
     private RelativeLayout   mLoaderContainer;
 
@@ -51,7 +48,7 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads != null && ads.size() > 0) {
-            new PubnativeInterstitial().show(this, ads.get(0), this);
+            new PubnativeInterstitial().show(this, ads.get(0));
         } else {
             Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
         }
@@ -63,25 +60,5 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
         Log.v(TAG, "onPubnativeRequestFailed: " + ex);
         Toast.makeText(this, "ERROR: " + ex, Toast.LENGTH_SHORT);
         mLoaderContainer.setVisibility(View.GONE);
-    }
-
-    // PubnativeInterstitial.Listener
-    //----------------------------------------------------------------------------------------------
-    @Override
-    public void onPubnativeInterstitialOpened() {
-        mLoaderContainer.setVisibility(View.GONE);
-        Log.v(TAG, "onPubnativeInterstitialOpened");
-    }
-
-    @Override
-    public void onPubnativeInterstitialClosed() {
-        mLoaderContainer.setVisibility(View.GONE);
-        Log.v(TAG, "onPubnativeInterstitialClosed");
-    }
-
-    @Override
-    public void onPubnativeInterstitialFailed(Exception exception) {
-        mLoaderContainer.setVisibility(View.GONE);
-        Log.e(TAG, "onPubnativeInterstitialFailed " + exception);
     }
 }

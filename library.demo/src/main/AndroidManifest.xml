@@ -23,7 +23,7 @@
         <activity android:name=".NativeAdActivity"/>
         <activity android:name=".InterstitialAdActivity"/>
 
-        <activity android:name="net.pubnative.library.interstitial.activity.PubnativeInterstitialActivity"/>
+        <activity android:name="net.pubnative.library.interstitial.PubnativeInterstitial"/>
     </application>
 
 </manifest>
