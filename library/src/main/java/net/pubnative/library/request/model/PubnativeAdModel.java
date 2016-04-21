@@ -28,7 +28,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import net.pubnative.URLDriller;
 import net.pubnative.library.request.PubnativeAsset;
