@@ -30,7 +30,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.WebView;
+
+import net.pubnative.library.utils.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,7 +43,6 @@ import java.net.URL;
 public class PubnativeHttpRequest {
 
     private static final String TAG         = PubnativeHttpRequest.class.getSimpleName();
-    private static       String userAgent   = null;
 
     //==============================================================================================
     // Listener
@@ -132,17 +132,21 @@ public class PubnativeHttpRequest {
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
 
-                if(userAgent == null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            userAgent = new WebView(context).getSettings().getUserAgentString();
-                            initiateRequest(urlString);
+                new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        Looper.prepare();
+                        invokeStart();
+                        String userAgent = SystemUtils.getWebViewUserAgent(context);
+                        if(TextUtils.isEmpty(userAgent)) {
+                            invokeFail(new Exception("PubnativeHttpRequest - Error: User agent cannot be retrieved"));
+                        } else {
+                            doRequest(urlString, userAgent);
                         }
-                    });
-                } else {
-                    initiateRequest(urlString);
-                }
+                    }
+                }).start();
             } else {
                 invokeFail(new Exception("PubnativeHttpRequest - Error: internet connection not detected, dropping call"));
             }
@@ -152,21 +156,8 @@ public class PubnativeHttpRequest {
     //==============================================================================================
     // Private
     //==============================================================================================
-    private void initiateRequest(final String urlString) {
 
-        Log.v(TAG, "initiateRequest");
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                invokeStart();
-                doRequest(urlString);
-            }
-        }).start();
-    }
-
-    protected void doRequest(String urlString) {
+    protected void doRequest(String urlString, String userAgent) {
 
         Log.v(TAG, "doRequest: " + urlString);
         try {
