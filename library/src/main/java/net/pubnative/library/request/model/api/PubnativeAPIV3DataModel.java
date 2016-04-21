@@ -21,24 +21,50 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.request.model.api;
 
-import net.pubnative.library.request.model.api.PubnativeAPIV3AdModel;
+import java.io.Serializable;
+import java.util.Map;
 
-/**
- * Data holder for a Pubnative tracking beacon
- * @deprecated This data holder is outdated and can contain null url's, so shouldn't be used
- */
-@Deprecated
-class PubnativeBeacon {
+public class PubnativeAPIV3DataModel implements Serializable {
 
-    String type;
-    String url;
-    String js;
+    public String type;
+    public Map    data;
 
-    interface BeaconType {
+    public String getText() {
 
-        String IMPRESSION = PubnativeAPIV3AdModel.Beacon.IMPRESSION;
-        String CLICK      = PubnativeAPIV3AdModel.Beacon.CLICK;
+        return getStringField("text");
+    }
+
+    public String getTracking() {
+
+        return getStringField("tracking");
+    }
+
+    public Integer getNumber() {
+
+        return getIntegerField("number");
+    }
+
+    public String getURL() {
+
+        return getStringField("url");
+    }
+
+    public String getStringField(String field) {
+        return (String) getDataField(field);
+    }
+
+    public Integer getIntegerField(String field) {
+        return (Integer) getDataField(field);
+    }
+
+    protected Object getDataField(String dataField) {
+
+        Object result = null;
+        if(data != null && data.containsKey(dataField)) {
+            result = data.get(dataField);
+        }
+        return result;
     }
 }

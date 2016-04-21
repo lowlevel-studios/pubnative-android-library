@@ -21,24 +21,40 @@
 // SOFTWARE.
 //
 
-package net.pubnative.library.request.model;
+package net.pubnative.library.widget;
 
-import net.pubnative.library.request.model.api.PubnativeAPIV3AdModel;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.webkit.WebView;
 
-/**
- * Data holder for a Pubnative tracking beacon
- * @deprecated This data holder is outdated and can contain null url's, so shouldn't be used
- */
-@Deprecated
-class PubnativeBeacon {
+public class PubnativeWebView extends WebView {
 
-    String type;
-    String url;
-    String js;
+    private static final String TAG = PubnativeWebView.class.getSimpleName();
 
-    interface BeaconType {
+    public PubnativeWebView(Context context) {
+        super(context);
+        init();
+    }
 
-        String IMPRESSION = PubnativeAPIV3AdModel.Beacon.IMPRESSION;
-        String CLICK      = PubnativeAPIV3AdModel.Beacon.CLICK;
+    public PubnativeWebView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public PubnativeWebView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init();
+    }
+
+
+    private void init() {
+        getSettings().setJavaScriptEnabled(true);
+    }
+
+    public void loadBeacon(final String jsBeacon) {
+
+        Log.v(TAG, "loadBeacon");
+        loadUrl("javascript:" + jsBeacon);
     }
 }
