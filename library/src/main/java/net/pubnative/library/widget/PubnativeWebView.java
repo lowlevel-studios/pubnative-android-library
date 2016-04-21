@@ -50,13 +50,6 @@ public class PubnativeWebView extends WebView {
 
     private void init() {
         getSettings().setJavaScriptEnabled(true);
-        post(new Runnable() {
-            @Override
-            public void run() {
-                getLayoutParams().height = 0;
-                getLayoutParams().width = 0;
-            }
-        });
     }
 
     public void loadBeacon(final String jsBeacon) {

@@ -504,10 +504,9 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                     if (TextUtils.isEmpty(beaconURL)) {
                         // JAVASCRIPT
                         String beaconJS = beaconData.getStringField("js");
-                        if (!TextUtils.isEmpty(beaconURL)) {
+                        if (!TextUtils.isEmpty(beaconJS)) {
                             try {
                                 PubnativeWebView webView = new PubnativeWebView(view.getContext());
-                                ((ViewGroup) view.getRootView()).addView(webView);
                                 webView.loadBeacon(beaconJS);
                             } catch (Exception e) {
                                 Log.e(TAG, "confirmImpressionBeacons - JS Error: " + e);
