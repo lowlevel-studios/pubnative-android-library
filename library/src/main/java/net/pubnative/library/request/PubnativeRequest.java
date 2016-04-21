@@ -208,6 +208,16 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         }
     }
 
+    /**
+     * Sets the timeout for the request to the specified timeout
+     * @param timeout int value of timeout in milliseconds
+     */
+    public void setTimeout(int timeout){
+
+        Log.v(TAG, "setTimeout");
+        PubnativeHttpRequest.setConnectionTimeout(timeout);
+    }
+
     //==============================================================================================
     // Private
     //==============================================================================================
