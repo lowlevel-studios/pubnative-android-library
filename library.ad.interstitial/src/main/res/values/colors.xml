@@ -8,4 +8,5 @@
     <color name="pn_shadow_dark">#151515</color>
     <color name="pn_rating_stars_fill">#009688</color>
     <color name="pn_rating_stars_empty">#D2D2D2</color>
+    <color name="pn_dark_gray_semitransparent">#80000000</color>
 </resources>
