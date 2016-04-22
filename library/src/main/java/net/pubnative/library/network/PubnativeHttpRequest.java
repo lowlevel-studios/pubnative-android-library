@@ -86,7 +86,7 @@ public class PubnativeHttpRequest {
     //==============================================================================================
 
     /**
-     * Sets a timeout for stabilshing connection with the server, if not specified default is 3000 ms
+     * Sets a timeout for establishing connection with the server, if not specified default is 4000 ms
      *
      * @param connectionTimeout time in milliseconds
      */

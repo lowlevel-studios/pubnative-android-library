@@ -19,6 +19,7 @@ pubnative-android-library is a collection of Open Source tools to implement API 
 * [Usage](#usage)
  *  [Request](#usage_request)
  *  [Track](#usage_track)
+ *  [Interstitial](#usage_interstitial)
 * [Misc](#misc)
  * [Proguard](#misc_proguard)
  * [Dependencies](#misc_dependencies)
@@ -69,7 +70,7 @@ PubNative library is a lean yet complete library that allows you to request and 
 Basic integration steps are:
 
 1. [Request](#usage_request): Using `PubnativeRequest`
-3. [Track](#usage_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
+2. [Track](#usage_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
 
 <a name="usage_request"></a>
 ### 1) Request
@@ -81,20 +82,33 @@ For simplier usage we're providing an interface `PubnativeRequest.Parameters` th
 ```java
 PubnativeRequest request = new PubnativeRequest();
 request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, "----YOUR_APP_TOKEN_HERE---");
-request.start(CONTEXT, PubnativeRequest.Endpoint.NATIVE, new PubnativeRequest.Listener()
-{
+request.start(CONTEXT, new PubnativeRequest.Listener() {
     @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads)
-    {
+    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex)
-    {
+    public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
         // TODO Auto-generated method stub
     }
 });
+```
+
+##### Testing Mode
+
+For enabling testing mode, call `setTestMode` method at the time of making request
+
+```
+request.setTestMode(true);
+```
+
+##### Timeout
+
+To set timeout, call `setTimeout` method. Default timeout is 4000ms
+
+```
+request.setTimeout(<timeoutinmillis>);
 ```
 
 <a name="usage_track"></a>
@@ -123,6 +137,22 @@ ad.startTracking(visibleView, new PubnativeAdModel.Listener() {
 ```
 
 If at some point you want to stop the view and click tracking, just call the ad `stopTracking()` method.
+
+<a name="usage_interstitial"></a>
+### 4) Interstitial
+![ScreenShot](interstitial.png)
+
+#### 4.1 Make a Request
+
+   [Request](#usage_request): Using `PubnativeRequest`
+    
+#### 4.2 Show fullscreen Ad
+
+   Call `show` method of `PubnativeInterstitial` with `context` & object of `PubnativeAdModel`
+
+```
+PubnativeInterstitial.show(CONTEXT, <ad>);
+```
 
 <a name="misc"></a>
 # Misc
