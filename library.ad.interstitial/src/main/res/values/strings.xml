@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Interstitial</string>
+    <string name="pn_sponsored_text">sponsored</string>
 </resources>

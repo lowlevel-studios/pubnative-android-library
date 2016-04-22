@@ -97,4 +97,14 @@
             android:scaleType="fitCenter" />
     
     </RelativeLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pn_sponsored_text"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:padding="3dp"
+        android:textColor="@color/pn_white"
+        android:background="@color/pn_dark_gray_semitransparent"
+        android:textSize="10sp"/>
 </RelativeLayout>
