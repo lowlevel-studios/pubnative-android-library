@@ -95,7 +95,7 @@ public class NativeAdActivity extends Activity implements PubnativeRequest.Liste
 
         PubnativeRequest request = new PubnativeRequest();
         request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, Settings.getAppToken());
-        request.start(this, PubnativeRequest.Endpoint.NATIVE, this);
+        request.start(this, this);
     }
     //==============================================================================================
     // Callbacks
