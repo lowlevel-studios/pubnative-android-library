@@ -69,7 +69,7 @@ Clone the repository and import the `:library` module into your project
 
 PubNative library is a lean yet complete library that allows you to request and show ads.
 
-<a name="usage_native   "></a>
+<a name="usage_native"></a>
 ## Native
 
 Basic integration steps are:
