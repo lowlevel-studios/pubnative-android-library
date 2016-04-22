@@ -71,6 +71,7 @@ Basic integration steps are:
 
 1. [Request](#usage_request): Using `PubnativeRequest`
 2. [Track](#usage_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
+3. [Interstitial](#usage_interstitial): Using `PubnativeInterstitial` builtin `show`
 
 <a name="usage_request"></a>
 ### 1) Request
@@ -99,7 +100,7 @@ request.start(CONTEXT, new PubnativeRequest.Listener() {
 
 For enabling testing mode, call `setTestMode` method at the time of making request
 
-```
+```java
 request.setTestMode(true);
 ```
 
@@ -107,7 +108,7 @@ request.setTestMode(true);
 
 To set timeout, call `setTimeout` method. Default timeout is 4000ms
 
-```
+```java
 request.setTimeout(<timeoutinmillis>);
 ```
 
