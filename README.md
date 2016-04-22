@@ -145,18 +145,16 @@ If at some point you want to stop the view and click tracking, just call the ad 
 
 <a name="usage_predefined"></a>
 ## Predefined
-Basic integration steps are:
 
-1. [Interstitial](#usage_predefined_interstitial): Using `PubnativeInterstitial` builtin `show`
 <a name="usage_interstitial"></a>
 ### Interstitial
 ![ScreenShot](interstitial.png)
 
-##### Make a Request
+##### 1. Make a Request
 
    [Request](#usage_request): Using `PubnativeRequest`
     
-##### Show fullscreen Ad
+##### 2. Show fullscreen Ad
 
    Call `show` method of `PubnativeInterstitial` with `context` & object of `PubnativeAdModel`
 
