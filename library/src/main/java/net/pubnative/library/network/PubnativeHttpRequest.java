@@ -118,20 +118,21 @@ public class PubnativeHttpRequest {
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
-                mHandler.post(new Runnable() {
+                new Thread(new Runnable() {
 
                     @Override
                     public void run() {
 
+                        Looper.prepare();
                         invokeStart();
                         String userAgent = SystemUtils.getWebViewUserAgent(context);
                         if (TextUtils.isEmpty(userAgent)) {
                             invokeFail(new Exception("PubnativeHttpRequest - Error: User agent cannot be retrieved"));
                         } else {
-                            initiateRequest(urlString, userAgent);
+                            doRequest(urlString, userAgent);
                         }
                     }
-                });
+                }).start();
             } else {
                 invokeFail(new Exception("PubnativeHttpRequest - Error: internet connection not detected, dropping call"));
             }
@@ -140,15 +141,6 @@ public class PubnativeHttpRequest {
     //==============================================================================================
     // Private
     //==============================================================================================
-
-    private void initiateRequest(final String urlString, final String userAgent) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                doRequest(urlString, userAgent);
-            }
-        }).start();
-    }
 
     protected void doRequest(String urlString, String userAgent) {
 
