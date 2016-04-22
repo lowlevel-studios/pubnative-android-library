@@ -17,9 +17,11 @@ pubnative-android-library is a collection of Open Source tools to implement API 
  * [Gradle](#install_gradle)
  * [Manual](#install_manual)
 * [Usage](#usage)
- *  [Request](#usage_request)
- *  [Track](#usage_track)
- *  [Interstitial](#usage_interstitial)
+ * [Native] (#usage_native)
+  * [Request](#usage_native_request)
+  * [Track](#usage_native_track)
+ * [Predefined] (#usage_predefined)
+  * [Interstitial](#usage_predefined_interstitial)
 * [Misc](#misc)
  * [Proguard](#misc_proguard)
  * [Dependencies](#misc_dependencies)
@@ -67,11 +69,13 @@ Clone the repository and import the `:library` module into your project
 
 PubNative library is a lean yet complete library that allows you to request and show ads.
 
+<a name="usage_native"></a>
+## Native
+
 Basic integration steps are:
 
 1. [Request](#usage_request): Using `PubnativeRequest`
 2. [Track](#usage_track): Using `PubnativeAdModel` builtin `startTracking` and `stopTracking`
-3. [Interstitial](#usage_interstitial): Using `PubnativeInterstitial` builtin `show`
 
 <a name="usage_request"></a>
 ### 1) Request
@@ -139,8 +143,12 @@ ad.startTracking(visibleView, new PubnativeAdModel.Listener() {
 
 If at some point you want to stop the view and click tracking, just call the ad `stopTracking()` method.
 
+<a name="usage_native"></a>
+## Predefined
+Basic integration steps are:
+1. [Interstitial](#usage_interstitial): Using `PubnativeInterstitial` builtin `show`
 <a name="usage_interstitial"></a>
-### 4) Interstitial
+### Interstitial
 ![ScreenShot](interstitial.png)
 
 #### 4.1 Make a Request
