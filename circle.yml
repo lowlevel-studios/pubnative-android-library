@@ -12,3 +12,7 @@ machine:
 #    branch: development
 #    commands:
 #      - echo TODO-Deploy to QA
+
+test:
+  override:
+    ./gradlew connectedAndroidTest coveralls
