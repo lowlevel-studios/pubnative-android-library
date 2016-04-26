@@ -23,5 +23,3 @@ test:
     - cp -r /home/ubuntu/pubnative-android-library/library/build/reports/coverage/* $CIRCLE_ARTIFACTS/code-coverage
     # copy the test results to the test results directory.
     - cp -r /home/ubuntu/pubnative-android-library/library/build/reports/androidTests/* $CIRCLE_TEST_REPORTS
-  post:
-      - coveralls
