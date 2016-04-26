@@ -1,6 +1,7 @@
 machine:
-  timezone:
-    Europe/Berlin
+  timezone: Europe/Berlin
+  environment:
+    COVERALLS_REPO_TOKEN: KfvQAfNmnrtJz8YkAB55wOSaKYZjtOl6L
 # TODO: Uncomment this to enable master/development compile only
 #general:
 #  branches:
@@ -19,5 +20,8 @@ test:
     - ./gradlew connectedAndroidTest coveralls
     # copy the build outputs to artifacts
     - cp -r /home/ubuntu/pubnative-android-library/library/build/outputs $CIRCLE_ARTIFACTS
+    - cp -r /home/ubuntu/pubnative-android-library/library/build/reports/coverage/* $CIRCLE_ARTIFACTS/code-coverage
     # copy the test results to the test results directory.
-    - cp -r /home/ubuntu/pubnative-android-library/library/build/reports/* $CIRCLE_TEST_REPORTS
+    - cp -r /home/ubuntu/pubnative-android-library/library/build/reports/androidTests/* $CIRCLE_TEST_REPORTS
+  post:
+      - coveralls
