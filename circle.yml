@@ -15,4 +15,9 @@ machine:
 
 test:
   override:
+    # run tests
     - ./gradlew connectedAndroidTest coveralls
+    # copy the build outputs to artifacts
+    - cp -r /home/ubuntu/pubnative-android-library/library/build/outputs $CIRCLE_ARTIFACTS
+    # copy the test results to the test results directory.
+    - cp -r /home/ubuntu/pubnative-android-library/library/build/outputs/reports/androidTests/* $CIRCLE_TEST_REPORTS
