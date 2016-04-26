@@ -100,17 +100,27 @@ request.start(CONTEXT, new PubnativeRequest.Listener() {
 });
 ```
 
-##### Testing Mode
+##### Asset filtering
 
-For enabling testing mode, call `setTestMode` method at the time of making request
+In order to avoid some traffic, you can also specify which assets do you want to receive within the request response assets, for that reason we've created a class `PubnativeAssets` that contains all the possible assets.
+
+Once created a request object, you can specify the assets by using the `setParameterArray` method from the request.
 
 ```java
-request.setTestMode(true);
+request.setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, new String[]{ PubnativeAsset.TITLE, PubnativeAsset.ICON, <ASSETS> });
+```
+
+##### Testing Mode
+
+If you're testing your app, we've enabled a test mode so you can test your app without affecting your reports, simply call the `setTestMode` method before doing the request and set the value to true. 
+
+```java
+request.setTestMode(<boolean>);
 ```
 
 ##### Timeout
 
-To set timeout, call `setTimeout` method. Default timeout is 4000ms
+If you want, you can set a timeout to avoid long waits in case of slow connections, simply use the request `setTimeout` method and specify the milliseconds a request can run before timing out. The default timeout is 4000ms
 
 ```java
 request.setTimeout(<timeoutinmillis>);
@@ -141,25 +151,10 @@ ad.startTracking(visibleView, new PubnativeAdModel.Listener() {
 });
 ```
 
-If at some point you want to stop the view and click tracking, just call the ad `stopTracking()` method.
+If your ad is removed from the screen or you're exiting the activity, you'll need to stop the tracking process with  the following method:
 
-<a name="usage_predefined"></a>
-## Predefined
-
-<a name="usage_interstitial"></a>
-### Interstitial
-![ScreenShot](interstitial.png)
-
-##### 1. Make a Request
-
-   [Request](#usage_request): Using `PubnativeRequest`
-    
-##### 2. Show fullscreen Ad
-
-   Call `show` method of `PubnativeInterstitial` with `context` & object of `PubnativeAdModel`
-
-```
-PubnativeInterstitial.show(CONTEXT, <ad>);
+```java
+ad.stopTracking();
 ```
 
 <a name="misc"></a>
