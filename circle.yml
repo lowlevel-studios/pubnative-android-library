@@ -15,4 +15,4 @@ machine:
 
 test:
   override:
-    ./gradlew connectedAndroidTest coveralls
+    - ./gradlew connectedAndroidTest coveralls
