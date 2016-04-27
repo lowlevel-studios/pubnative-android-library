@@ -107,6 +107,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
 
+                Log.v(TAG, "dispatchKeyEvent");
                 if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                     hide();
                     return true;
@@ -117,8 +118,8 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
             @Override
             protected void onWindowVisibilityChanged(int visibility) {
 
+                Log.v(TAG, "onWindowVisibilityChanged");
                 if (visibility != View.VISIBLE) {
-                    Log.v(TAG, "VIEW INVISIBLE");
                     hide();
                 }
             }
