@@ -1,16 +1,5 @@
 machine:
   timezone: Europe/Berlin
-# TODO: Uncomment this to enable master/development compile only
-#general:
-#  branches:
-#    only:
-#      - master
-#      - development
-#deployment:
-#  development:
-#    branch: development
-#    commands:
-#      - echo TODO-Deploy to QA
 
 test:
   pre:
@@ -25,7 +14,10 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-   - ./gradlew jacocoTestReport connectedAndroidTest
+    - ./gradlew jacocoTestReport connectedAndroidTest
+
+  post:
+    - cp -R build/reports/* $CIRCLE_ARTIFACTS
 
 deployment:
   codecov:

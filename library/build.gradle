@@ -17,6 +17,9 @@ android {
         versionCode 23
         versionName sharedVersion
     }
+    lintOptions {
+        abortOnError false
+    }
     buildTypes {
         debug {
             testCoverageEnabled true
@@ -25,9 +28,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    jacoco {
-        version "0.7.1.201405082137"
     }
 }
 
