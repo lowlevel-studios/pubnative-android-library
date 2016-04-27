@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import net.pubnative.library.ad.PubnativeInterstitial;
+import net.pubnative.library.interstitial.PubnativeInterstitial;
 import net.pubnative.library.demo.utils.Settings;
 
 public class InterstitialAdActivity extends Activity implements PubnativeInterstitial.Listener {

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/pn_background" >
+    android:background="@color/pubnative_interstitial_background" >
 
     <RelativeLayout
         android:id="@+id/pn_interstitial_container"
@@ -18,11 +18,11 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_centerHorizontal="false"
-            android:src="@drawable/logo_bw" />
+            android:src="@drawable/pubnative_interstitial_logo_bw" />
     
         <TextView
             android:id="@+id/pn_interstitial_cta"
-            style="@style/AL_DownloadButtonStyle"
+            style="@style/pubnative_interstitial_DownloadButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/pn_interstitial_company_logo"
@@ -46,7 +46,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="5dp"
                 android:adjustViewBounds="true"
-                android:background="@color/pn_white"
+                android:background="@color/pubnative_interstitial_white"
                 android:padding="3dp"/>
     
             <TextView
@@ -71,13 +71,13 @@
                 android:layout_alignBottom="@id/pn_interstitial_icon"
                 android:layout_marginBottom="5dp"
                 android:layout_toRightOf="@id/pn_interstitial_icon"
-                android:progressTint="@color/pn_rating_stars_fill"
-                android:progressBackgroundTint="@color/pn_rating_stars_empty"
+                android:progressTint="@color/pubnative_interstitial_rating_stars_fill"
+                android:progressBackgroundTint="@color/pubnative_interstitial_rating_stars_empty"
                 android:isIndicator="true" />
     
             <TextView
                 android:id="@+id/pn_interstitial_description"
-                style="@style/AL_DailyInfoBox"
+                style="@style/pubnative_interstitial_DailyInfoBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="false"
@@ -100,11 +100,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/pn_sponsored_text"
+        android:text="@string/pubnative_interstitial_sponsored_text"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:padding="3dp"
-        android:textColor="@color/pn_white"
-        android:background="@color/pn_dark_gray_semitransparent"
+        android:textColor="@color/pubnative_interstitial_white"
+        android:background="@color/pubnative_interstitial_dark_gray_semitransparent"
         android:textSize="10sp"/>
 </RelativeLayout>

@@ -1,4 +1,4 @@
-package net.pubnative.library.ad;
+package net.pubnative.library.interstitial;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -33,7 +33,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     protected WindowManager                  mWindowManager;
     // Interstitial view
     protected RelativeLayout                 mContainer;
-
     protected TextView                       mTitle;
     protected TextView                       mDescription;
     protected ImageView                      mIcon;
@@ -41,18 +40,52 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     protected RatingBar                      mRating;
     protected TextView                       mCTA;
 
+    /**
+     * Interface for callbacks related to the interstitial view behaviour
+     */
     public interface Listener {
 
+        /**
+         * Called whenever the interstitial finished loading an ad
+         *
+         * @param interstitial interstitial that finished the load
+         */
         void onPubnativeInterstitialLoadFinish(PubnativeInterstitial interstitial);
 
+        /**
+         * Called whenever the interstitial failed loading an ad
+         *
+         * @param interstitial interstitial that failed the load
+         * @param exception    exception with the description of the load error
+         */
         void onPubnativeInterstitialLoadFail(PubnativeInterstitial interstitial, Exception exception);
 
+        /**
+         * Called when the interstitial was just shown on the screen
+         *
+         * @param interstitial interstitial that was shown in the screen
+         */
         void onPubnativeInterstitialShow(PubnativeInterstitial interstitial);
 
+        /**
+         * Called when the interstitial impression was confrimed
+         *
+         * @param interstitial interstitial which impression was confirmed
+         */
         void onPubnativeInterstitialImpressionConfirmed(PubnativeInterstitial interstitial);
 
+        /**
+         * Called whenever the interstitial was clicked by the user
+         *
+         * @param interstitial interstitial that was clicked
+         */
         void onPubnativeInterstitialClick(PubnativeInterstitial interstitial);
 
+        /**
+         * Called whenever the interstitial was removed from the screen
+         *
+         * @param interstitial interstitial that was hidden
+         */
         void onPubnativeInterstitialHide(PubnativeInterstitial interstitial);
     }
 
@@ -83,7 +116,8 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
             @Override
             protected void onWindowVisibilityChanged(int visibility) {
-                if(visibility != View.VISIBLE) {
+
+                if (visibility != View.VISIBLE) {
                     Log.v(TAG, "VIEW INVISIBLE");
                     hide();
                 }
@@ -94,6 +128,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
     /**
      * Sets a callback listener for this interstitial object
+     *
      * @param listener valid PubnativeInterstitial.Listener object
      */
     public void setListener(Listener listener) {
@@ -134,6 +169,11 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         }
     }
 
+    /**
+     * Method that checks if the intersitial is ready to be shown in the screen
+     *
+     * @return true if the interstitial can be shown false if not
+     */
     public boolean isReady() {
 
         Log.v(TAG, "setListener");
@@ -167,6 +207,9 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         mIsLoading = false;
     }
 
+    //==============================================================================================
+    // Helpers
+    //==============================================================================================
     protected void hide() {
 
         Log.v(TAG, "hide");
@@ -181,7 +224,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     protected void render() {
 
         Log.v(TAG, "render");
-
         mTitle.setText(mAdModel.getTitle());
         mDescription.setText(mAdModel.getDescription());
         mCTA.setText(mAdModel.getCtaText());
@@ -199,10 +241,10 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         mAdModel.startTracking(mContainer, mCTA, this);
         invokeShow();
     }
+
     //==============================================================================================
     // Callback helpers
     //==============================================================================================
-
     protected void invokeLoadFinish() {
 
         Log.v(TAG, "invokeLoadFinish");
