@@ -1,5 +1,7 @@
 machine:
   timezone: Europe/Berlin
+  environment:
+    COVERALLS_REPO_TOKEN: KfvQAfNmnrtJz8YkAB55wOSaKYZjtOl6L
 
 test:
   pre:
