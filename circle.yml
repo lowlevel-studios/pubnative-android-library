@@ -17,8 +17,8 @@ test:
     - ./gradlew jacocoTestReport connectedAndroidTest
 
   post:
-    - cp -r build/reports/* $CIRCLE_ARTIFACTS
-    - cp -r app/build/reports/coverage/* $CIRCLE_TEST_REPORTS
+    - cp -r library/build/reports/* $CIRCLE_ARTIFACTS
+    - cp -r library/build/reports/coverage/* $CIRCLE_TEST_REPORTS
 
 deployment:
   codecov:
