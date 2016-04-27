@@ -27,7 +27,7 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-   - ./gradlew connectedCheck
+   - ./gradlew connectedAndroidTest jacocoTestReport
 
 deployment:
   codecov:
