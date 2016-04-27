@@ -5,13 +5,13 @@
     android:background="@color/pubnative_interstitial_background" >
 
     <RelativeLayout
-        android:id="@+id/pn_interstitial_container"
+        android:id="@+id/pubnative_interstitial_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="5dp" >
         
         <ImageView
-            android:id="@+id/pn_interstitial_company_logo"
+            android:id="@+id/pubnative_interstitial_company_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -21,20 +21,20 @@
             android:src="@drawable/pubnative_interstitial_logo_bw" />
     
         <TextView
-            android:id="@+id/pn_interstitial_cta"
+            android:id="@+id/pubnative_interstitial_cta"
             style="@style/pubnative_interstitial_DownloadButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/pn_interstitial_company_logo"
+            android:layout_above="@id/pubnative_interstitial_company_logo"
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp" />
     
         <RelativeLayout
-            android:id="@+id/pn_interstitial_data"
+            android:id="@+id/pubnative_interstitial_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/pn_interstitial_cta"
+            android:layout_above="@id/pubnative_interstitial_cta"
             android:layout_margin="10dp" >
     
             <ImageView
@@ -50,11 +50,11 @@
                 android:padding="3dp"/>
     
             <TextView
-                android:id="@+id/pn_interstitial_title"
+                android:id="@+id/pubnative_interstitial_title"
                 style="@android:style/TextAppearance.Large"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/pn_interstitial_rating"
+                android:layout_above="@+id/pubnative_interstitial_rating"
                 android:layout_alignParentRight="true"
                 android:layout_alignTop="@id/pn_interstitial_icon"
                 android:layout_toRightOf="@id/pn_interstitial_icon"
@@ -64,7 +64,7 @@
                 android:textColor="@android:color/black"/>
     
             <RatingBar
-                android:id="@+id/pn_interstitial_rating"
+                android:id="@+id/pubnative_interstitial_rating"
                 style="?android:attr/ratingBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
                 android:isIndicator="true" />
     
             <TextView
-                android:id="@+id/pn_interstitial_description"
+                android:id="@+id/pubnative_interstitial_description"
                 style="@style/pubnative_interstitial_DailyInfoBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,10 +87,10 @@
         </RelativeLayout>
     
         <ImageView
-            android:id="@+id/pn_interstitial_banner"
+            android:id="@+id/pubnative_interstitial_banner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/pn_interstitial_data"
+            android:layout_above="@id/pubnative_interstitial_data"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:adjustViewBounds="true"

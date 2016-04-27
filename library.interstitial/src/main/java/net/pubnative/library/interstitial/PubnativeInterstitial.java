@@ -96,12 +96,12 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         RelativeLayout interstitial = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_interstitial, null);
-        mTitle = (TextView) interstitial.findViewById(R.id.pn_interstitial_title);
-        mDescription = (TextView) interstitial.findViewById(R.id.pn_interstitial_description);
+        mTitle = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_title);
+        mDescription = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_description);
         mIcon = (ImageView) interstitial.findViewById(R.id.pn_interstitial_icon);
-        mBanner = (ImageView) interstitial.findViewById(R.id.pn_interstitial_banner);
-        mRating = (RatingBar) interstitial.findViewById(R.id.pn_interstitial_rating);
-        mCTA = (TextView) interstitial.findViewById(R.id.pn_interstitial_cta);
+        mBanner = (ImageView) interstitial.findViewById(R.id.pubnative_interstitial_banner);
+        mRating = (RatingBar) interstitial.findViewById(R.id.pubnative_interstitial_rating);
+        mCTA = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_cta);
         mContainer = new RelativeLayout(mContext) {
 
             @Override
