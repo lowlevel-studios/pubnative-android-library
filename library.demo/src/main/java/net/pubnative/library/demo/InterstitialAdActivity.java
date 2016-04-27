@@ -5,16 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
-import net.pubnative.library.demo.utils.Settings;
 import net.pubnative.library.ad.PubnativeInterstitial;
-import net.pubnative.library.request.PubnativeRequest;
-import net.pubnative.library.request.model.PubnativeAdModel;
+import net.pubnative.library.demo.utils.Settings;
 
-import java.util.List;
-
-public class InterstitialAdActivity extends Activity implements PubnativeRequest.Listener {
+public class InterstitialAdActivity extends Activity implements PubnativeInterstitial.Listener {
 
     private static final String TAG = InterstitialAdActivity.class.getName();
     private RelativeLayout mLoaderContainer;
@@ -32,33 +27,46 @@ public class InterstitialAdActivity extends Activity implements PubnativeRequest
 
         Log.v(TAG, "onRequestClick");
         mLoaderContainer.setVisibility(View.VISIBLE);
-        PubnativeRequest request = new PubnativeRequest();
-        request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, Settings.getAppToken());
-        request.start(this, this);
+        PubnativeInterstitial interstitial = new PubnativeInterstitial(this, Settings.getAppToken());
+        interstitial.setListener(this);
+        interstitial.load();
     }
+
     //==============================================================================================
     // Callbacks
     //==============================================================================================
-
-    // PubnativeRequest.Listener
+    // PubnativeInterstitial.Listener
     //----------------------------------------------------------------------------------------------
     @Override
-    public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
+    public void onPubnativeInterstitialLoadFinish(PubnativeInterstitial interstitial) {
+        Log.v(TAG, "onPubnativeInterstitialLoadFinish");
+        interstitial.show();
+    }
 
-        Log.v(TAG, "onPubnativeRequestSuccess");
-        if (ads != null && ads.size() > 0) {
-            PubnativeInterstitial.show(this, ads.get(0));
-        } else {
-            Toast.makeText(this, "ERROR: no - fill", Toast.LENGTH_SHORT);
-        }
+    @Override
+    public void onPubnativeInterstitialLoadFail(PubnativeInterstitial interstitial, Exception exception) {
+        Log.v(TAG, "onPubnativeInterstitialLoadFail", exception);
         mLoaderContainer.setVisibility(View.GONE);
     }
 
     @Override
-    public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
-
-        Log.v(TAG, "onPubnativeRequestFailed: " + ex);
-        Toast.makeText(this, "ERROR: " + ex, Toast.LENGTH_SHORT);
+    public void onPubnativeInterstitialShow(PubnativeInterstitial interstitial) {
+        Log.v(TAG, "onPubnativeInterstitialShow");
         mLoaderContainer.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPubnativeInterstitialImpressionConfirmed(PubnativeInterstitial interstitial) {
+        Log.v(TAG, "onPubnativeInterstitialImpressionConfirmed");
+    }
+
+    @Override
+    public void onPubnativeInterstitialClick(PubnativeInterstitial interstitial) {
+        Log.v(TAG, "onPubnativeInterstitialClick");
+    }
+
+    @Override
+    public void onPubnativeInterstitialHide(PubnativeInterstitial interstitial) {
+        Log.v(TAG, "onPubnativeInterstitialHide");
     }
 }
