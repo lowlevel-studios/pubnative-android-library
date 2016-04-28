@@ -25,9 +25,8 @@ test:
     - ./gradlew jacocoTestReport connectedAndroidTest cobertura coveralls
 
   post:
-      - cp -r app/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
-      - cp -r app/build/reports/* $CIRCLE_TEST_REPORTS
-      - ./gradlew coveralls
+      - cp -r library/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
+      - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
 
 deployment:
   codecov:
