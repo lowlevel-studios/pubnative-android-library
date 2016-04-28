@@ -16,5 +16,9 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-    - ./gradlew connectedAndroidTest
+    - ./gradlew jacocoTestReport connectedAndroidTest
     - ./gradlew cobertura coveralls
+
+  post:
+      - cp -r app/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
+      - cp -r app/build/reports/* $CIRCLE_TEST_REPORTS
