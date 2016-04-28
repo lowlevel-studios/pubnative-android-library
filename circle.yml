@@ -16,5 +16,5 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-    - ./gradlew jacocoTestReport connectedAndroidTest
+    - ./gradlew connectedAndroidTest
     - ./gradlew cobertura coveralls
