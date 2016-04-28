@@ -19,9 +19,6 @@ android {
         versionCode 23
         versionName sharedVersion
     }
-    lintOptions {
-        abortOnError false
-    }
     buildTypes {
         debug {
             testCoverageEnabled true

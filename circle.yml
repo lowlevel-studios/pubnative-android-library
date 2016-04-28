@@ -1,7 +1,5 @@
 machine:
   timezone: Europe/Berlin
-  environment:
-    COVERALLS_REPO_TOKEN: KfvQAfNmnrtJz8YkAB55wOSaKYZjtOl6L
 
 test:
   pre:
@@ -16,9 +14,4 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-    - ./gradlew jacocoTestReport connectedAndroidTest
     - ./gradlew cobertura coveralls
-
-  post:
-      - cp -r library/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
-      - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
