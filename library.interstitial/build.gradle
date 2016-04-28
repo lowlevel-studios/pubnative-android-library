@@ -2,24 +2,22 @@ apply plugin: 'com.android.library'
 //apply plugin: 'com.jfrog.bintray'
 //apply plugin: 'com.github.dcendents.android-maven'
 
-version = '2.0.4'
+version = '1.0.0'
 //group = 'net.pubnative'
 
 def sharedVersion = version
 
 android {
-    compileSdkVersion 10
+    compileSdkVersion 23
     buildToolsVersion "23.0.1"
+
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 10
-        versionCode 23
+        targetSdkVersion 23
+        versionCode 1
         versionName sharedVersion
     }
     buildTypes {
-        debug {
-            testCoverageEnabled true
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -29,15 +27,12 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.code.gson:gson:2.3'
-    compile "net.pubnative:url_driller:1.3.0"
-    compile 'net.pubnative:advertising_id_client:1.0.1'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile project(':library')
+//    compile 'net.pubnative:library:2.0.4'
 
     // JVM tests
     testCompile 'junit:junit:4.12'
-    testCompile 'com.squareup.assertj:assertj-android:1.0.0'
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'org.mockito:mockito-core:1.+'
 }
 
 //install {
@@ -47,7 +42,7 @@ dependencies {
 //            project {
 //                packaging 'aar'
 //
-//                name "pubnative-android-library"
+//                name "pubnative-android-library-interstitial"
 //                description "Pubnative API library fro Android"
 //                url "http://www.pubnative.net"
 //
@@ -106,11 +101,11 @@ dependencies {
 //    pkg {
 //        userOrg = 'pubnative'
 //        repo = 'maven'
-//        name = 'pubnative-android-library'
+//        name = 'pubnative-android-library-interstitial'
 //        websiteUrl = 'https://github.com/pubnative/pubnative-android-library'
 //        issueTrackerUrl = 'https://github.com/pubnative/pubnative-android-library/issues'
 //        vcsUrl = 'https://github.com/pubnative/pubnative-android-library.git'
-//        labels = ['pubnative', 'advertising', 'ad']
+//        labels = ['pubnative', 'advertising', 'ad', 'interstitial']
 //        licenses = ['MIT']
 //        version {
 //            name=sharedVersion

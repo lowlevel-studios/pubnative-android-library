@@ -22,8 +22,6 @@
         <activity android:name=".SettingsActivity"/>
         <activity android:name=".NativeAdActivity"/>
         <activity android:name=".InterstitialAdActivity"/>
-
-        <activity android:name="net.pubnative.library.ad.PubnativeInterstitial"/>
     </application>
 
 </manifest>
