@@ -17,13 +17,4 @@ test:
 
   override:
     - ./gradlew jacocoTestReport connectedAndroidTest
-
-  post:
-    - cp -r library/build/reports/coverage/* $CIRCLE_ARTIFACTS
-    - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
-
-deployment:
-  codecov:
-    branch: /.*/
-    commands:
-      - bash <(curl -s https://codecov.io/bash)
+    - ./gradlew cobertura coveralls
