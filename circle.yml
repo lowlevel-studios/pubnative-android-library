@@ -1,5 +1,13 @@
 machine:
   timezone: Europe/Berlin
+  java:
+      version: oraclejdk8
+
+dependencies:
+  pre:
+    - echo y | android update sdk --no-ui --all --filter tool
+    - echo y | android update sdk --no-ui --all --filter extra-android-support,extra-android-m2repository
+    - echo y | android update sdk --no-ui --all --filter build-tools-23.0.3
 
 test:
   pre:
@@ -14,4 +22,15 @@ test:
     - adb shell setprop dalvik.vm.dexopt-flags v=n,o=v
 
   override:
-    - ./gradlew cobertura coveralls
+    - ./gradlew jacocoTestReport connectedAndroidTest cobertura coveralls
+
+  post:
+      - cp -r app/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
+      - cp -r app/build/reports/* $CIRCLE_TEST_REPORTS
+      - ./gradlew coveralls
+
+deployment:
+  codecov:
+    branch: /.*/
+    commands:
+      - bash <(curl -s https://codecov.io/bash)
