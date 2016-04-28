@@ -23,13 +23,3 @@ test:
 
   override:
     - ./gradlew cobertura coveralls
-
-  post:
-      - cp -r library/build/reports/coverage/debug/* $CIRCLE_ARTIFACTS
-      - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
-
-deployment:
-  codecov:
-    branch: /.*/
-    commands:
-      - bash <(curl -s https://codecov.io/bash)
