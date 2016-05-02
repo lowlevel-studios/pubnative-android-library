@@ -66,6 +66,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     public enum Endpoint {
         NATIVE,
     }
+
     //==============================================================================================
     // REQUEST PARAMETERS
     //==============================================================================================
@@ -97,6 +98,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         String META_FIELDS                = "mf";
         String ASSET_FIELDS               = "af";
     }
+
     //==============================================================================================
     // LISTENER
     //==============================================================================================
@@ -122,6 +124,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
          */
         void onPubnativeRequestFailed(PubnativeRequest request, Exception ex);
     }
+
     //==============================================================================================
     // Public
     //==============================================================================================
@@ -233,6 +236,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     //==============================================================================================
     // Private
     //==============================================================================================
+
     protected void setDefaultParameters() {
 
         Log.v(TAG, "setDefaultParameters");
@@ -293,6 +297,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     //==============================================================================================
     // Listener Helpers
     //==============================================================================================
+
     protected void invokeOnSuccess(List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "invokeOnSuccess");
@@ -316,6 +321,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
     //==============================================================================================
     // PubnativeHttpRequest.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onPubnativeHttpRequestStart(PubnativeHttpRequest request) {
 
@@ -327,7 +333,8 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
 
         Log.v(TAG, "onPubnativeHttpRequestFinish");
         try {
-            PubnativeAPIV3ResponseModel apiResponseModel = new Gson().fromJson(result, PubnativeAPIV3ResponseModel.class);
+            PubnativeAPIV3ResponseModel apiResponseModel = new Gson()
+                    .fromJson(result, PubnativeAPIV3ResponseModel.class);
             if (apiResponseModel == null) {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
             } else if (PubnativeAPIV3ResponseModel.Status.OK.equals(apiResponseModel.status)) {
@@ -356,8 +363,10 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
         invokeOnFail(exception);
     }
 
+    //----------------------------------------------------------------------------------------------
     // AdvertisingIdClient.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onAdvertisingIdClientFinish(AdvertisingIdClient.AdInfo adInfo) {
 

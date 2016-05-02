@@ -51,7 +51,21 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
                                          URLDriller.Listener,
                                          Serializable {
 
-    private static String TAG = PubnativeAdModel.class.getSimpleName();
+    private static      String                     TAG                    = PubnativeAdModel.class.getSimpleName();
+    //Generic Fields
+    protected transient Listener                   mListener              = null;
+    protected           boolean                    mUseClickLoader        = true;
+    protected           boolean                    mUseBackgroundClick    = true;
+    protected           PubnativeAPIV3AdModel      mData                  = null;
+    protected           List<String>               mUsedAssets            = null;
+    //Tracking
+    private transient   PubnativeImpressionTracker mPubnativeAdTracker    = null;
+    private transient   boolean                    mIsImpressionConfirmed = false;
+    private transient   View                       mClickableView         = null;
+    private transient   View                       mAdView                = null;
+    //Loading View
+    private transient   RelativeLayout             loadingView            = null;
+
     //==============================================================================================
     // Listener
     //==============================================================================================
@@ -85,18 +99,13 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel);
     }
 
-    protected transient Listener              mListener           = null;
-    protected           boolean               mUseClickLoader     = true;
-    protected           boolean               mUseBackgroundClick = true;
-    protected           PubnativeAPIV3AdModel mData               = null;
-    protected           List<String>          mUsedAssets         = null;
-
     public static PubnativeAdModel create(PubnativeAPIV3AdModel data) {
 
         PubnativeAdModel model = new PubnativeAdModel();
         model.mData = data;
         return model;
     }
+
     //==============================================================================================
     // Generic Fields
     //==============================================================================================
@@ -159,6 +168,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
             }
         }
     }
+
     //==============================================================================================
     // Fields
     //==============================================================================================
@@ -361,6 +371,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         }
         return result;
     }
+
     //==============================================================================================
     // Helpers
     //==============================================================================================
@@ -412,10 +423,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     //==============================================================================================
     // Tracking
     //==============================================================================================
-    private transient PubnativeImpressionTracker mPubnativeAdTracker    = null;
-    private transient boolean                    mIsImpressionConfirmed = false;
-    private transient View                       mClickableView         = null;
-    private transient View                       mAdView                = null;
 
     /**
      * Start tracking of ad view to auto confirm impressions and handle clicks
@@ -566,7 +573,6 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     //==============================================================================================
     // LoadingView
     //==============================================================================================
-    private transient RelativeLayout loadingView = null;
 
     protected void showLoadingView() {
 
@@ -619,6 +625,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     //==============================================================================================
     // Listener helpers
     //==============================================================================================
+
     protected void invokeOnImpression(View view) {
 
         Log.v(TAG, "invokeOnImpression");
@@ -649,6 +656,7 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
     //==============================================================================================
     // PubnativeImpressionTracker.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onImpressionDetected(View view) {
 
@@ -657,8 +665,10 @@ public class PubnativeAdModel implements PubnativeImpressionTracker.Listener,
         invokeOnImpression(view);
     }
 
+    //----------------------------------------------------------------------------------------------
     // URLDriller.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onURLDrillerStart(String url) {
 

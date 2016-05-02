@@ -27,6 +27,7 @@ import net.pubnative.library.request.model.api.PubnativeAPIV3AdModel;
 
 /**
  * Data holder for a Pubnative tracking beacon
+ *
  * @deprecated This data holder is outdated and can contain null url's, so shouldn't be used
  */
 @Deprecated

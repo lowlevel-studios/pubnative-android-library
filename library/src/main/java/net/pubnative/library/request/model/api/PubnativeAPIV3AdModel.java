@@ -28,6 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PubnativeAPIV3AdModel implements Serializable {
+
+    //==============================================================================================
+    // Fields
+    //==============================================================================================
+
+    public String                        link;
+    public List<PubnativeAPIV3DataModel> assets;
+    public List<PubnativeAPIV3DataModel> beacons;
+    public List<PubnativeAPIV3DataModel> meta;
+
     //==============================================================================================
     // Interfaces
     //==============================================================================================
@@ -41,13 +51,6 @@ public class PubnativeAPIV3AdModel implements Serializable {
         String CLICK      = "click";
     }
 
-    //==============================================================================================
-    // Fields
-    //==============================================================================================
-    public String                        link;
-    public List<PubnativeAPIV3DataModel> assets;
-    public List<PubnativeAPIV3DataModel> beacons;
-    public List<PubnativeAPIV3DataModel> meta;
     //==============================================================================================
     // Asset
     //==============================================================================================
