@@ -145,8 +145,7 @@ public class PubnativeImpressionTracker {
     // Private
     //==============================================================================================
 
-    private ViewTreeObserver.OnGlobalLayoutListener  onGlobalLayoutListener  =
-            new ViewTreeObserver.OnGlobalLayoutListener() {
+    private ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
 
                 @Override
                 public void onGlobalLayout() {
@@ -154,8 +153,7 @@ public class PubnativeImpressionTracker {
                     checkImpression();
                 }
             };
-    private ViewTreeObserver.OnScrollChangedListener onScrollChangedListener =
-            new ViewTreeObserver.OnScrollChangedListener() {
+    private ViewTreeObserver.OnScrollChangedListener onScrollChangedListener = new ViewTreeObserver.OnScrollChangedListener() {
 
                 @Override
                 public void onScrollChanged() {

@@ -333,8 +333,7 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
 
         Log.v(TAG, "onPubnativeHttpRequestFinish");
         try {
-            PubnativeAPIV3ResponseModel apiResponseModel = new Gson()
-                    .fromJson(result, PubnativeAPIV3ResponseModel.class);
+            PubnativeAPIV3ResponseModel apiResponseModel = new Gson().fromJson(result, PubnativeAPIV3ResponseModel.class);
             if (apiResponseModel == null) {
                 invokeOnFail(new Exception("PubnativeRequest - Error: Response JSON error"));
             } else if (PubnativeAPIV3ResponseModel.Status.OK.equals(apiResponseModel.status)) {
