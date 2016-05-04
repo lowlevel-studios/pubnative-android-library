@@ -113,10 +113,8 @@ public class SystemUtils {
     public static boolean isTablet(Context context) {
 
         Log.v(TAG, "isTablet");
-        boolean xlarge = ((context.getResources().getConfiguration().screenLayout
-                           & Configuration.SCREENLAYOUT_SIZE_MASK) == 4);
-        boolean large = ((context.getResources().getConfiguration().screenLayout
-                          & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
+        boolean xlarge = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == 4);
+        boolean large = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
         return (xlarge || large);
     }
 
