@@ -1,8 +1,11 @@
 package net.pubnative.library.banner;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.pubnative.library.request.PubnativeRequest;
@@ -17,6 +20,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     protected Context               mContext;
     protected String                mAppToken;
     protected int                   mBannerSize;
+    protected WindowManager         mWindowManager;
+    protected FrameLayout           mContainer;
 
     public interface Size {
         public static final int BANNER_50 = 0;
@@ -26,9 +31,10 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public PubnativeBanner(Context context, String appToken, int bannerSize) {
         RelativeLayout banner = null;
 
-        mContext = context.getApplicationContext();
+        mContext = context;
         mAppToken = appToken;
         mBannerSize = bannerSize;
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         switch (bannerSize) {
             case Size.BANNER_90:
@@ -38,9 +44,10 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             default:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_phone, null);
                 break;
-
         }
-
+        mContainer = new FrameLayout(mContext);
+        mContainer.setBackgroundColor(Color.TRANSPARENT);
+        mContainer.addView(banner);
     }
 
     public void load() {
@@ -49,6 +56,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     public void show() {
         //TODO: show method implementation
+        render();
     }
 
     public void destroy() {
@@ -61,6 +69,11 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void render() {
         //TODO: render method implementation
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+        params.height = WindowManager.LayoutParams.MATCH_PARENT;
+        mWindowManager.addView(mContainer, params);
+        //invokeShow();
     }
 
     //==============================================================================================
