@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/pubnative_banner_view"
+                android:layout_width="match_parent"
+                android:layout_height="90dp">
+
+        <ImageView
+            android:id="@+id/pubnative_banner_image"
+            android:layout_width="90dp"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/pubnative_banner_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/pubnative_banner_image"
+            android:text="Title"/>
+
+        <TextView
+            android:id="@+id/pubnative_banner_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/pubnative_banner_image"
+            android:layout_below="@id/pubnative_banner_title"
+            android:text="Description"/>
+
+        <Button
+            android:id="@+id/pubnative_banner_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Install"/>
+
+</RelativeLayout>
