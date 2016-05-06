@@ -23,8 +23,7 @@
             android:layout_toLeftOf="@+id/pubnative_banner_button"
             android:layout_marginTop="4dp"
             android:textColor="#fff"
-            android:textSize="16sp"
-            android:text="Title"/>
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/pubnative_banner_description"
@@ -36,8 +35,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="#fff"
-            android:textSize="12sp"
-            android:text="Description"/>
+            android:textSize="12sp"/>
 
         <Button
             android:id="@+id/pubnative_banner_button"
