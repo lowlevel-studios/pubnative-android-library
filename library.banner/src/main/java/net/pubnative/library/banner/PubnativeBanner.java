@@ -1,9 +1,12 @@
 package net.pubnative.library.banner;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -19,35 +22,51 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public static final String TAG = PubnativeBanner.class.getSimpleName();
     protected Context               mContext;
     protected String                mAppToken;
-    protected int                   mBannerSize;
-    protected WindowManager         mWindowManager;
-    protected FrameLayout           mContainer;
+    protected Size                  mBannerSize;
+    protected Position              mBannerPosition;
 
-    public interface Size {
-        public static final int BANNER_50 = 0;
-        public static final int BANNER_90 = 1;
+    public enum Size {
+        BANNER_50,
+        BANNER_90
     }
 
-    public PubnativeBanner(Context context, String appToken, int bannerSize) {
+    public enum Position {
+        TOP,
+        BOTTOM
+    }
+
+    public PubnativeBanner(Context context, String appToken, Size bannerSize, Position bannerPosition) {
         RelativeLayout banner = null;
 
         mContext = context;
         mAppToken = appToken;
         mBannerSize = bannerSize;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mBannerPosition = bannerPosition;
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final ViewGroup viewGroup = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
         switch (bannerSize) {
-            case Size.BANNER_90:
+            case BANNER_90:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
                 break;
-            case Size.BANNER_50:
+            case BANNER_50:
             default:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_phone, null);
                 break;
         }
-        mContainer = new FrameLayout(mContext);
-        mContainer.setBackgroundColor(Color.TRANSPARENT);
-        mContainer.addView(banner);
+        RelativeLayout bannerView = (RelativeLayout) banner.findViewById(R.id.pubnative_banner_view);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)bannerView.getLayoutParams();
+        switch (bannerPosition) {
+            case TOP:
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                break;
+            case BOTTOM:
+            default:
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                break;
+        }
+        bannerView.setLayoutParams(params);
+
+        viewGroup.addView(banner);
     }
 
     public void load() {
@@ -69,11 +88,17 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void render() {
         //TODO: render method implementation
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        mWindowManager.addView(mContainer, params);
+
         //invokeShow();
+    }
+
+    protected int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = mContext.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
     //==============================================================================================

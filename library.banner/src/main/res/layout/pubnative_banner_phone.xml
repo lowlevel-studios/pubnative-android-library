@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/pubnative_banner_view"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@null">
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true">
 
-        <ImageView
-            android:id="@+id/pubnative_banner_image"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"/>
+        <RelativeLayout
+            android:id="@+id/pubnative_banner_view"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#6e15ea">
 
-        <TextView
-            android:id="@+id/pubnative_banner_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/pubnative_banner_image"
-            android:text="Title"/>
+                <ImageView
+                    android:id="@+id/pubnative_banner_image"
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"/>
 
-        <TextView
-            android:id="@+id/pubnative_banner_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/pubnative_banner_image"
-            android:layout_below="@id/pubnative_banner_title"
-            android:text="Description"/>
+                <TextView
+                    android:id="@+id/pubnative_banner_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/pubnative_banner_image"
+                    android:textColor="#fff"
+                    android:text="Title"/>
 
-        <Button
-            android:id="@+id/pubnative_banner_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="Install"/>
+                <TextView
+                    android:id="@+id/pubnative_banner_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/pubnative_banner_image"
+                    android:layout_below="@id/pubnative_banner_title"
+                    android:textColor="#fff"
+                    android:text="Description"/>
+
+                <Button
+                    android:id="@+id/pubnative_banner_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Install"/>
+
+        </RelativeLayout>
+
+
 
 </RelativeLayout>
