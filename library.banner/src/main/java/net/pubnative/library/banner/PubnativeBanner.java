@@ -1,6 +1,7 @@
 package net.pubnative.library.banner;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -14,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -100,6 +102,14 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         void onPubnativeBannerHide(PubnativeBanner banner);
     }
 
+    /**
+     * Banner constructor class
+     *
+     * @param context context of {@link Activity}, where is banner will show
+     * @param appToken application token from settings
+     * @param bannerSize size of banner
+     * @param bannerPosition banner position on the screen
+     */
     public PubnativeBanner(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
         mContext = context;
@@ -109,7 +119,13 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
         RelativeLayout banner;
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
+        if (context instanceof Activity) {
+            mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
+        } else {
+            Log.e(TAG, "Wrong type of Context. Must be Activity context");
+            Toast.makeText(context, "Wrong type of context. Must be Activity context.", Toast.LENGTH_LONG).show();
+            mContainer = new RelativeLayout(context);
+        }
         switch (bannerSize) {
             case BANNER_90:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
