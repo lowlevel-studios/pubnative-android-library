@@ -38,9 +38,9 @@ import android.webkit.WebView;
 
 public class SystemUtils {
 
-    private static final String TAG = SystemUtils.class.getSimpleName();
+    private static final String TAG               = SystemUtils.class.getSimpleName();
+    private static       String sWebViewUserAgent = null;
 
-    private static String sWebViewUserAgent = null;
     /**
      * Returns the package name of the app
      *
@@ -76,7 +76,7 @@ public class SystemUtils {
     public static String getWebViewUserAgent(Context context) {
 
         Log.v(TAG, "getWebViewUserAgent");
-        if(sWebViewUserAgent == null) {
+        if (sWebViewUserAgent == null) {
             try {
                 sWebViewUserAgent = new WebView(context).getSettings().getUserAgentString();
             } catch (Exception e) {

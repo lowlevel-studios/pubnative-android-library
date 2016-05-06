@@ -42,7 +42,12 @@ import java.net.URL;
 
 public class PubnativeHttpRequest {
 
-    private static final String TAG = PubnativeHttpRequest.class.getSimpleName();
+    private static final String   TAG                = PubnativeHttpRequest.class.getSimpleName();
+    // Request properties
+    protected static     int      sConnectionTimeout = 4000; // 4 seconds
+    // Inner
+    protected            Listener mListener          = null;
+    protected            Handler  mHandler           = null;
 
     //==============================================================================================
     // Listener
@@ -73,14 +78,6 @@ public class PubnativeHttpRequest {
         void onPubnativeHttpRequestFail(PubnativeHttpRequest request, Exception exception);
     }
 
-    //==============================================================================================
-    // Properties
-    //==============================================================================================
-    // Request properties
-    protected static int      sConnectionTimeout = 4000; // 4 seconds
-    // Inner
-    protected        Listener mListener          = null;
-    protected        Handler  mHandler           = null;
     //==============================================================================================
     // Public
     //==============================================================================================
@@ -137,6 +134,7 @@ public class PubnativeHttpRequest {
             }
         }
     }
+
     //==============================================================================================
     // Private
     //==============================================================================================
@@ -145,8 +143,10 @@ public class PubnativeHttpRequest {
 
         Log.v(TAG, "initiateRequest");
         new Thread(new Runnable() {
+
             @Override
             public void run() {
+
                 doRequest(urlString, userAgent);
             }
         }).start();

@@ -211,6 +211,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     //==============================================================================================
     // Helpers
     //==============================================================================================
+
     protected void hide() {
 
         Log.v(TAG, "hide");
@@ -246,6 +247,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     //==============================================================================================
     // Callback helpers
     //==============================================================================================
+
     protected void invokeLoadFinish() {
 
         Log.v(TAG, "invokeLoadFinish");
@@ -303,6 +305,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     //==============================================================================================
     // PubnativeRequest.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
@@ -322,8 +325,10 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         invokeLoadFail(ex);
     }
 
+    //----------------------------------------------------------------------------------------------
     // PubnativeAdModel.Listener
     //----------------------------------------------------------------------------------------------
+
     @Override
     public void onPubnativeAdModelImpression(PubnativeAdModel pubnativeAdModel, View view) {
 

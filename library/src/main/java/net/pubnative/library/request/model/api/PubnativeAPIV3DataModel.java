@@ -52,17 +52,19 @@ public class PubnativeAPIV3DataModel implements Serializable {
     }
 
     public String getStringField(String field) {
+
         return (String) getDataField(field);
     }
 
     public Double getNumberField(String field) {
+
         return (Double) getDataField(field);
     }
 
     protected Object getDataField(String dataField) {
 
         Object result = null;
-        if(data != null && data.containsKey(dataField)) {
+        if (data != null && data.containsKey(dataField)) {
             result = data.get(dataField);
         }
         return result;

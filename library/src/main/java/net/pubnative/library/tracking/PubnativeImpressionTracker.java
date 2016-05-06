@@ -44,6 +44,7 @@ public class PubnativeImpressionTracker {
     protected            boolean  mIsTrackingInProgress           = false;
     protected            boolean  mTrackingShouldStop             = false;
     protected            Handler  mHandler                        = null;
+
     //==============================================================================================
     // LISTENER
     //==============================================================================================
@@ -64,6 +65,7 @@ public class PubnativeImpressionTracker {
     //==============================================================================================
     // CONFIRM IMPRESSION
     //==============================================================================================
+
     private class CheckImpressionRunnable implements Runnable {
 
         @Override
@@ -103,6 +105,7 @@ public class PubnativeImpressionTracker {
             }
         }
     }
+
     //==============================================================================================
     // PUBLIC
     //==============================================================================================
@@ -141,22 +144,23 @@ public class PubnativeImpressionTracker {
     //==============================================================================================
     // Private
     //==============================================================================================
-    private ViewTreeObserver.OnGlobalLayoutListener  onGlobalLayoutListener  = new ViewTreeObserver.OnGlobalLayoutListener() {
 
-        @Override
-        public void onGlobalLayout() {
+    private ViewTreeObserver.OnGlobalLayoutListener onGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
 
-            checkImpression();
-        }
-    };
+                @Override
+                public void onGlobalLayout() {
+
+                    checkImpression();
+                }
+            };
     private ViewTreeObserver.OnScrollChangedListener onScrollChangedListener = new ViewTreeObserver.OnScrollChangedListener() {
 
-        @Override
-        public void onScrollChanged() {
+                @Override
+                public void onScrollChanged() {
 
-            checkImpression();
-        }
-    };
+                    checkImpression();
+                }
+            };
 
     private synchronized void checkImpression() {
 
@@ -224,6 +228,7 @@ public class PubnativeImpressionTracker {
             observer.removeOnScrollChangedListener(onScrollChangedListener);
         }
     }
+
     //==============================================================================================
     // Listener helpers
     //==============================================================================================
