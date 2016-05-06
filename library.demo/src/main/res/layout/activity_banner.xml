@@ -8,7 +8,8 @@
     <RelativeLayout
         android:id="@+id/activity_native_container_btn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
 
         <Button
             android:id="@+id/activity_native_btn_request"
@@ -17,6 +18,50 @@
             android:layout_alignParentTop="true"
             android:onClick="onRequestClick"
             android:text="Request" />
+
+        <RadioGroup
+            android:id="@+id/banner_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_native_btn_request"
+            android:checkedButton="@+id/rb_bottom">
+
+            <RadioButton
+                android:id="@+id/rb_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Banner on Top"/>
+
+            <RadioButton
+                android:id="@+id/rb_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Banner on Bottom"/>
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/banner_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_native_btn_request"
+            android:layout_toRightOf="@id/banner_position"
+            android:checkedButton="@+id/rb_height_50">
+
+            <RadioButton
+                android:id="@+id/rb_height_50"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Banner 50"/>
+
+            <RadioButton
+                android:id="@+id/rb_height_90"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Banner 90"/>
+
+        </RadioGroup>
+
     </RelativeLayout>
 
     <RelativeLayout

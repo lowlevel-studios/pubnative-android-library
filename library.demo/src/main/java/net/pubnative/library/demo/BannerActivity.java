@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 
 import net.pubnative.library.banner.PubnativeBanner;
@@ -13,6 +15,11 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
 
     public static final String TAG = BannerActivity.class.getSimpleName();
     private RelativeLayout mLoaderContainer;
+    private RadioButton mBottomPosition;
+    private RadioButton mSmallBanner;
+    private RadioGroup  mSizeGroup;
+    private RadioGroup  mPositionGroup;
+    private PubnativeBanner mBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,19 +28,38 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
         setContentView(R.layout.activity_banner);
 
         mLoaderContainer = (RelativeLayout) findViewById(R.id.activity_native_container_loader);
+        mSizeGroup = (RadioGroup) findViewById(R.id.banner_size);
+        mPositionGroup = (RadioGroup) findViewById(R.id.banner_position);
+        mBottomPosition = (RadioButton) findViewById(R.id.rb_bottom);
+        mSmallBanner = (RadioButton) findViewById(R.id.rb_height_50);
 
     }
 
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mBanner.destroy();
+        super.onPause();
+    }
+
     public void onRequestClick(View v) {
-        PubnativeBanner banner = new PubnativeBanner(
+        int selectedPositionId = mPositionGroup.getCheckedRadioButtonId();
+        int selectedSizeId = mSizeGroup.getCheckedRadioButtonId();
+
+        mBanner = new PubnativeBanner(
                 this,
                 Settings.getAppToken(),
-                PubnativeBanner.Size.BANNER_50,
-                PubnativeBanner.Position.BOTTOM
+                selectedSizeId == mSmallBanner.getId() ? PubnativeBanner.Size.BANNER_50 : PubnativeBanner.Size.BANNER_90,
+                selectedPositionId == mBottomPosition.getId() ? PubnativeBanner.Position.BOTTOM : PubnativeBanner.Position.TOP
         );
-        banner.setListener(this);
-        banner.load();
-        banner.show();
+        mBanner.setListener(this);
+        mBanner.load();
+        mBanner.show();
     }
 
     //==============================================================================================
