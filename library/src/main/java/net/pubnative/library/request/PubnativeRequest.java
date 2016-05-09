@@ -261,6 +261,18 @@ public class PubnativeRequest implements PubnativeHttpRequest.Listener,
                 mRequestParameters.put(Parameters.LONG, String.valueOf(location.getLongitude()));
             }
         }
+        // If no asset has been set explicitly, add them here to get asset fields in response
+        if(!mRequestParameters.containsKey(Parameters.ASSET_FIELDS)) {
+            String[] assets = new String[] {
+                    PubnativeAsset.TITLE,
+                    PubnativeAsset.DESCRIPTION,
+                    PubnativeAsset.ICON,
+                    PubnativeAsset.BANNER,
+                    PubnativeAsset.CALL_TO_ACTION,
+                    PubnativeAsset.RATING
+            };
+            setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, assets);
+        }
     }
 
     protected String getRequestURL() {
