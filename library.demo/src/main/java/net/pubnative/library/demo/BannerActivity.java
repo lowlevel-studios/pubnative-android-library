@@ -51,14 +51,13 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
         int selectedPositionId = mPositionGroup.getCheckedRadioButtonId();
         int selectedSizeId = mSizeGroup.getCheckedRadioButtonId();
 
-        mBanner = new PubnativeBanner(
-                this,
-                Settings.getAppToken(),
-                selectedSizeId == mSmallBanner.getId() ? PubnativeBanner.Size.BANNER_50 : PubnativeBanner.Size.BANNER_90,
-                selectedPositionId == mBottomPosition.getId() ? PubnativeBanner.Position.BOTTOM : PubnativeBanner.Position.TOP
-        );
+        mBanner = new PubnativeBanner();
         mBanner.setListener(this);
-        mBanner.load();
+        mBanner.load(this,
+                     Settings.getAppToken(),
+                     selectedSizeId == mSmallBanner.getId() ? PubnativeBanner.Size.BANNER_50 : PubnativeBanner.Size.BANNER_90,
+                     selectedPositionId == mBottomPosition.getId() ? PubnativeBanner.Position.BOTTOM : PubnativeBanner.Position.TOP
+                    );
         mBanner.show();
     }
 

@@ -24,7 +24,6 @@ dependencies {
 
     compile project(':library')
     compile project(':library.interstitial')
+    compile project(':library.banner')
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile project(path: ':library.banner')
 }
