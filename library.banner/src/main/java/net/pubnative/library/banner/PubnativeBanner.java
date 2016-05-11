@@ -1,21 +1,18 @@
 package net.pubnative.library.banner;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -37,11 +34,14 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     protected Boolean               mIsShown = false;
     protected Listener              mListener;
     protected PubnativeAdModel      mAdModel;
+    protected Handler               mHandler;
     // Banner view
     protected ViewGroup             mContainer;
     protected TextView              mTitle;
     protected TextView              mDescription;
     protected ImageView             mIcon;
+    protected RelativeLayout        mBannerView;
+    protected Button                mInstall;
 
     public enum Size {
         BANNER_50,
@@ -102,56 +102,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         void onPubnativeBannerHide(PubnativeBanner banner);
     }
 
-    /**
-     * Banner constructor class
-     *
-     * @param context context of {@link Activity}, where is banner will show
-     * @param appToken application token from settings
-     * @param bannerSize size of banner
-     * @param bannerPosition banner position on the screen
-     */
-    public PubnativeBanner(Context context, String appToken, Size bannerSize, Position bannerPosition) {
+    public PubnativeBanner() {
 
-        mContext = context;
-        mAppToken = appToken;
-        mBannerSize = bannerSize;
-        mBannerPosition = bannerPosition;
-
-        RelativeLayout banner;
-        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (context instanceof Activity) {
-            mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
-        } else {
-            Log.e(TAG, "Wrong type of Context. Must be Activity context");
-            Toast.makeText(context, "Wrong type of context. Must be Activity context.", Toast.LENGTH_LONG).show();
-            mContainer = new RelativeLayout(context);
-        }
-        switch (bannerSize) {
-            case BANNER_90:
-                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
-                break;
-            case BANNER_50:
-            default:
-                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_phone, null);
-                break;
-        }
-
-        RelativeLayout bannerView = (RelativeLayout) banner.findViewById(R.id.pubnative_banner_view);
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)bannerView.getLayoutParams();
-        switch (bannerPosition) {
-            case TOP:
-                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                break;
-            case BOTTOM:
-            default:
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                break;
-        }
-        mTitle = (TextView) banner.findViewById(R.id.pubnative_banner_title);
-        mDescription = (TextView) banner.findViewById(R.id.pubnative_banner_description);
-        mIcon = (ImageView) banner.findViewById(R.id.pubnative_banner_image);
-        bannerView.setLayoutParams(params);
-        mContainer.addView(banner);
     }
 
     /**
@@ -167,8 +119,16 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     /**
      * Starts loading an ad for this interstitial
+     *
+     * @param context context of {@link Activity}, where is banner will show
+     * @param appToken application token from settings
+     * @param bannerSize size of banner
+     * @param bannerPosition banner position on the screen
      */
-    public void load() {
+    public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
+
+        buildBanner(context, appToken, bannerSize, bannerPosition);
+
         Log.v(TAG, "load");
         if (TextUtils.isEmpty(mAppToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
@@ -176,20 +136,20 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
+        } else if (mIsShown) {
+            Log.w(TAG, "load - The ad is shown, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
-            mIsShown = false;
             mIsLoading = true;
+            mHandler = new Handler(Looper.getMainLooper());
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);
             String[] assets = new String[] {
                     PubnativeAsset.TITLE,
                     PubnativeAsset.DESCRIPTION,
                     PubnativeAsset.ICON,
-                    PubnativeAsset.BANNER,
-                    PubnativeAsset.CALL_TO_ACTION,
-                    PubnativeAsset.RATING
+                    PubnativeAsset.CALL_TO_ACTION
             };
             request.setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, assets);
             request.start(mContext, this);
@@ -236,6 +196,59 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     // Helpers
     //==============================================================================================
 
+    /**
+     * Banner constructor method
+     *
+     * @param context context of {@link Activity}, where is banner will show
+     * @param appToken application token from settings
+     * @param bannerSize size of banner
+     * @param bannerPosition banner position on the screen
+     */
+    protected void buildBanner(Context context, String appToken, Size bannerSize, Position bannerPosition) {
+
+        mContext = context;
+        mAppToken = appToken;
+        mBannerSize = bannerSize;
+        mBannerPosition = bannerPosition;
+
+        RelativeLayout banner;
+        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (context instanceof Activity) {
+            mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
+        } else {
+            Log.e(TAG, "Wrong type of Context. Must be Activity context");
+            mContainer = new RelativeLayout(context);
+        }
+        switch (bannerSize) {
+            case BANNER_90:
+                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
+                break;
+            case BANNER_50:
+            default:
+                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_phone, null);
+                break;
+        }
+
+        mBannerView = (RelativeLayout) banner.findViewById(R.id.pubnative_banner_view);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBannerView.getLayoutParams();
+        switch (bannerPosition) {
+            case TOP:
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                break;
+            case BOTTOM:
+            default:
+                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                break;
+        }
+        mTitle = (TextView) banner.findViewById(R.id.pubnative_banner_title);
+        mDescription = (TextView) banner.findViewById(R.id.pubnative_banner_description);
+        mIcon = (ImageView) banner.findViewById(R.id.pubnative_banner_image);
+        mInstall = (Button) banner.findViewById(R.id.pubnative_banner_button);
+
+        mBannerView.setLayoutParams(params);
+        mContainer.addView(banner);
+    }
+
     protected void hide() {
         Log.v(TAG, "hide");
         if (mIsShown) {
@@ -251,8 +264,9 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         Log.v(TAG, "render");
         mTitle.setText(mAdModel.getTitle());
         mDescription.setText(mAdModel.getDescription());
+        mInstall.setText(mAdModel.getCtaText());
         Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
-        mAdModel.startTracking(mContainer, mContainer.findViewById(R.id.pubnative_banner_button), this);
+        mAdModel.startTracking(mContainer, mBannerView, this);
         invokeShow();
     }
 
@@ -261,54 +275,96 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     //==============================================================================================
     protected void invokeLoadFinish() {
 
-        Log.v(TAG, "invokeLoadFinish");
-        mIsLoading = false;
-        if (mListener != null) {
-            mListener.onPubnativeBannerLoadFinish(this);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.v(TAG, "invokeLoadFinish");
+                mIsLoading = false;
+                if (mListener != null) {
+                    mListener.onPubnativeBannerLoadFinish(PubnativeBanner.this);
+                }
+            }
+        });
     }
 
-    protected void invokeLoadFail(Exception exception) {
+    protected void invokeLoadFail(final Exception exception) {
 
-        Log.v(TAG, "invokeLoadFail", exception);
-        mIsLoading = false;
-        if (mListener != null) {
-            mListener.onPubnativeBannerLoadFail(this, exception);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.v(TAG, "invokeLoadFail", exception);
+                mIsLoading = false;
+                if (mListener != null) {
+                    mListener.onPubnativeBannerLoadFail(PubnativeBanner.this, exception);
+                }
+            }
+        });
     }
 
     protected void invokeShow() {
 
-        mIsShown = true;
-        Log.v(TAG, "invokeShow");
-        if (mListener != null) {
-            mListener.onPubnativeBannerShow(this);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                mIsShown = true;
+                Log.v(TAG, "invokeShow");
+                if (mListener != null) {
+                    mListener.onPubnativeBannerShow(PubnativeBanner.this);
+                }
+            }
+        });
     }
 
     protected void invokeImpressionConfirmed() {
 
-        Log.v(TAG, "invokeImpressionConfirmed");
-        if (mListener != null) {
-            mListener.onPubnativeBannerImpressionConfirmed(this);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.v(TAG, "invokeImpressionConfirmed");
+                if (mListener != null) {
+                    mListener.onPubnativeBannerImpressionConfirmed(PubnativeBanner.this);
+                }
+            }
+        });
     }
 
     protected void invokeClick() {
 
-        Log.v(TAG, "invokeClick");
-        if (mListener != null) {
-            mListener.onPubnativeBannerClick(this);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.v(TAG, "invokeClick");
+                if (mListener != null) {
+                    mListener.onPubnativeBannerClick(PubnativeBanner.this);
+                }
+            }
+        });
     }
 
     protected void invokeHide() {
 
-        Log.v(TAG, "invokeHide");
-        mIsShown = false;
-        if (mListener != null) {
-            mListener.onPubnativeBannerHide(this);
-        }
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Log.v(TAG, "invokeHide");
+                mIsShown = false;
+                if (mListener != null) {
+                    mListener.onPubnativeBannerHide(PubnativeBanner.this);
+                }
+            }
+        });
     }
 
     //==============================================================================================
