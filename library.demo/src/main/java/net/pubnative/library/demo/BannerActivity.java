@@ -2,6 +2,7 @@ package net.pubnative.library.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
@@ -55,10 +56,41 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
         mBanner.setListener(this);
         mBanner.load(this,
                      Settings.getAppToken(),
-                     selectedSizeId == mSmallBanner.getId() ? PubnativeBanner.Size.BANNER_50 : PubnativeBanner.Size.BANNER_90,
-                     selectedPositionId == mBottomPosition.getId() ? PubnativeBanner.Position.BOTTOM : PubnativeBanner.Position.TOP
+                     getBannerSize(selectedSizeId),
+                     getBannerPosition(selectedPositionId)
                     );
         mBanner.show();
+    }
+
+    //==============================================================================================
+    // Helpers
+    //==============================================================================================
+
+    @NonNull
+    private PubnativeBanner.Position getBannerPosition(int selectedPositionId) {
+
+        PubnativeBanner.Position position;
+
+        if (selectedPositionId == mBottomPosition.getId()) {
+            position = PubnativeBanner.Position.BOTTOM;
+        } else {
+            position = PubnativeBanner.Position.TOP;
+        }
+
+        return position;
+    }
+
+    @NonNull
+    private PubnativeBanner.Size getBannerSize(int selectedSizeId) {
+
+        PubnativeBanner.Size size;
+
+        if (selectedSizeId == mSmallBanner.getId()) {
+            size = PubnativeBanner.Size.BANNER_50;
+        } else {
+            size = PubnativeBanner.Size.BANNER_90;
+        }
+        return size;
     }
 
     //==============================================================================================
