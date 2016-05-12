@@ -127,13 +127,13 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
-        buildBanner(context, appToken, bannerSize, bannerPosition);
-
         Log.v(TAG, "load");
         if (TextUtils.isEmpty(mAppToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
-        } else if (mContext == null) {
+        } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
+        } else if (!(context instanceof Activity)) {
+            invokeLoadFail(new Exception("PubnativeBanner - load error: wrong context type"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (mIsShown) {
@@ -143,6 +143,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         } else {
             mIsLoading = true;
             mHandler = new Handler(Looper.getMainLooper());
+            initialize(context, appToken, bannerSize, bannerPosition);
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);
             String[] assets = new String[] {
@@ -204,7 +205,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      * @param bannerSize size of banner
      * @param bannerPosition banner position on the screen
      */
-    protected void buildBanner(Context context, String appToken, Size bannerSize, Position bannerPosition) {
+    protected void initialize(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
         mContext = context;
         mAppToken = appToken;
@@ -213,12 +214,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
         RelativeLayout banner;
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (context instanceof Activity) {
-            mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
-        } else {
-            Log.e(TAG, "Wrong type of Context. Must be Activity context");
-            mContainer = new RelativeLayout(context);
-        }
+        mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
         switch (bannerSize) {
             case BANNER_90:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
@@ -240,6 +236,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
                 params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 break;
         }
+
         mTitle = (TextView) banner.findViewById(R.id.pubnative_banner_title);
         mDescription = (TextView) banner.findViewById(R.id.pubnative_banner_description);
         mIcon = (ImageView) banner.findViewById(R.id.pubnative_banner_image);
