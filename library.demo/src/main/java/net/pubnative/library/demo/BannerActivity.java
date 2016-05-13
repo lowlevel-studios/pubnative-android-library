@@ -2,7 +2,6 @@ package net.pubnative.library.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
@@ -66,7 +65,6 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
     // Helpers
     //==============================================================================================
 
-    @NonNull
     private PubnativeBanner.Position getBannerPosition(int selectedPositionId) {
 
         PubnativeBanner.Position position;
@@ -80,7 +78,6 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
         return position;
     }
 
-    @NonNull
     private PubnativeBanner.Size getBannerSize(int selectedSizeId) {
 
         PubnativeBanner.Size size;

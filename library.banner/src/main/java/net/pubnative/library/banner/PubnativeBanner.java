@@ -22,6 +22,8 @@ import net.pubnative.library.request.model.PubnativeAdModel;
 
 import java.util.List;
 
+import static junit.framework.Assert.fail;
+
 public class PubnativeBanner implements PubnativeRequest.Listener,
                                         PubnativeAdModel.Listener {
 
@@ -128,7 +130,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
         Log.v(TAG, "load");
-        if (TextUtils.isEmpty(mAppToken)) {
+        if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
@@ -145,7 +147,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             mHandler = new Handler(Looper.getMainLooper());
             initialize(context, appToken, bannerSize, bannerPosition);
             PubnativeRequest request = new PubnativeRequest();
-            request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);
+            request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, appToken);
             String[] assets = new String[] {
                     PubnativeAsset.TITLE,
                     PubnativeAsset.DESCRIPTION,

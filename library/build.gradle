@@ -12,7 +12,7 @@ def sharedVersion = version
 
 android {
     compileSdkVersion 10
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 10
@@ -69,7 +69,7 @@ tasks.coveralls {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.code.gson:gson:2.4'
     compile "net.pubnative:url_driller:1.3.0"
     compile 'net.pubnative:advertising_id_client:1.0.1'
 
