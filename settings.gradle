@@ -1,1 +1,1 @@
-include ':library', ':library.demo', ':library.interstitial'
+include ':library', ':library.demo', ':library.interstitial', ':library.ad.feed.banner'

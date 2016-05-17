@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pubnative_interstitial_white">@android:color/white</color>
+    <color name="pubnative_interstitial_dark_gray_semitransparent">#80000000</color>
+</resources>
