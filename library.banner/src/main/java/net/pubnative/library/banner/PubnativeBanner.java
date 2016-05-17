@@ -24,8 +24,6 @@ import net.pubnative.library.request.model.PubnativeAdModel;
 
 import java.util.List;
 
-import static junit.framework.Assert.fail;
-
 public class PubnativeBanner implements PubnativeRequest.Listener,
                                         PubnativeAdModel.Listener {
 
@@ -128,20 +126,17 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
-        mContext = context;
-        mAppToken = appToken;
-        mBannerSize = bannerSize;
-        mBannerPosition = bannerPosition;
-
+        Log.v(TAG, "load");
         mHandler = new Handler(Looper.getMainLooper());
 
-        Log.v(TAG, "load");
-        if (TextUtils.isEmpty(appToken)) {
+        if (mListener == null) {
+            Log.v(TAG, "load - The ad hasn't a listener, dropping this call");
+        } else if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
         } else if (!(context instanceof Activity)) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: wrong context type"));
+            invokeLoadFail(new Exception("PubnativeBanner - load error: wrong context type, must be Activity context"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (mIsShown) {
@@ -149,8 +144,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
+            mContext = context;
+            mAppToken = appToken;
+            mBannerSize = bannerSize;
+            mBannerPosition = bannerPosition;
             mIsLoading = true;
-            initialize(bannerSize, bannerPosition);
+            initialize();
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, appToken);
             String[] assets = new String[] {
@@ -171,7 +170,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public boolean isReady() {
 
-        Log.v(TAG, "setListener");
+        Log.v(TAG, "isReady");
         return mAdModel != null;
     }
 
@@ -181,8 +180,10 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public void show() {
         Log.v(TAG, "show");
         if (mIsShown) {
-            Log.w(TAG, "show - the ad is already shown, ");
-        } else if (isReady()) {
+            Log.w(TAG, "show - the ad is already shown, dropping this call");
+        } else if (mIsLoading) {
+            Log.w(TAG, "show - the ad is not loaded yet, dropping this call");
+        } else {
             mIsShown = true;
             mTitle.setText(mAdModel.getTitle());
             mDescription.setText(mAdModel.getDescription());
@@ -190,8 +191,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
             mAdModel.startTracking(mContainer, mBannerView, this);
             invokeShow();
-        } else {
-            Log.e(TAG, "show - Error: the banner is not yet loaded");
         }
     }
 
@@ -213,12 +212,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     /**
      * Banner constructor method
      */
-    protected void initialize(Size bannerSize, Position bannerPosition) {
+    protected void initialize() {
 
         RelativeLayout banner;
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
-        switch (bannerSize) {
+        switch (mBannerSize) {
             case BANNER_90:
                 banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
                 break;
@@ -230,7 +229,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
         mBannerView = (RelativeLayout) banner.findViewById(R.id.pubnative_banner_view);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBannerView.getLayoutParams();
-        switch (bannerPosition) {
+        switch (mBannerPosition) {
             case TOP:
                 params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 break;
@@ -402,6 +401,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public void onPubnativeAdModelClick(PubnativeAdModel pubnativeAdModel, View view) {
         Log.v(TAG, "onPubnativeAdModelClick");
         invokeClick();
+        destroy();
     }
 
     @Override
