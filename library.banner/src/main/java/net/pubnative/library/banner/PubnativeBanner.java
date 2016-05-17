@@ -107,10 +107,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         void onPubnativeBannerHide(PubnativeBanner banner);
     }
 
-    public PubnativeBanner() {
-
-    }
-
     /**
      * Sets a callback listener for this interstitial object
      *
