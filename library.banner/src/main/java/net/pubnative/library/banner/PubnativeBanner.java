@@ -245,15 +245,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         mInstall = (Button) banner.findViewById(R.id.pubnative_banner_button);
         mAdText = (TextView) banner.findViewById(R.id.pubnative_banner_ad);
 
-        if (Build.VERSION.SDK_INT < 11) {
-            final AlphaAnimation animation = new AlphaAnimation(0.0f, 0.5f);
-            animation.setDuration(1);
-            animation.setFillAfter(true);
-            mAdText.startAnimation(animation);
-        } else {
-            mAdText.setAlpha(0.5f);
-        }
-
         mBannerView.setLayoutParams(params);
         mContainer.addView(banner);
     }

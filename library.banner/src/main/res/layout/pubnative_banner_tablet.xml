@@ -57,6 +57,7 @@
             android:layout_centerHorizontal="true"
             android:textColor="@android:color/white"
             android:textSize="10sp"
+            android:alpha="0.5"
             android:text="Sponsored"/>
 
     </RelativeLayout>
