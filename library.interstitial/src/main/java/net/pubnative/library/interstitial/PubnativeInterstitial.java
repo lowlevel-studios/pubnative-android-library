@@ -1,5 +1,6 @@
 package net.pubnative.library.interstitial;
 
+import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -93,38 +94,42 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         mContext = context;
         mAppToken = appToken;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        RelativeLayout interstitial = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_interstitial, null);
-        mTitle = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_title);
-        mDescription = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_description);
-        mIcon = (ImageView) interstitial.findViewById(R.id.pn_interstitial_icon);
-        mBanner = (ImageView) interstitial.findViewById(R.id.pubnative_interstitial_banner);
-        mRating = (RatingBar) interstitial.findViewById(R.id.pubnative_interstitial_rating);
-        mCTA = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_cta);
-        mContainer = new RelativeLayout(mContext) {
+        if (context == null) {
+            Log.v(TAG, "PubnativeInterstitial - constructor error: context is null or empty");
+        } else {
+            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            RelativeLayout interstitial = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_interstitial, null);
+            mTitle = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_title);
+            mDescription = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_description);
+            mIcon = (ImageView) interstitial.findViewById(R.id.pn_interstitial_icon);
+            mBanner = (ImageView) interstitial.findViewById(R.id.pubnative_interstitial_banner);
+            mRating = (RatingBar) interstitial.findViewById(R.id.pubnative_interstitial_rating);
+            mCTA = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_cta);
+            mContainer = new RelativeLayout(mContext) {
 
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent event) {
+                @Override
+                public boolean dispatchKeyEvent(KeyEvent event) {
 
-                Log.v(TAG, "dispatchKeyEvent");
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                    hide();
-                    return true;
+                    Log.v(TAG, "dispatchKeyEvent");
+                    if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                        hide();
+                        return true;
+                    }
+                    return super.dispatchKeyEvent(event);
                 }
-                return super.dispatchKeyEvent(event);
-            }
 
-            @Override
-            protected void onWindowVisibilityChanged(int visibility) {
+                @Override
+                protected void onWindowVisibilityChanged(int visibility) {
 
-                Log.v(TAG, "onWindowVisibilityChanged");
-                if (visibility != View.VISIBLE) {
-                    hide();
+                    Log.v(TAG, "onWindowVisibilityChanged");
+                    if (visibility != View.VISIBLE) {
+                        hide();
+                    }
                 }
-            }
-        };
-        mContainer.addView(interstitial);
+            };
+            mContainer.addView(interstitial);
+        }
     }
 
     /**

@@ -31,7 +31,6 @@ dependencies {
     compile project(':library.interstitial')
     compile project(':library.banner')
     compile 'com.squareup.picasso:picasso:2.5.2'
-
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.assertj:assertj-android:1.0.0'
     testCompile 'org.robolectric:robolectric:3.0'
