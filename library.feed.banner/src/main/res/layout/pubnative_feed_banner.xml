@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/pubnative_interstitial_container"
+    android:id="@+id/pubnative_feed_banner_container"
     android:layout_width="match_parent"
-    android:layout_height="250dp">
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true">
 
     <RelativeLayout
         android:id="@+id/pubnative_feed_banner_view"
@@ -51,16 +52,15 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@color/pubnative_interstitial_dark_gray_semitransparent"
+            android:padding="3dp"
+            android:text="@string/pubnative_interstitial_sponsored_text"
+            android:textColor="@color/pubnative_interstitial_white"
+            android:textSize="10sp" />
     </RelativeLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:background="@color/pubnative_interstitial_dark_gray_semitransparent"
-        android:padding="3dp"
-        android:text="@string/pubnative_interstitial_sponsored_text"
-        android:textColor="@color/pubnative_interstitial_white"
-        android:textSize="10sp" />
 </RelativeLayout>
