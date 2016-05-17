@@ -27,9 +27,9 @@ public class InterstitialAdActivity extends Activity implements PubnativeInterst
 
         Log.v(TAG, "onRequestClick");
         mLoaderContainer.setVisibility(View.VISIBLE);
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(this, Settings.getAppToken());
+        PubnativeInterstitial interstitial = new PubnativeInterstitial();
         interstitial.setListener(this);
-        interstitial.load();
+        interstitial.load(this, Settings.getAppToken());
     }
 
     //==============================================================================================
