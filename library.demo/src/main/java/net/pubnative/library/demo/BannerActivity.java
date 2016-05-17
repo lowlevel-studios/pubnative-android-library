@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import net.pubnative.library.banner.PubnativeBanner;
 import net.pubnative.library.demo.utils.Settings;
@@ -14,11 +15,11 @@ import net.pubnative.library.demo.utils.Settings;
 public class BannerActivity extends Activity implements PubnativeBanner.Listener {
 
     public static final String TAG = BannerActivity.class.getSimpleName();
-    private RelativeLayout mLoaderContainer;
-    private RadioButton mBottomPosition;
-    private RadioButton mSmallBanner;
-    private RadioGroup  mSizeGroup;
-    private RadioGroup  mPositionGroup;
+    private RelativeLayout  mLoaderContainer;
+    private RadioButton     mBottomPosition;
+    private RadioButton     mSmallBanner;
+    private RadioGroup      mSizeGroup;
+    private RadioGroup      mPositionGroup;
     private PubnativeBanner mBanner;
 
     @Override

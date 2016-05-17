@@ -2,6 +2,7 @@ package net.pubnative.library.banner;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -44,6 +46,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     protected ImageView             mIcon;
     protected RelativeLayout        mBannerView;
     protected Button                mInstall;
+    protected TextView              mAdText;
 
     public enum Size {
         BANNER_50,
@@ -245,6 +248,16 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         mDescription = (TextView) banner.findViewById(R.id.pubnative_banner_description);
         mIcon = (ImageView) banner.findViewById(R.id.pubnative_banner_image);
         mInstall = (Button) banner.findViewById(R.id.pubnative_banner_button);
+        mAdText = (TextView) banner.findViewById(R.id.pubnative_banner_ad);
+
+        if (Build.VERSION.SDK_INT < 11) {
+            final AlphaAnimation animation = new AlphaAnimation(0.0f, 0.5f);
+            animation.setDuration(1);
+            animation.setFillAfter(true);
+            mAdText.startAnimation(animation);
+        } else {
+            mAdText.setAlpha(0.5f);
+        }
 
         mBannerView.setLayoutParams(params);
         mContainer.addView(banner);
