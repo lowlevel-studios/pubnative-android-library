@@ -129,6 +129,13 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
+        mContext = context;
+        mAppToken = appToken;
+        mBannerSize = bannerSize;
+        mBannerPosition = bannerPosition;
+
+        mHandler = new Handler(Looper.getMainLooper());
+
         Log.v(TAG, "load");
         if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
@@ -144,8 +151,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             invokeLoadFinish();
         } else {
             mIsLoading = true;
-            mHandler = new Handler(Looper.getMainLooper());
-            initialize(context, appToken, bannerSize, bannerPosition);
+            initialize(bannerSize, bannerPosition);
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, appToken);
             String[] assets = new String[] {
@@ -178,7 +184,13 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         if (mIsShown) {
             Log.w(TAG, "show - the ad is already shown, ");
         } else if (isReady()) {
-            render();
+            mIsShown = true;
+            mTitle.setText(mAdModel.getTitle());
+            mDescription.setText(mAdModel.getDescription());
+            mInstall.setText(mAdModel.getCtaText());
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
+            mAdModel.startTracking(mContainer, mBannerView, this);
+            invokeShow();
         } else {
             Log.e(TAG, "show - Error: the banner is not yet loaded");
         }
@@ -201,18 +213,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     /**
      * Banner constructor method
-     *
-     * @param context context of {@link Activity}, where is banner will show
-     * @param appToken application token from settings
-     * @param bannerSize size of banner
-     * @param bannerPosition banner position on the screen
      */
-    protected void initialize(Context context, String appToken, Size bannerSize, Position bannerPosition) {
-
-        mContext = context;
-        mAppToken = appToken;
-        mBannerSize = bannerSize;
-        mBannerPosition = bannerPosition;
+    protected void initialize(Size bannerSize, Position bannerPosition) {
 
         RelativeLayout banner;
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -259,16 +261,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         }
     }
 
-    protected void render() {
-        Log.v(TAG, "render");
-        mTitle.setText(mAdModel.getTitle());
-        mDescription.setText(mAdModel.getDescription());
-        mInstall.setText(mAdModel.getCtaText());
-        Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
-        mAdModel.startTracking(mContainer, mBannerView, this);
-        invokeShow();
-    }
-
     //==============================================================================================
     // Callback helpers
     //==============================================================================================
@@ -311,7 +303,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             @Override
             public void run() {
 
-                mIsShown = true;
                 Log.v(TAG, "invokeShow");
                 if (mListener != null) {
                     mListener.onPubnativeBannerShow(PubnativeBanner.this);
@@ -358,7 +349,6 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             public void run() {
 
                 Log.v(TAG, "invokeHide");
-                mIsShown = false;
                 if (mListener != null) {
                     mListener.onPubnativeBannerHide(PubnativeBanner.this);
                 }
