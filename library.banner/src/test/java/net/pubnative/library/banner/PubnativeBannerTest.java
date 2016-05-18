@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.text.TextUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +50,8 @@ public class PubnativeBannerTest {
         banner.mListener = listener;
         Exception ex = new Exception();
         banner.invokeLoadFail(ex);
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerLoadFail(eq(banner), eq(ex));
     }
@@ -67,7 +69,8 @@ public class PubnativeBannerTest {
         banner.mHandler = serviceHandler;
         banner.mListener = listener;
         banner.invokeLoadFinish();
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerLoadFinish(eq(banner));
     }
@@ -85,7 +88,8 @@ public class PubnativeBannerTest {
         banner.mHandler = serviceHandler;
         banner.mListener = listener;
         banner.invokeShow();
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerShow(eq(banner));
     }
@@ -103,7 +107,8 @@ public class PubnativeBannerTest {
         banner.mHandler = serviceHandler;
         banner.mListener = listener;
         banner.invokeImpressionConfirmed();
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerImpressionConfirmed(eq(banner));
     }
@@ -121,7 +126,8 @@ public class PubnativeBannerTest {
         banner.mHandler = serviceHandler;
         banner.mListener = listener;
         banner.invokeClick();
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerClick(eq(banner));
     }
@@ -139,7 +145,8 @@ public class PubnativeBannerTest {
         banner.mHandler = serviceHandler;
         banner.mListener = listener;
         banner.invokeHide();
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(listener).onPubnativeBannerHide(eq(banner));
     }
@@ -148,6 +155,8 @@ public class PubnativeBannerTest {
     public void loadBanner_withNullContext_returnsException() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
         final Exception ex = new Exception();
         doAnswer(new Answer() {
 
@@ -168,6 +177,8 @@ public class PubnativeBannerTest {
     public void loadBanner_withNotActivityContext_returnsException() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
         final Exception ex = new Exception();
         doAnswer(new Answer() {
 
@@ -188,6 +199,8 @@ public class PubnativeBannerTest {
     public void loadBanner_withEmptyAppToken_returnsException() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
         final Exception ex = new Exception();
         Context context = mock(Activity.class);
         doAnswer(new Answer() {
@@ -219,7 +232,8 @@ public class PubnativeBannerTest {
         Context context = mock(Activity.class);
         when(banner.isReady()).thenReturn(true);
         banner.load(context, FAKE_APP_TOKEN, null, null);
-        ((ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper())).idle();
+        ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
+        shadowLooper.idle();
 
         verify(banner).invokeLoadFinish();
     }
