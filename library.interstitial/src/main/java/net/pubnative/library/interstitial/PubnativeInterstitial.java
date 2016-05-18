@@ -1,6 +1,5 @@
 package net.pubnative.library.interstitial;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;

@@ -1,21 +1,13 @@
 package net.pubnative.library.interstitial;
 
 import android.app.Activity;
-import android.content.Context;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -27,26 +19,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({TextUtils.class})
+@Config(constants = BuildConfig.class, sdk = 16)
+@RunWith(RobolectricGradleTestRunner.class)
 public class PubnativeInterstitialTest {
 
     public static final String FAKE_APP_TOKEN = "1234567890";
 
-    Context mMockContext;
-    LayoutInflater mMockInflator;
-    RelativeLayout mMockView;
-
-    @Before
-    public void setUp() {
-        mMockContext = mock(Activity.class);
-        mMockInflator = mock(LayoutInflater.class);
-        mMockView = mock(RelativeLayout.class);
-        PowerMockito.mockStatic(TextUtils.class);
-
-        when(mMockContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).thenReturn(mMockInflator);
-        when(mMockInflator.inflate(any(Integer.class), any(ViewGroup.class))).thenReturn(mMockView);
-    }
 
     @Test
     public void createInterstitial_withNullContext_returnsObject() {
@@ -82,9 +60,10 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withEmptyAppToken_invokeLoadFail() {
 
-        when(TextUtils.isEmpty(any(CharSequence.class))).thenReturn(true);
+        //when(TextUtils.isEmpty(any(CharSequence.class))).thenReturn(true);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(mMockContext, "");
+        PubnativeInterstitial interstitial = new PubnativeInterstitial(activity, "");
         PubnativeInterstitial spyInterstitial = spy(interstitial);
 
         final Exception ex = mock(Exception.class);
@@ -107,14 +86,9 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadIterstitial_whenReady_invokeLoadFinish() {
 
-        Context context = mock(Activity.class);
-        LayoutInflater inflater = mock(LayoutInflater.class);
-        RelativeLayout view = mock(RelativeLayout.class);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
-        when(context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).thenReturn(inflater);
-        when(inflater.inflate(any(Integer.class), any(ViewGroup.class))).thenReturn(view);
-
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(context, FAKE_APP_TOKEN);
+        PubnativeInterstitial interstitial = new PubnativeInterstitial(activity, FAKE_APP_TOKEN);
         PubnativeInterstitial spyInterstitial = spy(interstitial);
         when(spyInterstitial.isReady()).thenReturn(true);
 
