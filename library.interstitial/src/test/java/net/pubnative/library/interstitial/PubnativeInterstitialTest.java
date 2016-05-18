@@ -16,6 +16,8 @@ import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -61,7 +63,7 @@ public class PubnativeInterstitialTest {
         PubnativeInterstitial interstitial = new PubnativeInterstitial(null, FAKE_APP_TOKEN);
         PubnativeInterstitial spyInterstitial = spy(interstitial);
 
-        final Exception ex = new Exception();
+        final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
 
             @Override
@@ -85,7 +87,7 @@ public class PubnativeInterstitialTest {
         PubnativeInterstitial interstitial = new PubnativeInterstitial(mMockContext, "");
         PubnativeInterstitial spyInterstitial = spy(interstitial);
 
-        final Exception ex = new Exception();
+        final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
 
             @Override

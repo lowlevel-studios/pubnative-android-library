@@ -54,7 +54,7 @@ public class PubnativeBannerTest {
         mServiceHandler = new Handler(mServiceLooper);
 
         mBanner.mHandler = mServiceHandler;
-        Exception ex = new Exception();
+        Exception ex = mock(Exception.class);
         mBanner.invokeLoadFail(ex);
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
@@ -145,7 +145,7 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_withNullContext_returnsException() {
 
-        final Exception ex = new Exception();
+        final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
 
             @Override
@@ -164,7 +164,7 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_withNotActivityContext_returnsException() {
 
-        final Exception ex = new Exception();
+        final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
 
             @Override
@@ -183,7 +183,7 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_withEmptyAppToken_returnsException() {
 
-        final Exception ex = new Exception();
+        final Exception ex = mock(Exception.class);
         Context context = mock(Activity.class);
         doAnswer(new Answer() {
 
