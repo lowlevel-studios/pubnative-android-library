@@ -23,9 +23,6 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricGradleTestRunner.class)
 public class PubnativeInterstitialTest {
 
-    public static final String FAKE_APP_TOKEN = "1234567890";
-
-
     @Test
     public void createInterstitial_withNullContext_returnsObject() {
 
@@ -38,6 +35,8 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withNullContext_invokeLoadFail() {
 
+        String appToken = "123456";
+
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
 
         final Exception ex = mock(Exception.class);
@@ -50,7 +49,7 @@ public class PubnativeInterstitialTest {
                 return null;
             }
         }).when(interstitial).invokeLoadFail(any(Exception.class));
-        interstitial.load(null, FAKE_APP_TOKEN);
+        interstitial.load(null, appToken);
 
         verify(interstitial).invokeLoadFail(eq(ex));
 
@@ -59,6 +58,8 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withEmptyAppToken_invokeLoadFail() {
 
+        String appToken = "";
+
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
@@ -74,7 +75,7 @@ public class PubnativeInterstitialTest {
             }
         }).when(interstitial).invokeLoadFail(any(Exception.class));
 
-        interstitial.load(activity, "");
+        interstitial.load(activity, appToken);
 
         verify(interstitial).invokeLoadFail(eq(ex));
 
@@ -83,12 +84,14 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadIterstitial_whenReady_invokeLoadFinish() {
 
+        String appToken = "123456";
+
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
         when(interstitial.isReady()).thenReturn(true);
 
-        interstitial.load(activity, FAKE_APP_TOKEN);
+        interstitial.load(activity, appToken);
 
         verify(interstitial).invokeLoadFinish();
 

@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.request.PubnativeAsset;
@@ -127,9 +128,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         Log.v(TAG, "load");
         mHandler = new Handler(Looper.getMainLooper());
 
-        if (mListener == null) {
-            Log.v(TAG, "load - The ad hasn't a listener, dropping this call");
-        } else if (TextUtils.isEmpty(appToken)) {
+        if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
@@ -142,6 +141,11 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
+
+            if (mListener == null) {
+                Log.v(TAG, "load - The ad hasn't a listener");
+            }
+
             mContext = context;
             mAppToken = appToken;
             mBannerSize = bannerSize;
@@ -177,10 +181,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public void show() {
         Log.v(TAG, "show");
-        if (mIsShown) {
-            Log.w(TAG, "show - the ad is already shown, dropping this call");
-        } else if (mIsLoading) {
-            Log.w(TAG, "show - the ad is not loaded yet, dropping this call");
+        if (!isReady()) {
+            Log.w(TAG, "show - the ad is not ready yet, dropping this call");
         } else {
             mIsShown = true;
             mTitle.setText(mAdModel.getTitle());
