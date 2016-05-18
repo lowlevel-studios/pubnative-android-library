@@ -5,8 +5,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.text.TextUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -31,132 +31,120 @@ public class PubnativeBannerTest {
 
     public static final String FAKE_APP_TOKEN = "1234567890";
 
-    @Mock Context mMockContext;
+    @Mock Context                      mMockContext;
 
-    protected Handler serviceHandler;
-    protected Looper serviceLooper;
+    protected Handler                  mServiceHandler;
+    protected Looper                   mServiceLooper;
+    protected PubnativeBanner          mBanner;
+    protected PubnativeBanner.Listener mListener;
+
+    @Before
+    public void setUp() {
+        mBanner = spy(PubnativeBanner.class);
+        mListener = mock(PubnativeBanner.Listener.class);
+        mBanner.mListener = mListener;
+    }
 
     @Test
     public void invokeLoadFail_shouldCallOnLoadFail() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
+        mBanner.mHandler = mServiceHandler;
         Exception ex = new Exception();
-        banner.invokeLoadFail(ex);
+        mBanner.invokeLoadFail(ex);
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerLoadFail(eq(banner), eq(ex));
+        verify(mListener).onPubnativeBannerLoadFail(eq(mBanner), eq(ex));
     }
 
     @Test
     public void invokeLoadFinish_shouldCallOnLoadFinish() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
-        banner.invokeLoadFinish();
+        mBanner.mHandler = mServiceHandler;
+        mBanner.invokeLoadFinish();
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerLoadFinish(eq(banner));
+        verify(mListener).onPubnativeBannerLoadFinish(eq(mBanner));
     }
 
     @Test
     public void invokeShow_shouldCallOnShow() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
-        banner.invokeShow();
+        mBanner.mHandler = mServiceHandler;
+        mBanner.invokeShow();
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerShow(eq(banner));
+        verify(mListener).onPubnativeBannerShow(eq(mBanner));
     }
 
     @Test
     public void invokeImpressionConfirmed_shouldCallOnImpressionConfirmed() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
-        banner.invokeImpressionConfirmed();
+        mBanner.mHandler = mServiceHandler;
+        mBanner.invokeImpressionConfirmed();
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerImpressionConfirmed(eq(banner));
+        verify(mListener).onPubnativeBannerImpressionConfirmed(eq(mBanner));
     }
 
     @Test
     public void invokeClick_shouldCallOnClick() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
-        banner.invokeClick();
+        mBanner.mHandler = mServiceHandler;
+        mBanner.invokeClick();
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerClick(eq(banner));
+        verify(mListener).onPubnativeBannerClick(eq(mBanner));
     }
 
     @Test
     public void invokeHide_shouldCallOnHide() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
-        banner.invokeHide();
+        mBanner.mHandler = mServiceHandler;
+        mBanner.invokeHide();
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(listener).onPubnativeBannerHide(eq(banner));
+        verify(mListener).onPubnativeBannerHide(eq(mBanner));
     }
 
     @Test
     public void loadBanner_withNullContext_returnsException() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
-        banner.mListener = listener;
         final Exception ex = new Exception();
         doAnswer(new Answer() {
 
@@ -166,19 +154,16 @@ public class PubnativeBannerTest {
                 args[0] = ex;
                 return null;
             }
-        }).when(banner).invokeLoadFail(any(Exception.class));
-        banner.load(null, FAKE_APP_TOKEN, null, null);
+        }).when(mBanner).invokeLoadFail(any(Exception.class));
+        mBanner.load(null, FAKE_APP_TOKEN, null, null);
 
-        verify(banner).invokeLoadFail(eq(ex));
+        verify(mBanner).invokeLoadFail(eq(ex));
 
     }
 
     @Test
     public void loadBanner_withNotActivityContext_returnsException() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
-        banner.mListener = listener;
         final Exception ex = new Exception();
         doAnswer(new Answer() {
 
@@ -188,19 +173,16 @@ public class PubnativeBannerTest {
                 args[0] = ex;
                 return null;
             }
-        }).when(banner).invokeLoadFail(any(Exception.class));
-        banner.load(mMockContext, FAKE_APP_TOKEN, null, null);
+        }).when(mBanner).invokeLoadFail(any(Exception.class));
+        mBanner.load(mMockContext, FAKE_APP_TOKEN, null, null);
 
-        verify(banner).invokeLoadFail(eq(ex));
+        verify(mBanner).invokeLoadFail(eq(ex));
 
     }
 
     @Test
     public void loadBanner_withEmptyAppToken_returnsException() {
 
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
-        banner.mListener = listener;
         final Exception ex = new Exception();
         Context context = mock(Activity.class);
         doAnswer(new Answer() {
@@ -211,31 +193,28 @@ public class PubnativeBannerTest {
                 args[0] = ex;
                 return null;
             }
-        }).when(banner).invokeLoadFail(any(Exception.class));
-        banner.load(context, "", null, null);
+        }).when(mBanner).invokeLoadFail(any(Exception.class));
+        mBanner.load(context, "", null, null);
 
-        verify(banner).invokeLoadFail(eq(ex));
+        verify(mBanner).invokeLoadFail(eq(ex));
 
     }
 
     @Test
     public void loadBanner_whenBannerReady_returnsException() {
-        PubnativeBanner banner = spy(PubnativeBanner.class);
-        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         HandlerThread serviceThread = new HandlerThread("[" + PubnativeBanner.class.getSimpleName() + "Thread]");
         serviceThread.start();
-        serviceLooper = serviceThread.getLooper();
-        serviceHandler = new Handler(serviceLooper);
+        mServiceLooper = serviceThread.getLooper();
+        mServiceHandler = new Handler(mServiceLooper);
 
-        banner.mHandler = serviceHandler;
-        banner.mListener = listener;
+        mBanner.mHandler = mServiceHandler;
         Context context = mock(Activity.class);
-        when(banner.isReady()).thenReturn(true);
-        banner.load(context, FAKE_APP_TOKEN, null, null);
+        when(mBanner.isReady()).thenReturn(true);
+        mBanner.load(context, FAKE_APP_TOKEN, null, null);
         ShadowLooper shadowLooper = (ShadowLooper) ShadowExtractor.extract(serviceThread.getLooper());
         shadowLooper.idle();
 
-        verify(banner).invokeLoadFinish();
+        verify(mBanner).invokeLoadFinish();
     }
 
 }
