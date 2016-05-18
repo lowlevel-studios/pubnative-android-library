@@ -38,7 +38,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     protected RelativeLayout                mInFeedBannerView;
     protected TextView                      mTitle;
     protected TextView                      mDescription;
-    protected ImageView                     mIcon;
+    protected ImageView                     mIconImage;
+    protected ImageView                     mBannerImage;
     protected Button                        mInstall;
 
     /**
@@ -102,8 +103,10 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
         } else if (!(context instanceof Activity)) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: wrong context type"));
+        } else if (mListener == null) {
+            Log.e(TAG, "load - listener is not set, dropping this call");
         } else if (mIsLoading) {
-            Log.w(TAG, "load - The ad is being loaded, dropping this call");
+            Log.i(TAG, "load - The ad is being loaded, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
@@ -115,6 +118,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
                     PubnativeAsset.TITLE,
                     PubnativeAsset.DESCRIPTION,
                     PubnativeAsset.ICON,
+                    PubnativeAsset.BANNER,
                     PubnativeAsset.CALL_TO_ACTION
             };
             request.setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, assets);
@@ -141,7 +145,9 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         Log.v(TAG, "show");
         if(isReady()) {
             container.removeAllViews();
-            container.addView(mInFeedBannerView);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-1, -2);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT);
+            container.addView(mInFeedBannerView, params);
             renderInFeedbanner();
             mAdModel.startTracking(mInFeedBannerView, mInstall, this);
         }
@@ -214,7 +220,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             mInFeedBannerView = (RelativeLayout) inflater.inflate(R.layout.pubnative_feed_banner, null);
             mTitle = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_title);
             mDescription = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_description);
-            mIcon = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_image);
+            mIconImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_iconImage);
+            mBannerImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_bannerImage);
             mInstall = (Button) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_button);
         }
     }
@@ -225,7 +232,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         mTitle.setText(mAdModel.getTitle());
         mDescription.setText(mAdModel.getDescription());
         mInstall.setText(mAdModel.getCtaText());
-        Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
+        Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIconImage);
+        Picasso.with(mContext).load(mAdModel.getBannerUrl()).into(mBannerImage);
         invokeShow();
     }
 
