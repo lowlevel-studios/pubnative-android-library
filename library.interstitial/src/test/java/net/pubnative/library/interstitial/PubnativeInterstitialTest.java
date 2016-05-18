@@ -24,15 +24,6 @@ import static org.mockito.Mockito.when;
 public class PubnativeInterstitialTest {
 
     @Test
-    public void createInterstitial_withNullContext_returnsObject() {
-
-        PubnativeInterstitial interstitial = new PubnativeInterstitial();
-
-        Assertions.assertThat(interstitial).isNotNull();
-
-    }
-
-    @Test
     public void loadInterstitial_withNullContext_invokeLoadFail() {
 
         String appToken = "123456";

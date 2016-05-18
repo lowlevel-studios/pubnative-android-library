@@ -59,7 +59,6 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
                      getBannerSize(selectedSizeId),
                      getBannerPosition(selectedPositionId)
                     );
-        mBanner.show();
     }
 
     //==============================================================================================
