@@ -29,7 +29,7 @@ public class PubnativeInterstitialTest {
     @Test
     public void createInterstitial_withNullContext_returnsObject() {
 
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(null, null);
+        PubnativeInterstitial interstitial = new PubnativeInterstitial();
 
         Assertions.assertThat(interstitial).isNotNull();
 
@@ -38,8 +38,7 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withNullContext_invokeLoadFail() {
 
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(null, FAKE_APP_TOKEN);
-        PubnativeInterstitial spyInterstitial = spy(interstitial);
+        PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
 
         final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
@@ -50,21 +49,19 @@ public class PubnativeInterstitialTest {
                 args[0] = ex;
                 return null;
             }
-        }).when(spyInterstitial).invokeLoadFail(any(Exception.class));
-        spyInterstitial.load();
+        }).when(interstitial).invokeLoadFail(any(Exception.class));
+        interstitial.load(null, FAKE_APP_TOKEN);
 
-        verify(spyInterstitial).invokeLoadFail(eq(ex));
+        verify(interstitial).invokeLoadFail(eq(ex));
 
     }
 
     @Test
     public void loadInterstitial_withEmptyAppToken_invokeLoadFail() {
 
-        //when(TextUtils.isEmpty(any(CharSequence.class))).thenReturn(true);
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(activity, "");
-        PubnativeInterstitial spyInterstitial = spy(interstitial);
+        PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
 
         final Exception ex = mock(Exception.class);
         doAnswer(new Answer() {
@@ -75,11 +72,11 @@ public class PubnativeInterstitialTest {
                 args[0] = ex;
                 return null;
             }
-        }).when(spyInterstitial).invokeLoadFail(any(Exception.class));
+        }).when(interstitial).invokeLoadFail(any(Exception.class));
 
-        spyInterstitial.load();
+        interstitial.load(activity, "");
 
-        verify(spyInterstitial).invokeLoadFail(eq(ex));
+        verify(interstitial).invokeLoadFail(eq(ex));
 
     }
 
@@ -88,13 +85,12 @@ public class PubnativeInterstitialTest {
 
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
-        PubnativeInterstitial interstitial = new PubnativeInterstitial(activity, FAKE_APP_TOKEN);
-        PubnativeInterstitial spyInterstitial = spy(interstitial);
-        when(spyInterstitial.isReady()).thenReturn(true);
+        PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
+        when(interstitial.isReady()).thenReturn(true);
 
-        spyInterstitial.load();
+        interstitial.load(activity, FAKE_APP_TOKEN);
 
-        verify(spyInterstitial).invokeLoadFinish();
+        verify(interstitial).invokeLoadFinish();
 
     }
 
