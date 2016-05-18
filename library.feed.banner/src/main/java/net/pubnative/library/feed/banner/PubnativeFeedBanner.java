@@ -85,24 +85,29 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     }
 
     /**
+     * Sets a callback listener for this feed banner object
+     *
+     * @param listener valid PubnativeFeedBanner.Listener object
+     */
+    public void setListener(Listener listener) {
+
+        Log.v(TAG, "setListener");
+        mListener = listener;
+    }
+
+    /**
      * Load Feed Banner
      * @param context  A valid context
      * @param appToken App token
-     * @param listener Listener for callbacks
      */
-    public void load(Context context, String appToken, Listener listener) {
+    public void load(Context context, String appToken) {
 
         Log.v(TAG, "load");
-        mContext = context;
-        mAppToken = appToken;
-        mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
-        if (TextUtils.isEmpty(mAppToken)) {
+        if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: app token is null or empty"));
-        } else if (mContext == null) {
+        } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
-        } else if (!(context instanceof Activity)) {
-            invokeLoadFail(new Exception("PubnativeFeedBanner - load error: wrong context type"));
         } else if (mListener == null) {
             Log.e(TAG, "load - listener is not set, dropping this call");
         } else if (mIsLoading) {
@@ -111,6 +116,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeLoadFinish();
         } else {
             mIsLoading = true;
+            mContext = context;
+            mAppToken = appToken;
             initialize(); // to prepare the view
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);

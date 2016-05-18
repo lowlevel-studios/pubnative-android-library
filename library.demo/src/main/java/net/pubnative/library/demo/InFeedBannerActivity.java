@@ -30,7 +30,9 @@ public class InFeedBannerActivity extends Activity implements PubnativeFeedBanne
 
         Log.v(TAG, "onRequestClick");
         mLoaderContainer.setVisibility(View.VISIBLE);
-        new PubnativeFeedBanner().load(this, Settings.getAppToken(), this);
+        PubnativeFeedBanner feedBanner = new PubnativeFeedBanner();
+        feedBanner.setListener(this);
+        feedBanner.load(this, Settings.getAppToken());
     }
 
     //==============================================================================================
