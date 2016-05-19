@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import net.pubnative.library.banner.PubnativeBanner;
 import net.pubnative.library.demo.utils.Settings;
@@ -51,6 +50,11 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
     public void onRequestClick(View v) {
         int selectedPositionId = mPositionGroup.getCheckedRadioButtonId();
         int selectedSizeId = mSizeGroup.getCheckedRadioButtonId();
+
+        //Remove previous banner before create new
+        if (mBanner != null) {
+            mBanner.destroy();
+        }
 
         mBanner = new PubnativeBanner();
         mBanner.setListener(this);

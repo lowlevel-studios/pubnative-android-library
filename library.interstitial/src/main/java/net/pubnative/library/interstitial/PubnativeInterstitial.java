@@ -12,8 +12,10 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import net.pubnative.library.exceptions.PubnativeException;
 import net.pubnative.library.request.PubnativeAsset;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
@@ -107,14 +109,19 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         Log.v(TAG, "load");
         if (TextUtils.isEmpty(appToken)) {
-            invokeLoadFail(new Exception("PubnativeInterstitial - load error: app token is null or empty"));
+            invokeLoadFail(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY);
         } else if (context == null) {
-            invokeLoadFail(new Exception("PubnativeInterstitial - load error: context is null or empty"));
+            invokeLoadFail(PubnativeException.CONTEXT_IS_NULL);
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
+
+            if (mListener == null) {
+                Log.v(TAG, "load - The ad hasn't a listener");
+            }
+
             mContext = context;
             mAppToken = appToken;
             mIsShown = false;
@@ -313,7 +320,18 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeInterstitial - load error: no-fill"));
         } else {
             mAdModel = ads.get(0);
-            invokeLoadFinish();
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    invokeLoadFinish();
+                }
+
+                @Override
+                public void onError() {
+                    invokeLoadFail(new Exception("PubnativeBanner - load error: no-fill"));
+                }
+            });
         }
     }
 

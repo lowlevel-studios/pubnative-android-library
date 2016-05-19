@@ -14,9 +14,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import net.pubnative.library.exceptions.PubnativeException;
 import net.pubnative.library.request.PubnativeAsset;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
@@ -129,11 +130,11 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         mHandler = new Handler(Looper.getMainLooper());
 
         if (TextUtils.isEmpty(appToken)) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
+            invokeLoadFail(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY);
         } else if (context == null) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
+            invokeLoadFail(PubnativeException.CONTEXT_IS_NULL);
         } else if (!(context instanceof Activity)) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: wrong context type, must be Activity context"));
+            invokeLoadFail(PubnativeException.WRONG_TYPE_CONTEXT);
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (mIsShown) {
@@ -368,7 +369,18 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeBanner - load error: no-fill"));
         } else {
             mAdModel = ads.get(0);
-            invokeLoadFinish();
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    invokeLoadFinish();
+                }
+
+                @Override
+                public void onError() {
+                    invokeLoadFail(new Exception("PubnativeBanner - load error: no-fill"));
+                }
+            });
         }
     }
 

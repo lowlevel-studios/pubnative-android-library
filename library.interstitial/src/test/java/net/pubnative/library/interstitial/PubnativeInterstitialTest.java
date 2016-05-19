@@ -2,19 +2,14 @@ package net.pubnative.library.interstitial;
 
 import android.app.Activity;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+import net.pubnative.library.exceptions.PubnativeException;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,20 +24,9 @@ public class PubnativeInterstitialTest {
         String appToken = "123456";
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-
-        final Exception ex = mock(Exception.class);
-        doAnswer(new Answer() {
-
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                args[0] = ex;
-                return null;
-            }
-        }).when(interstitial).invokeLoadFail(any(Exception.class));
+        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
         interstitial.load(null, appToken);
-
-        verify(interstitial).invokeLoadFail(eq(ex));
+        verify(interstitial).invokeLoadFail(eq(PubnativeException.CONTEXT_IS_NULL));
 
     }
 
@@ -50,25 +34,12 @@ public class PubnativeInterstitialTest {
     public void loadInterstitial_withEmptyAppToken_invokeLoadFail() {
 
         String appToken = "";
-
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-
-        final Exception ex = mock(Exception.class);
-        doAnswer(new Answer() {
-
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                args[0] = ex;
-                return null;
-            }
-        }).when(interstitial).invokeLoadFail(any(Exception.class));
-
+        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
         interstitial.load(activity, appToken);
-
-        verify(interstitial).invokeLoadFail(eq(ex));
+        verify(interstitial).invokeLoadFail(eq(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY));
 
     }
 
@@ -76,14 +47,14 @@ public class PubnativeInterstitialTest {
     public void loadIterstitial_whenReady_invokeLoadFinish() {
 
         String appToken = "123456";
-
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
+        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
+
         when(interstitial.isReady()).thenReturn(true);
 
         interstitial.load(activity, appToken);
-
         verify(interstitial).invokeLoadFinish();
 
     }
