@@ -9,10 +9,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -23,15 +26,12 @@ import static org.mockito.Mockito.when;
 public class PubnativeBannerTest {
 
     @Test
-    public void invokeLoadFail_shouldCallOnLoadFail() {
+    public void invokeLoadFail_withValidListener_shouldCallOnLoadFail() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         Exception ex = mock(Exception.class);
         banner.invokeLoadFail(ex);
 
@@ -39,126 +39,190 @@ public class PubnativeBannerTest {
     }
 
     @Test
-    public void invokeLoadFinish_shouldCallOnLoadFinish() {
+    public void invokeLoadFail_withNullListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        Exception ex = mock(Exception.class);
+        banner.invokeLoadFail(ex);
+    }
+
+    @Test
+    public void invokeLoadFinish_withValidListener_shouldCallOnLoadFinish() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         banner.invokeLoadFinish();
 
         verify(listener).onPubnativeBannerLoadFinish(eq(banner));
     }
 
     @Test
-    public void invokeShow_shouldCallOnShow() {
+    public void invokeLoadFinish_withNullListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeLoadFinish();
+    }
+
+    @Test
+    public void invokeShow_withValidListener_shouldCallOnShow() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         banner.invokeShow();
 
         verify(listener).onPubnativeBannerShow(eq(banner));
     }
 
     @Test
-    public void invokeImpressionConfirmed_shouldCallOnImpressionConfirmed() {
+    public void invokeShow_withNullListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeShow();
+    }
+
+    @Test
+    public void invokeImpressionConfirmed_withValidListener_shouldCallOnImpressionConfirmed() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         banner.invokeImpressionConfirmed();
 
         verify(listener).onPubnativeBannerImpressionConfirmed(eq(banner));
     }
 
     @Test
-    public void invokeClick_shouldCallOnClick() {
+    public void invokeImpressionConfirmed_withValidListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeImpressionConfirmed();
+    }
+
+    @Test
+    public void invokeClick_withValidListener_shouldCallOnClick() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         banner.invokeClick();
 
         verify(listener).onPubnativeBannerClick(eq(banner));
     }
 
     @Test
-    public void invokeHide_shouldCallOnHide() {
+    public void invokeClick_withNullListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeClick();
+    }
+
+    @Test
+    public void invokeHide_withValidListener_shouldCallOnHide() {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
-
-        Handler handler = new Handler();
-
-        banner.mHandler = handler;
+        banner.mHandler = new Handler();
         banner.invokeHide();
 
         verify(listener).onPubnativeBannerHide(eq(banner));
     }
 
     @Test
-    public void loadBanner_withNullContext_returnsException() {
+    public void invokeHide_withNullListener_shouldPass() {
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeHide();
+    }
+
+    @Test
+    public void loadBanner_withNullContext_callOnPubnativeBannerLoadFail() {
 
         String appToken = "123456";
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
         banner.load(null, appToken, null, null);
-        verify(banner).invokeLoadFail(any(Exception.class));
+
+        verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
     }
 
     @Test
-    public void loadBanner_withNotActivityContext_returnsException() {
+    public void loadBanner_withNotActivityContext_callOnPubnativeBannerLoadFail() {
 
         String appToken = "123456";
-        Context context = mock(Application.class);
+        Context context = RuntimeEnvironment.application.getApplicationContext();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
         banner.load(context, appToken, null, null);
-        verify(banner).invokeLoadFail(any(Exception.class));
+
+        verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
     }
 
     @Test
-    public void loadBanner_withEmptyAppToken_returnsException() {
+    public void loadBanner_withEmptyAppToken_callOnPubnativeBannerLoadFail() {
 
         String appToken = "";
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
         banner.load(activity, appToken, null, null);
-        verify(banner).invokeLoadFail(any(Exception.class));
+
+        verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
     }
 
     @Test
-    public void loadBanner_whenBannerReady_returnsException() {
+    public void loadBanner_whenBannerReady_callOnPubnativeBannerLoadFinish() {
 
         String appToken = "123456";
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
         when(banner.isReady()).thenReturn(true);
         banner.load(activity, appToken, null, null);
 
-        verify(banner).invokeLoadFinish();
+        verify(listener).onPubnativeBannerLoadFinish(banner);
+    }
+
+    @Test
+    public void loadBanner_withNullHandler_createNewHandler(){
+        String appToken = "123456";
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
+
+        PubnativeBanner banner = spy(PubnativeBanner.class);
+        PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
+        banner.mListener = listener;
+        when(banner.isReady()).thenReturn(true);
+        banner.load(activity, appToken, null, null);
+
+        assertThat(banner.mHandler).isNotNull();
+
     }
 
 }
