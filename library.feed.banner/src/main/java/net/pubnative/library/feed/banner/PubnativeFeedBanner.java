@@ -1,6 +1,5 @@
 package net.pubnative.library.feed.banner;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,6 +30,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     protected String                        mAppToken;
     protected PubnativeFeedBanner.Listener  mListener;
     protected boolean                       mIsLoading = false;
+    protected boolean                       mIsShown = false;
     protected Handler                       mHandler;
     protected PubnativeAdModel              mAdModel;
 
@@ -40,7 +40,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     protected TextView                      mDescription;
     protected ImageView                     mIconImage;
     protected ImageView                     mBannerImage;
-    protected Button                        mInstall;
+    protected Button                        mCallToAction;
 
     /**
      * Interface for callbacks related to the in-feed banner
@@ -108,8 +108,6 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: app token is null or empty"));
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
-        } else if (mListener == null) {
-            Log.e(TAG, "load - listener is not set, dropping this call");
         } else if (mIsLoading) {
             Log.i(TAG, "load - The ad is being loaded, dropping this call");
         } else if (isReady()) {
@@ -135,12 +133,15 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
 
     /**
      * Checks whether ad has been retrieved
-     * @return true if retrieved otherwise false
+     * @return true if retrieved & not shown otherwise false
      */
     public boolean isReady() {
 
         Log.v(TAG, "isReady");
-        return mAdModel != null;
+        if (mListener == null) {
+            Log.e(TAG, "load - listener is not set, try to set listener by setListener(Listener listener) method");
+        }
+        return !mIsLoading && mAdModel != null && !mIsShown;
     }
 
     /**
@@ -151,13 +152,119 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
 
         Log.v(TAG, "show");
         if(isReady()) {
+            mIsShown = true;
             container.removeAllViews();
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(-1, -2);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.CENTER_IN_PARENT);
             container.addView(mInFeedBannerView, params);
-            renderInFeedbanner();
-            mAdModel.startTracking(mInFeedBannerView, mInstall, this);
+            render();
+            invokeShow();
+            mAdModel.startTracking(mInFeedBannerView, mCallToAction, this);
         }
+    }
+
+    /**
+     * Destroy the current InFeed banner
+     */
+    public void destroy() {
+
+        Log.v(TAG, "destroy");
+        mAdModel = null;
+        mIsLoading = false;
+    }
+
+    private void initialize() {
+
+        Log.v(TAG, "initialize");
+        if(mInFeedBannerView == null) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInFeedBannerView = (RelativeLayout) inflater.inflate(R.layout.pubnative_feed_banner, null);
+            mTitle = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_title);
+            mDescription = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_description);
+            mIconImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_iconImage);
+            mBannerImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_bannerImage);
+            mCallToAction = (Button) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_button);
+        }
+    }
+
+    private void render() {
+
+        Log.v(TAG, "render");
+        mTitle.setText(mAdModel.getTitle());
+        mDescription.setText(mAdModel.getDescription());
+        mCallToAction.setText(mAdModel.getCtaText());
+        Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIconImage);
+        Picasso.with(mContext).load(mAdModel.getBannerUrl()).into(mBannerImage);
+    }
+
+    private void invokeShow() {
+
+        Log.v(TAG, "invokeShow");
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    mListener.onPubnativeFeedBannerShow(PubnativeFeedBanner.this);
+                }
+            }
+        });
+    }
+
+    private void invokeLoadFail(final Exception exception) {
+
+        Log.v(TAG, "invokeLoadFail", exception);
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    mListener.onPubnativeFeedBannerLoadFailed(PubnativeFeedBanner.this, exception);
+                }
+            }
+        });
+    }
+
+    private void invokeLoadFinish() {
+
+        Log.v(TAG, "invokeLoadFinish");
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    mListener.onPubnativeFeedBannerLoadFinish(PubnativeFeedBanner.this);
+                }
+            }
+        });
+    }
+
+    private void invokeImpressionConfirmed() {
+
+        Log.v(TAG, "invokeImpressionConfirmed");
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    mListener.onPubnativeFeedBannerImpressionConfirmed(PubnativeFeedBanner.this);
+                }
+            }
+        });
+    }
+
+    private void invokeClick() {
+
+        Log.v(TAG, "invokeClick");
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                if (mListener != null) {
+                    mListener.onPubnativeFeedBannerClick(PubnativeFeedBanner.this);
+                }
+            }
+        });
     }
 
     //==============================================================================================
@@ -169,21 +276,21 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void onPubnativeRequestSuccess(PubnativeRequest request, List<PubnativeAdModel> ads) {
 
         Log.v(TAG, "onPubnativeRequestSuccess");
+        mIsLoading = false;
         if (ads == null || ads.size() == 0) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: no-fill"));
         } else {
             mAdModel = ads.get(0);
             invokeLoadFinish();
         }
-        mIsLoading = false;
     }
 
     @Override
     public void onPubnativeRequestFailed(PubnativeRequest request, Exception ex) {
 
         Log.v(TAG, "onPubnativeRequestFailed");
-        invokeLoadFail(ex);
         mIsLoading = false;
+        invokeLoadFail(ex);
     }
 
     //==============================================================================================
@@ -207,115 +314,5 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel) {
 
         Log.v(TAG, "onPubnativeAdModelOpenOffer");
-    }
-
-    /**
-     * Destroy the current InFeed banner
-     */
-    public void destroy() {
-
-        Log.v(TAG, "destroy");
-        mAdModel = null;
-        mIsLoading = false;
-    }
-
-    private void initialize() {
-
-        Log.v(TAG, "initialize");
-        if(mInFeedBannerView == null) {
-            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mInFeedBannerView = (RelativeLayout) inflater.inflate(R.layout.pubnative_feed_banner, null);
-            mTitle = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_title);
-            mDescription = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_description);
-            mIconImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_iconImage);
-            mBannerImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_bannerImage);
-            mInstall = (Button) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_button);
-        }
-    }
-
-    private void renderInFeedbanner() {
-
-        Log.v(TAG, "renderInFeedbanner");
-        mTitle.setText(mAdModel.getTitle());
-        mDescription.setText(mAdModel.getDescription());
-        mInstall.setText(mAdModel.getCtaText());
-        Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIconImage);
-        Picasso.with(mContext).load(mAdModel.getBannerUrl()).into(mBannerImage);
-        invokeShow();
-    }
-
-    private void invokeShow() {
-
-        Log.v(TAG, "invokeShow");
-        mHandler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                mIsLoading = false;
-                if (mListener != null) {
-                    mListener.onPubnativeFeedBannerShow(PubnativeFeedBanner.this);
-                }
-            }
-        });
-    }
-
-    private void invokeLoadFail(final Exception exception) {
-
-        Log.v(TAG, "invokeLoadFail", exception);
-        mHandler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                mIsLoading = false;
-                if (mListener != null) {
-                    mListener.onPubnativeFeedBannerLoadFailed(PubnativeFeedBanner.this, exception);
-                }
-            }
-        });
-    }
-
-    private void invokeLoadFinish() {
-
-        Log.v(TAG, "invokeLoadFinish");
-        mHandler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                mIsLoading = false;
-                if (mListener != null) {
-                    mListener.onPubnativeFeedBannerLoadFinish(PubnativeFeedBanner.this);
-                }
-            }
-        });
-    }
-
-    private void invokeImpressionConfirmed() {
-
-        Log.v(TAG, "invokeImpressionConfirmed");
-        mHandler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                mIsLoading = false;
-                if (mListener != null) {
-                    mListener.onPubnativeFeedBannerImpressionConfirmed(PubnativeFeedBanner.this);
-                }
-            }
-        });
-    }
-
-    private void invokeClick() {
-
-        Log.v(TAG, "invokeClick");
-        mHandler.post(new Runnable() {
-
-            @Override
-            public void run() {
-                mIsLoading = false;
-                if (mListener != null) {
-                    mListener.onPubnativeFeedBannerClick(PubnativeFeedBanner.this);
-                }
-            }
-        });
     }
 }

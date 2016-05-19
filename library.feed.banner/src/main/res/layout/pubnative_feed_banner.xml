@@ -3,7 +3,7 @@
     android:id="@+id/pubnative_feed_banner_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@color/pubnative_infeed_white"
     android:padding="2dp">
 
     <LinearLayout
@@ -23,9 +23,9 @@
 
             <ImageView
                 android:id="@+id/pubnative_feed_banner_iconImage"
-                android:layout_width="50dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"/>
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="8dp" />
 
             <TextView
                 android:id="@+id/pubnative_feed_banner_title"
@@ -36,7 +36,7 @@
                 android:maxLines="1"
                 android:textSize="16sp"
                 android:layout_marginTop="2dp"
-                android:textColor="#1d2129"/>
+                android:textColor="@color/pubnative_infeed_title_color"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
                 android:paddingBottom="2dp"
                 android:text="@string/pubnative_interstitial_sponsored_text"
                 android:textSize="10sp"
-                android:textColor="#90949c"/>
+                android:textColor="@color/pubnative_infeed_sponsored_text_color"/>
 
         </RelativeLayout>
 
@@ -67,7 +67,7 @@
                 android:ellipsize="end"
                 android:textSize="12sp"
                 android:maxLines="2"
-                android:textColor="@android:color/black"
+                android:textColor="@color/pubnative_infeed_black"
                 android:layout_toLeftOf="@+id/pubnative_feed_banner_button"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
@@ -78,7 +78,10 @@
                 android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:background="@drawable/cta_button"
+                android:textColor="#4B4F56"
+                android:shadowColor="#F4F4F4"/>
         </RelativeLayout>
 
     </LinearLayout>
