@@ -5,14 +5,13 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Handler;
 
-import net.pubnative.library.exceptions.PubnativeException;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -121,7 +120,7 @@ public class PubnativeBannerTest {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         banner.load(null, appToken, null, null);
-        verify(banner).invokeLoadFail(eq(PubnativeException.CONTEXT_IS_NULL));
+        verify(banner).invokeLoadFail(any(Exception.class));
 
     }
 
@@ -133,7 +132,7 @@ public class PubnativeBannerTest {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         banner.load(context, appToken, null, null);
-        verify(banner).invokeLoadFail(eq(PubnativeException.WRONG_TYPE_CONTEXT));
+        verify(banner).invokeLoadFail(any(Exception.class));
 
     }
 
@@ -145,7 +144,7 @@ public class PubnativeBannerTest {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         banner.load(activity, appToken, null, null);
-        verify(banner).invokeLoadFail(eq(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY));
+        verify(banner).invokeLoadFail(any(Exception.class));
 
     }
 

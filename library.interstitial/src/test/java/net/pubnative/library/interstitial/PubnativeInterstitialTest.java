@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
-import net.pubnative.library.exceptions.PubnativeException;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -26,7 +26,7 @@ public class PubnativeInterstitialTest {
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
         interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
         interstitial.load(null, appToken);
-        verify(interstitial).invokeLoadFail(eq(PubnativeException.CONTEXT_IS_NULL));
+        verify(interstitial).invokeLoadFail(any(Exception.class));
 
     }
 
@@ -39,7 +39,7 @@ public class PubnativeInterstitialTest {
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
         interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
         interstitial.load(activity, appToken);
-        verify(interstitial).invokeLoadFail(eq(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY));
+        verify(interstitial).invokeLoadFail(any(Exception.class));
 
     }
 

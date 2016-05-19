@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import net.pubnative.library.exceptions.PubnativeException;
 import net.pubnative.library.request.PubnativeAsset;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
@@ -109,9 +108,9 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         Log.v(TAG, "load");
         if (TextUtils.isEmpty(appToken)) {
-            invokeLoadFail(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY);
+            invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
         } else if (context == null) {
-            invokeLoadFail(PubnativeException.CONTEXT_IS_NULL);
+            invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (isReady()) {

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import net.pubnative.library.exceptions.PubnativeException;
 import net.pubnative.library.request.PubnativeAsset;
 import net.pubnative.library.request.PubnativeRequest;
 import net.pubnative.library.request.model.PubnativeAdModel;
@@ -127,26 +126,26 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public void load(Context context, String appToken, Size bannerSize, Position bannerPosition) {
 
         Log.v(TAG, "load");
-        mHandler = new Handler(Looper.getMainLooper());
+
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+
+        if (mListener == null) {
+            Log.v(TAG, "load - The ad hasn't a listener");
+        }
 
         if (TextUtils.isEmpty(appToken)) {
-            invokeLoadFail(PubnativeException.APPTOKEN_IS_NULL_OR_EMPTY);
+            invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
         } else if (context == null) {
-            invokeLoadFail(PubnativeException.CONTEXT_IS_NULL);
-        } else if (!(context instanceof Activity)) {
-            invokeLoadFail(PubnativeException.WRONG_TYPE_CONTEXT);
+            invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (mIsShown) {
             Log.w(TAG, "load - The ad is shown, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
-        } else {
-
-            if (mListener == null) {
-                Log.v(TAG, "load - The ad hasn't a listener");
-            }
-
+        } else if (context instanceof Activity) {
             mContext = context;
             mAppToken = appToken;
             mBannerSize = bannerSize;
@@ -163,6 +162,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             };
             request.setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, assets);
             request.start(mContext, this);
+        } else {
+            invokeLoadFail(new Exception("PubnativeBanner - load error: wrong context type, must be Activity context"));
         }
     }
 
@@ -182,9 +183,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
      */
     public void show() {
         Log.v(TAG, "show");
-        if (!isReady()) {
-            Log.w(TAG, "show - the ad is not ready yet, dropping this call");
-        } else {
+        if (isReady()) {
             mIsShown = true;
             mTitle.setText(mAdModel.getTitle());
             mDescription.setText(mAdModel.getDescription());
@@ -192,6 +191,8 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
             mAdModel.startTracking(mContainer, mBannerView, this);
             invokeShow();
+        } else {
+            Log.w(TAG, "show - the ad is not ready yet, dropping this call");
         }
     }
 
@@ -266,12 +267,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     //==============================================================================================
     protected void invokeLoadFinish() {
 
+        Log.v(TAG, "invokeLoadFinish");
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeLoadFinish");
                 mIsLoading = false;
                 if (mListener != null) {
                     mListener.onPubnativeBannerLoadFinish(PubnativeBanner.this);
@@ -282,12 +283,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void invokeLoadFail(final Exception exception) {
 
+        Log.v(TAG, "invokeLoadFail", exception);
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeLoadFail", exception);
                 mIsLoading = false;
                 if (mListener != null) {
                     mListener.onPubnativeBannerLoadFail(PubnativeBanner.this, exception);
@@ -298,12 +299,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void invokeShow() {
 
+        Log.v(TAG, "invokeShow");
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeShow");
                 if (mListener != null) {
                     mListener.onPubnativeBannerShow(PubnativeBanner.this);
                 }
@@ -313,12 +314,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void invokeImpressionConfirmed() {
 
+        Log.v(TAG, "invokeImpressionConfirmed");
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeImpressionConfirmed");
                 if (mListener != null) {
                     mListener.onPubnativeBannerImpressionConfirmed(PubnativeBanner.this);
                 }
@@ -328,12 +329,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void invokeClick() {
 
+        Log.v(TAG, "invokeClick");
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeClick");
                 if (mListener != null) {
                     mListener.onPubnativeBannerClick(PubnativeBanner.this);
                 }
@@ -343,12 +344,12 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
 
     protected void invokeHide() {
 
+        Log.v(TAG, "invokeHide");
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
 
-                Log.v(TAG, "invokeHide");
                 if (mListener != null) {
                     mListener.onPubnativeBannerHide(PubnativeBanner.this);
                 }
