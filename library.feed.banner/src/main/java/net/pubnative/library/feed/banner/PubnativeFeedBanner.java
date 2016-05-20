@@ -109,9 +109,9 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
-            Log.i(TAG, "load - The ad is being loaded, dropping this call");
+            Log.i(TAG, "The ad is being loaded, dropping this call");
         }  else if (mIsShown) {
-            Log.w(TAG, "load - The ad has been shown already, dropping this call");
+            Log.e(TAG, "The ad has been shown already, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
@@ -142,7 +142,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
 
         Log.v(TAG, "isReady");
         if (mListener == null) {
-            Log.e(TAG, "load - listener is not set, try to set listener by setListener(Listener listener) method");
+            Log.w(TAG, "Listener is not set, try to set listener by setListener(Listener listener) method");
         }
         return mAdModel != null;
     }
@@ -155,7 +155,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
 
         Log.v(TAG, "show");
         if(mIsShown) {
-            Log.e(TAG, "show - the ad has been shown already.");
+            Log.e(TAG, "The ad has been shown already.");
         } else if(isReady()) {
             mIsShown = true;
             container.removeAllViews();
@@ -166,7 +166,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeShow();
             mAdModel.startTracking(mInFeedBannerView, mCallToAction, this);
         } else {
-            Log.e(TAG, "show - the ad is not ready yet");
+            Log.e(TAG, "The ad is not ready yet");
         }
     }
 
