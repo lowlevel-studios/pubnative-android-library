@@ -95,4 +95,101 @@ public class PubnativeFeedBannerTest {
         banner.onPubnativeRequestFailed(request, mock(Exception.class));
         verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(any(PubnativeFeedBanner.class), any(Exception.class));
     }
+
+    @Test
+    public void invokeLoadFail_withNullListener_shouldPass() {
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeLoadFail(mock(Exception.class));
+    }
+
+    @Test
+    public void invokeLoadFail_withValidListener_invokesLoadFailed() {
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
+        banner.mListener = listener;
+        Exception exception = mock(Exception.class);
+        banner.invokeLoadFail(exception);
+
+        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), eq(exception));
+    }
+
+    @Test
+    public void invokeLoadFinish_withNullListener_shouldPass() {
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeLoadFinish();
+    }
+
+    @Test
+    public void invokeLoadFinish_withValidListener_invokesLoadFinish() {
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
+        banner.mListener = listener;
+        banner.invokeLoadFinish();
+
+        verify(listener, times(1)).onPubnativeFeedBannerLoadFinish(eq(banner));
+    }
+
+    @Test
+    public void invokeShow_withNullListener_shouldPass() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeShow();
+    }
+
+    @Test
+    public void invokeShow_withValidListener_invokesShow() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
+        banner.invokeShow();
+
+        verify(listener).onPubnativeFeedBannerShow(eq(banner));
+    }
+
+    @Test
+    public void invokeImpressionConfirmed_withNullListener_shouldPass() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeImpressionConfirmed();
+    }
+
+    @Test
+    public void invokeImpressionConfirmed_withValidListener_invokesImpressionConfirmed() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
+        banner.invokeImpressionConfirmed();
+
+        verify(listener).onPubnativeFeedBannerImpressionConfirmed(eq(banner));
+    }
+
+    @Test
+    public void invokeClick_withNullListener_shouldPass() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        banner.mHandler = new Handler();
+        banner.invokeClick();
+    }
+
+    @Test
+    public void invokeClick_withValidListener_invokesClick() {
+
+        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
+        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
+        banner.mListener = listener;
+        banner.mHandler = new Handler();
+        banner.invokeClick();
+
+        verify(listener).onPubnativeFeedBannerClick(eq(banner));
+    }
 }

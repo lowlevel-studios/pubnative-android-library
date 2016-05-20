@@ -110,12 +110,15 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.i(TAG, "load - The ad is being loaded, dropping this call");
+        }  else if (mIsShown) {
+            Log.w(TAG, "load - The ad has been shown already, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
             mIsLoading = true;
             mContext = context;
             mAppToken = appToken;
+            mAdModel = null;
             initialize(); // to prepare the view
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);
@@ -141,7 +144,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         if (mListener == null) {
             Log.e(TAG, "load - listener is not set, try to set listener by setListener(Listener listener) method");
         }
-        return !mIsLoading && mAdModel != null && !mIsShown;
+        return mAdModel != null;
     }
 
     /**
@@ -151,7 +154,9 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void show(ViewGroup container) {
 
         Log.v(TAG, "show");
-        if(isReady()) {
+        if(mIsShown) {
+            Log.e(TAG, "show - the ad has been shown already.");
+        } else if(isReady()) {
             mIsShown = true;
             container.removeAllViews();
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -160,6 +165,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             render();
             invokeShow();
             mAdModel.startTracking(mInFeedBannerView, mCallToAction, this);
+        } else {
+            Log.e(TAG, "show - the ad is not ready yet");
         }
     }
 
@@ -171,6 +178,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         Log.v(TAG, "destroy");
         mAdModel = null;
         mIsLoading = false;
+        mIsShown = false;
     }
 
     private void initialize() {
@@ -197,7 +205,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         Picasso.with(mContext).load(mAdModel.getBannerUrl()).into(mBannerImage);
     }
 
-    private void invokeShow() {
+    protected void invokeShow() {
 
         Log.v(TAG, "invokeShow");
         mHandler.post(new Runnable() {
@@ -211,7 +219,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         });
     }
 
-    private void invokeLoadFail(final Exception exception) {
+    protected void invokeLoadFail(final Exception exception) {
 
         Log.v(TAG, "invokeLoadFail", exception);
         mHandler.post(new Runnable() {
@@ -225,7 +233,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         });
     }
 
-    private void invokeLoadFinish() {
+    protected void invokeLoadFinish() {
 
         Log.v(TAG, "invokeLoadFinish");
         mHandler.post(new Runnable() {
@@ -239,7 +247,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         });
     }
 
-    private void invokeImpressionConfirmed() {
+    protected void invokeImpressionConfirmed() {
 
         Log.v(TAG, "invokeImpressionConfirmed");
         mHandler.post(new Runnable() {
@@ -253,7 +261,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         });
     }
 
-    private void invokeClick() {
+    protected void invokeClick() {
 
         Log.v(TAG, "invokeClick");
         mHandler.post(new Runnable() {
