@@ -23,11 +23,9 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withNullContext_invokeLoadFail() {
 
-        String appToken = "123456";
-
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
         interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
-        interstitial.load(null, appToken);
+        interstitial.load(null, "123456");
 
         verify(interstitial.mListener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
 
@@ -36,12 +34,11 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadInterstitial_withEmptyAppToken_invokeLoadFail() {
 
-        String appToken = "";
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
         interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
-        interstitial.load(activity, appToken);
+        interstitial.load(activity, "");
 
         verify(interstitial.mListener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
 
@@ -50,7 +47,6 @@ public class PubnativeInterstitialTest {
     @Test
     public void loadIterstitial_whenReady_invokeLoadFinish() {
 
-        String appToken = "123456";
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
@@ -58,7 +54,7 @@ public class PubnativeInterstitialTest {
 
         when(interstitial.isReady()).thenReturn(true);
 
-        interstitial.load(activity, appToken);
+        interstitial.load(activity, "123456");
 
         verify(interstitial.mListener).onPubnativeInterstitialLoadFinish(interstitial);
 

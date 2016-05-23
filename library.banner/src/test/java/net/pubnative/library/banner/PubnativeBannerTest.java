@@ -149,13 +149,11 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_withNullContext_callOnPubnativeBannerLoadFail() {
 
-        String appToken = "123456";
-
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
         banner.mHandler = new Handler();
-        banner.load(null, appToken, null, null);
+        banner.load(null, "123456", PubnativeBanner.Size.BANNER_50, PubnativeBanner.Position.BOTTOM);
 
         verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
@@ -164,14 +162,13 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_withNotActivityContext_callOnPubnativeBannerLoadFail() {
 
-        String appToken = "123456";
         Context context = RuntimeEnvironment.application.getApplicationContext();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
         banner.mHandler = new Handler();
-        banner.load(context, appToken, null, null);
+        banner.load(context, "123456", PubnativeBanner.Size.BANNER_50, PubnativeBanner.Position.BOTTOM);
 
         verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
@@ -187,7 +184,7 @@ public class PubnativeBannerTest {
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
         banner.mHandler = new Handler();
-        banner.load(activity, appToken, null, null);
+        banner.load(activity, appToken, PubnativeBanner.Size.BANNER_50, PubnativeBanner.Position.BOTTOM);
 
         verify(listener).onPubnativeBannerLoadFail(eq(banner), any(Exception.class));
 
@@ -196,7 +193,6 @@ public class PubnativeBannerTest {
     @Test
     public void loadBanner_whenBannerReady_callOnPubnativeBannerLoadFinish() {
 
-        String appToken = "123456";
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
@@ -204,21 +200,21 @@ public class PubnativeBannerTest {
         banner.mListener = listener;
         banner.mHandler = new Handler();
         when(banner.isReady()).thenReturn(true);
-        banner.load(activity, appToken, null, null);
+        banner.load(activity, "123456", PubnativeBanner.Size.BANNER_50, PubnativeBanner.Position.BOTTOM);
 
         verify(listener).onPubnativeBannerLoadFinish(banner);
     }
 
     @Test
     public void loadBanner_withNullHandler_createNewHandler(){
-        String appToken = "123456";
+
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         PubnativeBanner.Listener listener = mock(PubnativeBanner.Listener.class);
         banner.mListener = listener;
         when(banner.isReady()).thenReturn(true);
-        banner.load(activity, appToken, null, null);
+        banner.load(activity, "123456", PubnativeBanner.Size.BANNER_50, PubnativeBanner.Position.BOTTOM);
 
         assertThat(banner.mHandler).isNotNull();
 
