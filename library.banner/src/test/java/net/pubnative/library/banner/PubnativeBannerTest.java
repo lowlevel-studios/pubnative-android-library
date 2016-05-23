@@ -43,8 +43,7 @@ public class PubnativeBannerTest {
 
         PubnativeBanner banner = spy(PubnativeBanner.class);
         banner.mHandler = new Handler();
-        Exception ex = mock(Exception.class);
-        banner.invokeLoadFail(ex);
+        banner.invokeLoadFail(mock(Exception.class));
     }
 
     @Test

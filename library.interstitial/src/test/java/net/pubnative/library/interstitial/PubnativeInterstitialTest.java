@@ -80,8 +80,7 @@ public class PubnativeInterstitialTest {
     public void invokeLoadFail_withNullListener_shouldPass() {
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-        Exception ex = mock(Exception.class);
-        interstitial.invokeLoadFail(ex);
+        interstitial.invokeLoadFail(mock(Exception.class));
     }
 
     @Test
