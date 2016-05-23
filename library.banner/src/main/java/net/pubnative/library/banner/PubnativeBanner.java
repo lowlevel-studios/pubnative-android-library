@@ -405,11 +405,11 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     public void onPubnativeAdModelClick(PubnativeAdModel pubnativeAdModel, View view) {
         Log.v(TAG, "onPubnativeAdModelClick");
         invokeClick();
-        destroy();
     }
 
     @Override
     public void onPubnativeAdModelOpenOffer(PubnativeAdModel pubnativeAdModel) {
         Log.v(TAG, "onPubnativeAdModelOpenOffer");
+        destroy();
     }
 }
