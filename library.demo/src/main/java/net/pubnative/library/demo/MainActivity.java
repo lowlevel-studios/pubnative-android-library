@@ -64,4 +64,12 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, InterstitialAdActivity.class);
         startActivity(intent);
     }
+
+    public void onBannerClick(View view) {
+
+        Log.v(TAG, "onBannerClick");
+        // Launch interstitial activity
+        Intent intent = new Intent(this, BannerActivity.class);
+        startActivity(intent);
+    }
 }

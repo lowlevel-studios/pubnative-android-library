@@ -12,6 +12,7 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.request.PubnativeAsset;
@@ -106,6 +107,11 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     public void load(Context context, String appToken) {
 
         Log.v(TAG, "load");
+
+        if (mListener == null) {
+            Log.v(TAG, "load - The ad hasn't a listener");
+        }
+
         if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeInterstitial - load error: app token is null or empty"));
         } else if (context == null) {
@@ -310,10 +316,21 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads == null || ads.size() == 0) {
-            invokeLoadFail(new Exception("PubnativeInterstitial - load error: no-fill"));
+            invokeLoadFail(new Exception("PubnativeInterstitial - load error: error loading resources"));
         } else {
             mAdModel = ads.get(0);
-            invokeLoadFinish();
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    invokeLoadFinish();
+                }
+
+                @Override
+                public void onError() {
+                    invokeLoadFail(new Exception("PubnativeInterstitial - preload icon error: can't load icon"));
+                }
+            });
         }
     }
 
