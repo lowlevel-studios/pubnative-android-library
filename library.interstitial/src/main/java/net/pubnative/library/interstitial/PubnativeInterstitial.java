@@ -107,20 +107,20 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     public void load(Context context, String appToken) {
 
         Log.v(TAG, "load");
+
+        if (mListener == null) {
+            Log.v(TAG, "load - The ad hasn't a listener");
+        }
+
         if (TextUtils.isEmpty(appToken)) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: app token is null or empty"));
+            invokeLoadFail(new Exception("PubnativeInterstitial - load error: app token is null or empty"));
         } else if (context == null) {
-            invokeLoadFail(new Exception("PubnativeBanner - load error: context is null or empty"));
+            invokeLoadFail(new Exception("PubnativeInterstitial - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
-
-            if (mListener == null) {
-                Log.v(TAG, "load - The ad hasn't a listener");
-            }
-
             mContext = context;
             mAppToken = appToken;
             mIsShown = false;
