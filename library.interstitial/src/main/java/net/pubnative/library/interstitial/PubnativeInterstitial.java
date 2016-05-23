@@ -316,7 +316,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads == null || ads.size() == 0) {
-            invokeLoadFail(new Exception("PubnativeInterstitial - load error: no-fill"));
+            invokeLoadFail(new Exception("PubnativeInterstitial - load error: error loading resources"));
         } else {
             mAdModel = ads.get(0);
             Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
@@ -328,7 +328,7 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
                 @Override
                 public void onError() {
-                    invokeLoadFail(new Exception("PubnativeBanner - load error: no-fill"));
+                    invokeLoadFail(new Exception("PubnativeInterstitial - preload icon error: can't load icon"));
                 }
             });
         }
