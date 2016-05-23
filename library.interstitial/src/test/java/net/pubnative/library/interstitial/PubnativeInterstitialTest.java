@@ -24,10 +24,11 @@ public class PubnativeInterstitialTest {
     public void loadInterstitial_withNullContext_invokeLoadFail() {
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
+        PubnativeInterstitial.Listener listener = mock(PubnativeInterstitial.Listener.class);
+        interstitial.mListener = listener;
         interstitial.load(null, "123456");
 
-        verify(interstitial.mListener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
+        verify(listener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
 
     }
 
@@ -37,10 +38,11 @@ public class PubnativeInterstitialTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
+        PubnativeInterstitial.Listener listener = mock(PubnativeInterstitial.Listener.class);
+        interstitial.mListener = listener;
         interstitial.load(activity, "");
 
-        verify(interstitial.mListener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
+        verify(listener).onPubnativeInterstitialLoadFail(eq(interstitial), any(Exception.class));
 
     }
 
@@ -50,13 +52,14 @@ public class PubnativeInterstitialTest {
         Activity activity = Robolectric.buildActivity(Activity.class).create().get();
 
         PubnativeInterstitial interstitial = spy(PubnativeInterstitial.class);
-        interstitial.mListener = spy(PubnativeInterstitial.Listener.class);
+        PubnativeInterstitial.Listener listener = mock(PubnativeInterstitial.Listener.class);
+        interstitial.mListener = listener;
 
         when(interstitial.isReady()).thenReturn(true);
 
         interstitial.load(activity, "123456");
 
-        verify(interstitial.mListener).onPubnativeInterstitialLoadFinish(interstitial);
+        verify(listener).onPubnativeInterstitialLoadFinish(interstitial);
 
     }
 
