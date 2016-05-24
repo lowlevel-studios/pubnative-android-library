@@ -190,6 +190,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
             mInstall.setText(mAdModel.getCtaText());
             Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIcon);
             mAdModel.startTracking(mContainer, mBannerView, this);
+            mBannerView.setVisibility(View.VISIBLE);
             invokeShow();
         } else {
             Log.w(TAG, "show - the ad is not ready yet, dropping this call");
@@ -254,6 +255,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
     protected void hide() {
         Log.v(TAG, "hide");
         if (mIsShown) {
+            mBannerView.setVisibility(View.GONE);
             RelativeLayout rootBannerView = (RelativeLayout) mContainer.findViewById(R.id.pubnative_banner_root_view);
             mContainer.removeView(rootBannerView);
             mAdModel.stopTracking();
