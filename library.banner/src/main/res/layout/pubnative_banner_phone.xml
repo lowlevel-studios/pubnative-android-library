@@ -72,8 +72,8 @@
             android:padding="2dp"
             android:background="#650067"
             android:textColor="@android:color/white"
-            android:textSize="8sp"
-            android:alpha="0.5"
+            android:textSize="10sp"
+            android:alpha="0.85"
             android:text="Sponsored"/>
 
     </RelativeLayout>

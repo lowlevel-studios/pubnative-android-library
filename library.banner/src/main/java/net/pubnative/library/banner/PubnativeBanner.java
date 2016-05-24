@@ -222,7 +222,7 @@ public class PubnativeBanner implements PubnativeRequest.Listener,
         mContainer = (ViewGroup) ((ViewGroup) ((Activity) mContext).findViewById(android.R.id.content)).getChildAt(0);
         switch (mBannerSize) {
             case BANNER_90:
-                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner_tablet, null);
+                banner = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_banner, null);
                 break;
             case BANNER_50:
             default:
