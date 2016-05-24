@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#FCFDFD" />
+    <solid android:color="@color/pubnative_infeed_btn_green" />
     <stroke
         android:width="1dp"
-        android:color="#CCCCCC" />
+        android:color="@color/pubnative_infeed_btn_green" />
     <size android:height="32dp" />
     <padding android:left="15dp"
         android:right="15dp" />
+    <corners android:radius="2dp" />
 </shape>

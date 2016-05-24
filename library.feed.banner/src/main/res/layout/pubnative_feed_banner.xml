@@ -3,86 +3,100 @@
     android:id="@+id/pubnative_feed_banner_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/pubnative_infeed_white"
-    android:padding="2dp">
+    android:background="@color/pubnative_infeed_white">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/pubnative_feed_banner_view"
         android:layout_width="320dp"
         android:layout_height="250dp"
-        android:id="@+id/pubnative_feed_banner_view"
-        android:orientation="vertical"
         android:layout_centerInParent="true"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:padding="2dp">
 
         <RelativeLayout
             android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="2dp">
 
             <ImageView
                 android:id="@+id/pubnative_feed_banner_iconImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:layout_marginRight="8dp" />
 
             <TextView
                 android:id="@+id/pubnative_feed_banner_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:layout_toRightOf="@id/pubnative_feed_banner_iconImage"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textSize="16sp"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/pubnative_infeed_title_color"/>
+                android:textColor="@color/pubnative_infeed_title_color"
+                android:textSize="16sp" />
 
-            <TextView
+            <RatingBar
+                android:id="@+id/pubnative_infeed_rating"
+                style="?android:attr/ratingBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/pubnative_feed_banner_title"
+                android:layout_alignBottom="@id/pubnative_feed_banner_iconImage"
+                android:layout_marginTop="3dp"
                 android:layout_toRightOf="@id/pubnative_feed_banner_iconImage"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                android:text="@string/pubnative_interstitial_sponsored_text"
-                android:textSize="10sp"
-                android:textColor="@color/pubnative_infeed_sponsored_text_color"/>
-
+                android:isIndicator="true"
+                android:progressBackgroundTint="@color/pubnative_infeed_rating_stars_empty"
+                android:progressTint="@color/pubnative_infeed_rating_stars_fill"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <ImageView
             android:id="@+id/pubnative_feed_banner_bannerImage"
             android:layout_width="match_parent"
-            android:layout_height="160dp"/>
+            android:layout_height="match_parent"
+            android:layout_above="@+id/footer"
+            android:layout_below="@+id/header" />
 
         <RelativeLayout
+            android:id="@+id/footer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp">
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="2dp">
+
             <TextView
                 android:id="@+id/pubnative_feed_banner_description"
+                style="@style/pubnative_infeed_description_background"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:textSize="12sp"
-                android:maxLines="2"
-                android:textColor="@color/pubnative_infeed_black"
-                android:layout_toLeftOf="@+id/pubnative_feed_banner_button"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:paddingRight="2dp"/>
+                android:layout_marginRight="5dp"
+                android:layout_toLeftOf="@+id/pubnative_feed_banner_button"
+                android:ellipsize="end"
+                android:maxLines="2" />
 
             <Button
                 android:id="@+id/pubnative_feed_banner_button"
-                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/cta_button"
-                android:textColor="#4B4F56"
-                android:shadowColor="#F4F4F4"/>
+                android:textColor="@color/pubnative_infeed_white" />
         </RelativeLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/pubnative_infeed_sponsored_background_color"
+        android:padding="2dp"
+        android:text="@string/pubnative_interstitial_sponsored_text"
+        android:textColor="@color/pubnative_infeed_sponsored_text_color"
+        android:textSize="10sp" />
 </RelativeLayout>

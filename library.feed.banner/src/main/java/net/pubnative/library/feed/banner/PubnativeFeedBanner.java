@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -41,6 +42,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     protected ImageView                     mIconImage;
     protected ImageView                     mBannerImage;
     protected Button                        mCallToAction;
+    protected RatingBar                     mRating;
 
     /**
      * Interface for callbacks related to the in-feed banner
@@ -127,7 +129,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
                     PubnativeAsset.DESCRIPTION,
                     PubnativeAsset.ICON,
                     PubnativeAsset.BANNER,
-                    PubnativeAsset.CALL_TO_ACTION
+                    PubnativeAsset.CALL_TO_ACTION,
+                    PubnativeAsset.RATING
             };
             request.setParameterArray(PubnativeRequest.Parameters.ASSET_FIELDS, assets);
             request.start(mContext, this);
@@ -188,6 +191,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mInFeedBannerView = (RelativeLayout) inflater.inflate(R.layout.pubnative_feed_banner, null);
             mTitle = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_title);
+            mRating = (RatingBar) mInFeedBannerView.findViewById(R.id.pubnative_infeed_rating);
             mDescription = (TextView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_description);
             mIconImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_iconImage);
             mBannerImage = (ImageView) mInFeedBannerView.findViewById(R.id.pubnative_feed_banner_bannerImage);
@@ -203,6 +207,10 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         mCallToAction.setText(mAdModel.getCtaText());
         Picasso.with(mContext).load(mAdModel.getIconUrl()).into(mIconImage);
         Picasso.with(mContext).load(mAdModel.getBannerUrl()).into(mBannerImage);
+        if(mAdModel.getRating() > 0) {
+            mRating.setRating(mAdModel.getRating());
+            mRating.setVisibility(View.VISIBLE);
+        }
     }
 
     protected void invokeShow() {

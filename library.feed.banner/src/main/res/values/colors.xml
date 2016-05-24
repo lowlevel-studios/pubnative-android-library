@@ -2,7 +2,10 @@
 <resources>
     <color name="pubnative_infeed_white">@android:color/white</color>
     <color name="pubnative_infeed_title_color">#1d2129</color>
-    <color name="pubnative_infeed_sponsored_text_color">#90949c</color>
+    <color name="pubnative_infeed_btn_green">#779C43</color>
+    <color name="pubnative_infeed_sponsored_text_color">@android:color/white</color>
+    <color name="pubnative_infeed_sponsored_background_color">#66006A</color>
     <color name="pubnative_infeed_black">@android:color/black</color>
-    <color name="pubnative_infeed_cta_button_text_color">#4B4F56</color>
+    <color name="pubnative_infeed_rating_stars_fill">#009688</color>
+    <color name="pubnative_infeed_rating_stars_empty">#D2D2D2</color>
 </resources>
