@@ -43,7 +43,7 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 23
-        versionCode System.getenv("CIRCLE_BUILD_NUM")?:1
+        versionCode System.getenv("CIRCLE_BUILD_NUM")?System.getenv("CIRCLE_BUILD_NUM").toInteger():1
         versionName version
     }
     buildTypes {
