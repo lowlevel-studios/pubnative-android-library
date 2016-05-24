@@ -4,6 +4,8 @@ machine:
       version: oraclejdk8
 
 test:
+  pre:
+    - ./gradlew projectInfo
   override:
     - ./gradlew cobertura coveralls
 
