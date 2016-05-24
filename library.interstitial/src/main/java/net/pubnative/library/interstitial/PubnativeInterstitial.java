@@ -12,6 +12,7 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.request.PubnativeAsset;
@@ -89,44 +90,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         void onPubnativeInterstitialHide(PubnativeInterstitial interstitial);
     }
 
-    public PubnativeInterstitial(Context context, String appToken) {
-
-        mContext = context;
-        mAppToken = appToken;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        RelativeLayout interstitial = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_interstitial, null);
-        mTitle = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_title);
-        mDescription = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_description);
-        mIcon = (ImageView) interstitial.findViewById(R.id.pn_interstitial_icon);
-        mBanner = (ImageView) interstitial.findViewById(R.id.pubnative_interstitial_banner);
-        mRating = (RatingBar) interstitial.findViewById(R.id.pubnative_interstitial_rating);
-        mCTA = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_cta);
-        mContainer = new RelativeLayout(mContext) {
-
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent event) {
-
-                Log.v(TAG, "dispatchKeyEvent");
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                    hide();
-                    return true;
-                }
-                return super.dispatchKeyEvent(event);
-            }
-
-            @Override
-            protected void onWindowVisibilityChanged(int visibility) {
-
-                Log.v(TAG, "onWindowVisibilityChanged");
-                if (visibility != View.VISIBLE) {
-                    hide();
-                }
-            }
-        };
-        mContainer.addView(interstitial);
-    }
-
     /**
      * Sets a callback listener for this interstitial object
      *
@@ -141,20 +104,28 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
     /**
      * Starts loading an ad for this interstitial
      */
-    public void load() {
+    public void load(Context context, String appToken) {
 
         Log.v(TAG, "load");
-        if (TextUtils.isEmpty(mAppToken)) {
+
+        if (mListener == null) {
+            Log.v(TAG, "load - The ad hasn't a listener");
+        }
+
+        if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeInterstitial - load error: app token is null or empty"));
-        } else if (mContext == null) {
+        } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeInterstitial - load error: context is null or empty"));
         } else if (mIsLoading) {
             Log.w(TAG, "load - The ad is loaded or being loaded, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
+            mContext = context;
+            mAppToken = appToken;
             mIsShown = false;
             mIsLoading = true;
+            initialize();
             PubnativeRequest request = new PubnativeRequest();
             request.setParameter(PubnativeRequest.Parameters.APP_TOKEN, mAppToken);
             String[] assets = new String[] {
@@ -207,7 +178,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         mIsShown = false;
         mIsLoading = false;
     }
-
     //==============================================================================================
     // Helpers
     //==============================================================================================
@@ -242,6 +212,42 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         mWindowManager.addView(mContainer, params);
         mAdModel.startTracking(mContainer, mCTA, this);
         invokeShow();
+    }
+
+    protected void initialize() {
+
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        RelativeLayout interstitial = (RelativeLayout) layoutInflater.inflate(R.layout.pubnative_interstitial, null);
+        mTitle = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_title);
+        mDescription = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_description);
+        mIcon = (ImageView) interstitial.findViewById(R.id.pn_interstitial_icon);
+        mBanner = (ImageView) interstitial.findViewById(R.id.pubnative_interstitial_banner);
+        mRating = (RatingBar) interstitial.findViewById(R.id.pubnative_interstitial_rating);
+        mCTA = (TextView) interstitial.findViewById(R.id.pubnative_interstitial_cta);
+        mContainer = new RelativeLayout(mContext) {
+
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent event) {
+
+                Log.v(TAG, "dispatchKeyEvent");
+                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                    hide();
+                    return true;
+                }
+                return super.dispatchKeyEvent(event);
+            }
+
+            @Override
+            protected void onWindowVisibilityChanged(int visibility) {
+
+                Log.v(TAG, "onWindowVisibilityChanged");
+                if (visibility != View.VISIBLE) {
+                    hide();
+                }
+            }
+        };
+        mContainer.addView(interstitial);
     }
 
     //==============================================================================================
@@ -299,7 +305,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
             mListener.onPubnativeInterstitialHide(this);
         }
     }
-
     //==============================================================================================
     // Callbacks
     //==============================================================================================
@@ -311,10 +316,21 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
 
         Log.v(TAG, "onPubnativeRequestSuccess");
         if (ads == null || ads.size() == 0) {
-            invokeLoadFail(new Exception("PubnativeInterstitial - load error: no-fill"));
+            invokeLoadFail(new Exception("PubnativeInterstitial - load error: error loading resources"));
         } else {
             mAdModel = ads.get(0);
-            invokeLoadFinish();
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    invokeLoadFinish();
+                }
+
+                @Override
+                public void onError() {
+                    invokeLoadFail(new Exception("PubnativeInterstitial - preload icon error: can't load icon"));
+                }
+            });
         }
     }
 
@@ -324,7 +340,6 @@ public class PubnativeInterstitial implements PubnativeRequest.Listener,
         Log.v(TAG, "onPubnativeRequestFailed");
         invokeLoadFail(ex);
     }
-
     //----------------------------------------------------------------------------------------------
     // PubnativeAdModel.Listener
     //----------------------------------------------------------------------------------------------
