@@ -11,7 +11,8 @@
         android:layout_height="250dp"
         android:layout_centerInParent="true"
         android:gravity="center_horizontal"
-        android:padding="2dp">
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp">
 
         <RelativeLayout
             android:id="@+id/header"
@@ -22,9 +23,10 @@
 
             <ImageView
                 android:id="@+id/pubnative_feed_banner_iconImage"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginRight="8dp" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="8dp"
+                android:scaleType="fitXY"/>
 
             <TextView
                 android:id="@+id/pubnative_feed_banner_title"
@@ -35,20 +37,19 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/pubnative_infeed_title_color"
-                android:textSize="16sp" />
+                android:textStyle="bold"
+                android:textSize="16sp"/>
 
             <RatingBar
                 android:id="@+id/pubnative_infeed_rating"
-                style="?android:attr/ratingBarStyleSmall"
+                style="@style/ratingBarStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="17dp"
                 android:layout_alignBottom="@id/pubnative_feed_banner_iconImage"
                 android:layout_marginTop="3dp"
                 android:layout_toRightOf="@id/pubnative_feed_banner_iconImage"
-                android:isIndicator="true"
-                android:progressBackgroundTint="@color/pubnative_infeed_rating_stars_empty"
-                android:progressTint="@color/pubnative_infeed_rating_stars_fill"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:isIndicator="true"/>
         </RelativeLayout>
 
         <ImageView
@@ -83,8 +84,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/cta_button"
-                android:textColor="@color/pubnative_infeed_white" />
+                android:background="@drawable/pubnative_cta_button"
+                android:textColor="@color/pubnative_infeed_white"
+                android:layout_marginRight="1dp"/>
         </RelativeLayout>
 
     </RelativeLayout>
