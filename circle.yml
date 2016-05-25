@@ -1,7 +1,5 @@
 machine:
   timezone: Europe/Berlin
-  java:
-      version: oraclejdk8
 
 test:
   pre:
