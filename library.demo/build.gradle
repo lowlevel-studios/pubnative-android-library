@@ -74,7 +74,6 @@ task fabric << {
     }
 
     // Add keys to fabric.properties file
-    file << "apiKey=${fabricKey}"
-    file << "\n"
-    file << "apiSecret=${fabricSecret}"
+    file << "apiKey=${System.getenv("FABRIC_KEY")}\n"
+    file << "apiSecret=${System.getenv("FABRIC_SECRET")}\n"
 }
