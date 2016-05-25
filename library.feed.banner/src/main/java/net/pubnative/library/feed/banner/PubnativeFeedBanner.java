@@ -210,6 +210,8 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         if(mAdModel.getRating() > 0) {
             mRating.setRating(mAdModel.getRating());
             mRating.setVisibility(View.VISIBLE);
+        } else {
+            mRating.setVisibility(View.GONE);
         }
     }
 

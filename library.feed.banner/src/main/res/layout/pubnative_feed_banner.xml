@@ -85,8 +85,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/pubnative_cta_button"
-                android:textColor="@color/pubnative_infeed_white"
-                android:layout_marginRight="1dp"/>
+                android:textColor="@color/pubnative_infeed_white"/>
         </RelativeLayout>
 
     </RelativeLayout>
