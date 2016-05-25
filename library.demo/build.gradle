@@ -10,12 +10,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
+        // FABRIC
         classpath 'io.fabric.tools:gradle:1.+'
     }
 }
-repositories {
-    maven { url 'https://maven.fabric.io/public' }
-    maven { url 'https://dl.bintray.com/cerberillo/maven' }
+task projectInfo << {
+    println ""
+    println " === ${project.group}:${project.name}:${version} - (${System.getenv("CIRCLE_BUILD_NUM")}) ==="
+    println ""
 }
 //==================================================================================================
 // ANDROID
@@ -38,7 +40,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     testOptions {
         unitTests {
             returnDefaultValues = true
@@ -51,29 +52,28 @@ dependencies {
     compile project(':library.interstitial')
     compile project(':library.banner')
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
-        transitive = true;
-    }
-}
-task projectInfo << {
-    println "\n Compiling: ${project.group}:${project.name}:${version} - (${System.getenv("CIRCLE_BUILD_NUM")})\n"
 }
 //==================================================================================================
 // FABRIC
 //==================================================================================================
-apply plugin: 'io.fabric'
-task fabric << {
-    File file = new File('library.demo/fabric.properties')
-    if (file.canRead()) {
-        file.delete()
-    }
+if (System.getenv("CIRCLECI")) {
+    apply plugin: 'io.fabric'
+    println ""
+    println "======== FABRIC ========"
     try {
-        file.createNewFile()
+        File file = new File("${project.projectDir.absolutePath}/fabric.properties")
+        if (!file.canRead()) {
+            file.createNewFile()
+            file << "apiKey=${System.getenv("FABRIC_API_KEY")}\n"
+            file << "apiSecret=${System.getenv("FABRIC_API_SECRET")}\n"
+        }
+        println " - Success"
+        println "========================"
+        println ""
     } catch (IOException ioException) {
-        return
+        println " - Error: "
+        println " ${ioException.toString()}"
+        println "========================"
+        println ""
     }
-
-    // Add keys to fabric.properties file
-    file << "apiKey=${System.getenv("FABRIC_KEY")}\n"
-    file << "apiSecret=${System.getenv("FABRIC_SECRET")}\n"
 }

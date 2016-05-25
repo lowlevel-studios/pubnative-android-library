@@ -7,5 +7,20 @@ test:
   pre:
     - ./gradlew projectInfo
   override:
+    - ./gradlew clean test
+  post:
     - ./gradlew cobertura coveralls
 
+deployment:
+  staging:
+    branch: development
+    commands:
+      # Publish to Fabric
+      - ./gradlew assembleDebug crashlyticsUploadDistributionDebug
+  production:
+    branch: master
+    commands:
+      # Publish to FABRIC
+      - ./gradlew assembleDebug crashlyticsUploadDistributionDebug
+      # Publish to BINTRAY
+      - ./gradlew bintrayUpload
