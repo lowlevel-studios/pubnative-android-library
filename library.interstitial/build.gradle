@@ -123,14 +123,9 @@ bintray {
         userOrg = 'pubnative'
         repo = 'maven'
         name = project.name
-        websiteUrl = project.property("repositoryURL")
-        issueTrackerUrl = "${project.property("repositoryURL")}/issues"
-        vcsUrl = "${project.property("repositoryURL")}.git"
-        labels = ['pubnative', 'advertising', 'ad']
-        licenses = ['MIT']
         version {
-            name = version
-            vcsTag = version
+            name = project.version
+            vcsTag = project.version
         }
     }
 }
