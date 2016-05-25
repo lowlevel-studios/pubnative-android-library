@@ -37,14 +37,15 @@ public class BannerActivity extends Activity implements PubnativeBanner.Listener
 
     @Override
     protected void onResume() {
-
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        mBanner.destroy();
         super.onPause();
+        if (mBanner != null){
+            mBanner.destroy();
+        }
     }
 
     public void onRequestClick(View v) {
