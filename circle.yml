@@ -12,13 +12,6 @@ test:
     - ./gradlew cobertura coveralls
 
 deployment:
-  test:
-    branch: improve_workflow
-    commands:
-      # Publish to FABRIC
-      - ./gradlew assembleDebug crashlyticsUploadDistributionDebug
-      # Publish to BINTRAY
-      - ./gradlew bintrayUpload
   staging:
     branch: development
     commands:
