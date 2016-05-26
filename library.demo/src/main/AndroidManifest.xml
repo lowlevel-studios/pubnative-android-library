@@ -23,6 +23,7 @@
         <activity android:name=".InterstitialAdActivity"/>
         <activity android:name=".BannerActivity">
         </activity>
+        <activity android:name=".InFeedBannerActivity"/>
     </application>
 
 </manifest>

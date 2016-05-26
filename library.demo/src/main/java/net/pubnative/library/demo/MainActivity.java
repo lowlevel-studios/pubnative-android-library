@@ -72,4 +72,12 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, BannerActivity.class);
         startActivity(intent);
     }
+
+    public void onInFeedBannerClick(View view) {
+
+        Log.v(TAG, "onInFeedBannerClick");
+        // Launch InFeedBanner activity
+        Intent intent = new Intent(this, InFeedBannerActivity.class);
+        startActivity(intent);
+    }
 }
