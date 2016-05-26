@@ -162,8 +162,10 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
         Log.v(TAG, "show");
         if(container == null) {
             Log.e(TAG, "passed container argument cannot be null");
+        } else if(mIsLoading) {
+            Log.w(TAG, "The ad is loading, dropping this call");
         } else if(mIsShown) {
-            Log.e(TAG, "The ad has been shown already.");
+            Log.w(TAG, "The ad has been shown already, dropping this call");
         } else if(isReady()) {
             mIsShown = true;
             container.removeAllViews();
@@ -174,7 +176,7 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeShow();
             mAdModel.startTracking(mInFeedBannerView, mCallToAction, this);
         } else {
-            Log.e(TAG, "The ad is not ready yet");
+            Log.w(TAG, "The ad is not loaded, please ensure to call load() before calling show()");
         }
     }
 
@@ -184,12 +186,21 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void destroy() {
 
         Log.v(TAG, "destroy");
-        if(mIsShown && mInFeedBannerView.getParent() != null) {
-            ((ViewGroup)mInFeedBannerView.getParent()).removeAllViews();
-        }
+        hide();
         mAdModel = null;
         mIsLoading = false;
         mIsShown = false;
+    }
+
+    /**
+     * Hides the current InFeed banner
+     */
+    public void hide() {
+
+        Log.v(TAG, "hide");
+        if(mIsShown && mInFeedBannerView.getParent() != null) {
+            ((ViewGroup)mInFeedBannerView.getParent()).removeAllViews();
+        }
     }
 
     private void initialize() {
