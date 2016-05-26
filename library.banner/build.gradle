@@ -74,7 +74,7 @@ install {
             project {
                 packaging 'aar'
                 name project.name
-                description "Pubnative API library fro Android"
+                description "Predefined banner for PubNative's Android Library"
                 url "http://www.pubnative.net"
                 licenses {
                     license {
