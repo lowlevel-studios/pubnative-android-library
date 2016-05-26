@@ -14,6 +14,7 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import net.pubnative.library.request.PubnativeAsset;
@@ -105,15 +106,20 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void load(Context context, String appToken) {
 
         Log.v(TAG, "load");
-        mHandler = new Handler(Looper.getMainLooper());
+        if(mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        if (mListener == null) {
+            Log.w(TAG, "Listener is not set, try to set listener by setListener(Listener listener) method");
+        }
         if (TextUtils.isEmpty(appToken)) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: app token is null or empty"));
         } else if (context == null) {
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: context is null or empty"));
         } else if (mIsLoading) {
-            Log.i(TAG, "The ad is being loaded, dropping this call");
+            Log.w(TAG, "The ad is being loaded, dropping this call");
         }  else if (mIsShown) {
-            Log.e(TAG, "The ad has been shown already, dropping this call");
+            Log.w(TAG, "The ad has been shown already, dropping this call");
         } else if (isReady()) {
             invokeLoadFinish();
         } else {
@@ -144,9 +150,6 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public boolean isReady() {
 
         Log.v(TAG, "isReady");
-        if (mListener == null) {
-            Log.w(TAG, "Listener is not set, try to set listener by setListener(Listener listener) method");
-        }
         return mAdModel != null;
     }
 
@@ -157,7 +160,9 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void show(ViewGroup container) {
 
         Log.v(TAG, "show");
-        if(mIsShown) {
+        if(container == null) {
+            Log.e(TAG, "passed container argument cannot be null");
+        } else if(mIsShown) {
             Log.e(TAG, "The ad has been shown already.");
         } else if(isReady()) {
             mIsShown = true;
@@ -179,6 +184,9 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
     public void destroy() {
 
         Log.v(TAG, "destroy");
+        if(mIsShown && mInFeedBannerView.getParent() != null) {
+            ((ViewGroup)mInFeedBannerView.getParent()).removeAllViews();
+        }
         mAdModel = null;
         mIsLoading = false;
         mIsShown = false;
@@ -299,7 +307,29 @@ public class PubnativeFeedBanner implements PubnativeRequest.Listener,
             invokeLoadFail(new Exception("PubnativeFeedBanner - load error: no-fill"));
         } else {
             mAdModel = ads.get(0);
-            invokeLoadFinish();
+            Picasso.with(mContext).load(mAdModel.getIconUrl()).fetch(new Callback() {
+
+                @Override
+                public void onSuccess() {
+                    Picasso.with(mContext).load(mAdModel.getBannerUrl()).fetch(new Callback() {
+
+                        @Override
+                        public void onSuccess() {
+                            invokeLoadFinish();
+                        }
+
+                        @Override
+                        public void onError() {
+                            invokeLoadFail(new Exception("PubnativeFeedBanner - banner loading error"));
+                        }
+                    });
+                }
+
+                @Override
+                public void onError() {
+                    invokeLoadFail(new Exception("PubnativeFeedBanner - icon loading error"));
+                }
+            });
         }
     }
 

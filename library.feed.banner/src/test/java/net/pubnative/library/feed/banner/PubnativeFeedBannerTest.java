@@ -35,7 +35,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         banner.load(null, "app_token");
 
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         banner.load(RuntimeEnvironment.application.getApplicationContext(), "");
 
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         banner.load(RuntimeEnvironment.application.getApplicationContext(), null);
 
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
     }
 
     @Test
@@ -69,19 +69,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         PubnativeRequest request = mock(PubnativeRequest.class);
         banner.onPubnativeRequestSuccess(request, null);
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
-    }
-
-    @Test
-    public void onPubnativeRequestSuccess_withAds_invokesLoadFinish() {
-
-        PubnativeFeedBanner banner = spy(PubnativeFeedBanner.class);
-        banner.mHandler = new Handler();
-        PubnativeFeedBanner.Listener listener = mock(PubnativeFeedBanner.Listener.class);
-        banner.mListener = listener;
-        PubnativeRequest request = mock(PubnativeRequest.class);
-        banner.onPubnativeRequestSuccess(request, Arrays.asList(mock(PubnativeAdModel.class)));
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFinish(any(PubnativeFeedBanner.class));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
     }
 
     @Test
@@ -93,7 +81,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         PubnativeRequest request = mock(PubnativeRequest.class);
         banner.onPubnativeRequestFailed(request, mock(Exception.class));
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(any(PubnativeFeedBanner.class), any(Exception.class));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), any(Exception.class));
     }
 
     @Test
@@ -112,7 +100,7 @@ public class PubnativeFeedBannerTest {
         Exception exception = mock(Exception.class);
         banner.invokeLoadFail(exception);
 
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFailed(eq(banner), eq(exception));
+        verify(listener).onPubnativeFeedBannerLoadFailed(eq(banner), eq(exception));
     }
 
     @Test
@@ -130,7 +118,7 @@ public class PubnativeFeedBannerTest {
         banner.mListener = listener;
         banner.invokeLoadFinish();
 
-        verify(listener, times(1)).onPubnativeFeedBannerLoadFinish(eq(banner));
+        verify(listener).onPubnativeFeedBannerLoadFinish(eq(banner));
     }
 
     @Test

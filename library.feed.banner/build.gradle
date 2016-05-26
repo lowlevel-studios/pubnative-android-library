@@ -8,12 +8,12 @@ version = '1.0.0'
 def sharedVersion = version
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 10
     buildToolsVersion "23.0.1"
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 23
+        targetSdkVersion 10
         versionCode 1
         versionName sharedVersion
     }
