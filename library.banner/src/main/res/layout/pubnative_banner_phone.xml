@@ -70,11 +70,10 @@
             android:layout_height="15dp"
             android:layout_alignParentBottom="true"
             android:padding="2dp"
-            android:background="#650067"
+            android:background="@color/pubnative_banner_sponsored_purple"
             android:textColor="@android:color/white"
             android:textSize="10sp"
-            android:alpha="0.85"
-            android:text="Sponsored"/>
+            android:text="@string/sponsored"/>
 
     </RelativeLayout>
 
